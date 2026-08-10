@@ -1,6 +1,13 @@
 import { Router } from "express";
+import { IAuthController } from "../interfaces/IAuthController.js";
 
-const authRouter = Router()
 
+export default function createAuthRoutes(authcontroller : IAuthController){
+    const authRouter = Router();
 
-export default authRouter
+    authRouter.post('/register', (req , res ) =>{
+        void authcontroller.register(req , res);
+    })
+return authRouter
+}
+

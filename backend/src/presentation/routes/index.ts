@@ -1,7 +1,14 @@
 import { Router } from 'express'
-import authRouter from './authRoutes.js'
-const router = Router()
+import { IAuthController } from '../interfaces/IAuthController.js'
+import createAuthRoutes from './authRoutes.js'
 
-router.use('/auth',authRouter)
+export default function createRoutes(authcontroller : IAuthController){
+    const router = Router()
+    const authRoutes = createAuthRoutes(authcontroller)
+    router.use('/auth',authRoutes)
+    return router
+}
 
-export default router
+
+
+

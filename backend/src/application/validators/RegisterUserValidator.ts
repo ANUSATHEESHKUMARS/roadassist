@@ -1,15 +1,16 @@
-import { RegisterUserDto } from '../auth/dtos/RegisterUserDTO.js'
+import { RegisterUserDto } from "../dtos/RegisterUserDTO.js"
+import { IRegisterUserValidator } from "./interfaces/IRegisterUserValidator.js"
 
-export class RegisterUserValidator {
+export class RegisterUserValidator implements IRegisterUserValidator{
     validate(registerUserDto: RegisterUserDto): void{
-        if(!registerUserDto.fullName.trim()){
+        if(!registerUserDto.fullName?.trim()){
              throw new Error("Full name is required")
         }
         if(registerUserDto.fullName.trim().length <= 3){
             throw new Error("Full name must contain at least 3 characters.")
         }
         //for email validaion
-        if(!registerUserDto.email.trim()){
+        if(!registerUserDto.email?.trim()){
              throw new Error("email should not be empty")
         }
         if(registerUserDto.email.length > 100){
@@ -20,8 +21,14 @@ export class RegisterUserValidator {
             throw new Error("Invalid email format.")
         }
         //phone number validation
-        if(!registerUserDto.phoneNumber.trim()){
-            throw new Error('')
+        if(!registerUserDto.phoneNumber?.trim()){
+            throw new Error('Phone number is required')
+        }
+        if(!/^\d{10}$/.test(registerUserDto.phoneNumber.trim())){
+            throw new Error("Password is required.")
+        }
+        if(registerUserDto.password.length < 8){
+            throw new Error("Password much contain at least 8 characters..")
         }
         
     }

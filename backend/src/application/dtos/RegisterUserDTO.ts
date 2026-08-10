@@ -3,4 +3,4 @@ export interface RegisterUserDto {
     email: string,
     phoneNumber: string,
     password : string
-}
+} 
