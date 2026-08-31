@@ -1,9 +1,10 @@
 
 import { IPasswordHasher } from "../contracts/IPasswordHasher.js";
 import { IRegisterUserUseCase } from "../interfaces/IRegisterUserUseCase.js";
-import { RegisterUserDto } from "../dtos/RegisterUserDTO.js";
+import { RegisterUserDto } from "../dtos/user.js";
 import { IUserRepository } from "../../domain/User/repositories/IUserRepository.js";
 import { IRegisterUserValidator } from "../validators/interfaces/IRegisterUserValidator.js";
+import { User } from "../../domain/User/entities/User.js";
 
 export class RegisterUserUseCase implements IRegisterUserUseCase {
     constructor(private passwordHasher: IPasswordHasher, 
@@ -23,5 +24,15 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
         const hashedPassword = await this.passwordHasher.hash(registerUserDto.password)
           console.log('Validation passed')
           console.log(registerUserDto)
+          const user = new User(
+            registerUserDto.fullName,
+            registerUserDto.email,
+            registerUserDto.phoneNumber,
+           hashedPassword,
+           "user"
+          )
+          await this.userRepository.save(user)
     }
 } 
+
+

@@ -1,4 +1,4 @@
-import { RegisterUserDto } from "../dtos/RegisterUserDTO.js"
+import { RegisterUserDto } from "../dtos/user.js"
 import { IRegisterUserValidator } from "./interfaces/IRegisterUserValidator.js"
 
 export class RegisterUserValidator implements IRegisterUserValidator{
@@ -33,3 +33,4 @@ export class RegisterUserValidator implements IRegisterUserValidator{
         
     }
 }
+

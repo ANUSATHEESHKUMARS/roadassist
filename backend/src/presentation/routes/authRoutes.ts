@@ -8,6 +8,16 @@ export default function createAuthRoutes(authcontroller : IAuthController){
     authRouter.post('/register', (req , res ) =>{
         void authcontroller.register(req , res);
     })
+    authRouter.post('/login', (req , res )=>{
+        console.log('data is reached the route')
+        res.json({
+            messgae : "workng "
+        })
+    })
 return authRouter
 }
+
+
+
+
 
