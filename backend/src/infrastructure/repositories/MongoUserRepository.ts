@@ -4,16 +4,19 @@ import { User } from "../../domain/User/entities/User.js";
 
 export class MongoUserRepository implements IUserRepository{
 
-    async save(user:User): Promise<void>{
-    await UserModel.create({
+    async save(user:User): Promise<User>{
+    const savedUser = await UserModel.create({
       fullName:user.fullName,
       email:user.email,
       phoneNumber:user.phoneNumber,
       password:user.getpassword(),
       role:user.role
     })
+    user.userId = savedUser._id.toString()
+    return user
     }
 
+    
     async findbyemail(email: string): Promise<User |null>{
      const userDocument = await UserModel.findOne({email})
      if(!userDocument){
@@ -26,13 +29,5 @@ export class MongoUserRepository implements IUserRepository{
         userDocument.role
      )
     }
-
-   //  async function (id : string): void{
-   //   const newDate = new Date()
-   // const today =   await UserModel.findById()
-
-
-
-   //  }
-
+    
 }

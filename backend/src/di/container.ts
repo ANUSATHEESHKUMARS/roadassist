@@ -1,9 +1,12 @@
 import { LoginUserUseCase } from "../application/auth/LoginUserUseCase.js";
 import { RegisterUserUseCase } from "../application/auth/RegisterUserUseCase.js";
+import { SendOtpUseCase } from "../application/auth/SendOtpUseCase.js";
 import { RegisterUserValidator } from "../application/validators/RegisterUserValidator.js";
+import { MongoOtpRepository } from "../infrastructure/repositories/MongoOtpRepository.js";
 import { MongoUserRepository } from "../infrastructure/repositories/MongoUserRepository.js";
 import { BcryptPasswordHasher } from "../infrastructure/services/BcryptPasswordHasher.js";
 import { JwtTokenService } from "../infrastructure/services/jwtTokenService.js";
+import { OtpService } from "../infrastructure/services/OtpService.js";
 import { AuthController } from "../presentation/controllers/AuthController.js";
 import { IAuthController } from "../presentation/interfaces/IAuthController.js";
 
@@ -16,8 +19,15 @@ const tokenService = new JwtTokenService()
 
 const registerUserValidator = new RegisterUserValidator()
 
-const registerUserUseCase = new RegisterUserUseCase(passwordHasher , userRepository, registerUserValidator)
 
+
+const otpRepository = new MongoOtpRepository()
+
+const otpService = new OtpService()
+
+const sendOtpUseCase  = new SendOtpUseCase( otpRepository ,otpService )
+
+const registerUserUseCase = new RegisterUserUseCase(passwordHasher , userRepository, registerUserValidator, sendOtpUseCase)
 
 const loginUserUseCase = new LoginUserUseCase(userRepository , passwordHasher ,tokenService )
 

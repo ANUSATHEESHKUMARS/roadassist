@@ -5,7 +5,7 @@ import express from 'express'
 const app = express()
 
 app.use((req, res, next) => {
-    console.log("🔥 REQUEST ENTERED EXPRESS:", req.method, req.url)
+    console.log("REQUEST ENTERED EXPRESS:", req.method, req.url)
     next()
 })
 
@@ -22,3 +22,6 @@ app.get('/', (req, res) => {
 app.use('/api', createRoutes(authcontroller))
 
 export default app
+
+
+

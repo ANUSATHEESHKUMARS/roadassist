@@ -5,11 +5,13 @@ import { RegisterUserDto } from "../dtos/user.js";
 import { IUserRepository } from "../../domain/User/repositories/IUserRepository.js";
 import { IRegisterUserValidator } from "../validators/interfaces/IRegisterUserValidator.js";
 import { User } from "../../domain/User/entities/User.js";
+import { ISendOtpUserUseCase } from "../interfaces/ISendOtpuserUserCase.js";
 
 export class RegisterUserUseCase implements IRegisterUserUseCase {
     constructor(private passwordHasher: IPasswordHasher, 
         private userRepository : IUserRepository,
-        private registerUserValidator: IRegisterUserValidator
+        private registerUserValidator: IRegisterUserValidator,
+        private sendOtpUseCase : ISendOtpUserUseCase
     ){}
     async execute(registerUserDto: RegisterUserDto): Promise<void> {
         console.log('hsjdfhksdfhj')
@@ -32,7 +34,10 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
            "user"
           )
           await this.userRepository.save(user)
-    }
+          await this.sendOtpUseCase.execute(user.userId , user.email , "EMAIL_VERIFICATION")
+          
+
+    } 
 } 
 
 
