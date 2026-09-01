@@ -1,6 +1,7 @@
 export class Otp {
     constructor(
         public readonly userId : string,
+        public readonly email : string,
         public readonly codeHash : string,
         public readonly purpose : OtpPurpose,
         public readonly expiresAt : Date,

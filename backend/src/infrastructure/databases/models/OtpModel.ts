@@ -9,7 +9,11 @@ export interface IOtpDocument extends Document {
     userId :Types.ObjectId,
     email: string,
     codeHash: string,
-    purpose: "EMAIL_VERIFICATION" | "PASSWORD_RESET" | "LOGIN",
+      purpose:
+        | "EMAIL_VERIFICATION"
+        | "PHONE_VERIFICATION"
+        | "PASSWORD_RESET"
+        | "LOGIN";
     expiresAt: Date
     attempts: number,
     used: boolean,
@@ -36,7 +40,7 @@ const otpSchema = new Schema<IOtpDocument>(
         },
         purpose : {
             type : String,
-            enum : ["EMAIL_VERIFICATION" , "PASSWORD_RESET", "LOGIN"],
+            enum : ["EMAIL_VERIFICATION" ,"PHONE_VERIFICATION" , "PASSWORD_RESET", "LOGIN"],
             required : true
         },
         expiresAt : {
@@ -49,7 +53,7 @@ const otpSchema = new Schema<IOtpDocument>(
         },
         used : {
             type : Boolean,
-            required : false
+            default : false
         },
         
     },{
