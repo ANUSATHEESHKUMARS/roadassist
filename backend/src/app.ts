@@ -1,4 +1,5 @@
 import { authcontroller } from './di/container.js'
+import { errorHandlingMiddleware } from './presentation/middlewares/ErrorHandlingMiddleware.js'
 import createRoutes from './presentation/routes/index.js'
 import express from 'express'
 
@@ -20,6 +21,9 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api', createRoutes(authcontroller))
+
+
+app.use(errorHandlingMiddleware)
 
 export default app
 

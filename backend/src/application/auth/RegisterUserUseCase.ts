@@ -6,6 +6,7 @@ import { IUserRepository } from "../../domain/User/repositories/IUserRepository.
 import { IRegisterUserValidator } from "../validators/interfaces/IRegisterUserValidator.js";
 import { User } from "../../domain/User/entities/User.js";
 import { ISendOtpUserUseCase } from "../interfaces/ISendOtpuserUserCase.js";
+import { ConflictError } from "../../shared/errors/ConflitError.js";
 
 export class RegisterUserUseCase implements IRegisterUserUseCase {
     constructor(private passwordHasher: IPasswordHasher, 
@@ -13,14 +14,14 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
         private registerUserValidator: IRegisterUserValidator,
         private sendOtpUseCase : ISendOtpUserUseCase
     ){}
-    async execute(registerUserDto: RegisterUserDto): Promise<void> {
+    async execute(registerUserDto: RegisterUserDto): Promise<{message : string ;otp:string;}> {
         console.log('hsjdfhksdfhj')
         this.registerUserValidator.validate(registerUserDto);
         console.log('presnam onnum illaa')
         const existingUser = await this.userRepository.findbyemail(registerUserDto.email)
        
         if(existingUser){
-            throw new Error("user alredy exists")
+            throw new ConflictError("user already exists","USER_ALREADY_EXISTS")
         }
         console.log('hello')
         const hashedPassword = await this.passwordHasher.hash(registerUserDto.password)
@@ -34,8 +35,10 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
            "user"
           )
           await this.userRepository.save(user)
-          await this.sendOtpUseCase.execute(user.userId , user.email , "EMAIL_VERIFICATION")
-          
+       const otpResponse =  await this.sendOtpUseCase.execute(user.userId , user.email , "EMAIL_VERIFICATION")
+       console.log(otpResponse)
+          return {message : "success" ,
+             otp : otpResponse.otp}
 
     } 
 } 

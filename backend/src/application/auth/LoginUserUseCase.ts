@@ -1,4 +1,5 @@
 import { IUserRepository } from "../../domain/User/repositories/IUserRepository.js";
+import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
 import { IPasswordHasher } from "../contracts/IPasswordHasher.js";
 import { ITokenService } from "../contracts/ITokenService.js";
 import { LoginUserDTO } from "../dtos/user.js";
@@ -12,11 +13,11 @@ export class LoginUserUseCase implements ILoginUserUserCase {
      async execute(loginUserDto : LoginUserDTO): Promise<string>{
         const user = await this.userRepository.findbyemail(loginUserDto.email)
         if(!user){
-            throw new Error("Invalid email or password")
+            throw new UnauthorizedError("Invalid email or password", "INVALID_CREDENTIALS")
         }
        const isValidPassword = await this.passwordHasher.compare(loginUserDto.password , user.getpassword())
        if(!isValidPassword){
-        throw new Error("invalid credentials ...")
+        throw new UnauthorizedError("invalid credentials ...", "INVALID_CREATEDTIALS")
        }
        const token =  this.tokenService.generateToken({
         userId : user.userId,

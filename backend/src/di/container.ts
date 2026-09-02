@@ -8,7 +8,6 @@ import { BcryptPasswordHasher } from "../infrastructure/services/BcryptPasswordH
 import { JwtTokenService } from "../infrastructure/services/jwtTokenService.js";
 import { OtpService } from "../infrastructure/services/OtpService.js";
 import { AuthController } from "../presentation/controllers/AuthController.js";
-import { IAuthController } from "../presentation/interfaces/IAuthController.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -25,7 +24,7 @@ const otpRepository = new MongoOtpRepository()
 
 const otpService = new OtpService()
 
-const sendOtpUseCase  = new SendOtpUseCase( otpRepository ,otpService )
+const sendOtpUseCase  = new SendOtpUseCase( otpRepository ,otpService)
 
 const registerUserUseCase = new RegisterUserUseCase(passwordHasher , userRepository, registerUserValidator, sendOtpUseCase)
 
