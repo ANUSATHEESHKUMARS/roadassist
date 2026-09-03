@@ -4,6 +4,7 @@ import { IOtpService } from "../contracts/IOtpService.js";
 import { ISendOtpUserUseCase } from "../interfaces/ISendOtpuserUserCase.js";
 import { Otp } from "../../domain/User/entities/Otp.js";
 
+
 export class SendOtpUseCase implements ISendOtpUserUseCase {
     constructor(private readonly otpRepository: IOtpRepository, private readonly otpService: IOtpService) { }
     async execute(userId: string, email: string, purpose: OtpPurpose): Promise<{ message: string ; otp : string}> {
@@ -16,9 +17,8 @@ export class SendOtpUseCase implements ISendOtpUserUseCase {
             purpose,
             expiresAt)
         await this.otpRepository.save(otpEntity)
-     console.log('saved succesfullyy')
-
-     return {message : "succes" , otp : otp}
+    console.log("this is for generating" , otp)
+     return {message : "success" , otp : otp}
     
     }
 }
