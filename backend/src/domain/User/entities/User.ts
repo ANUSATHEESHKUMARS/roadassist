@@ -5,7 +5,7 @@ export class User {
         public email: string,
         public phoneNumber: string,
         private password: string,
-        public role: string,
+        public role: UserRole,
         public userId?: string,) {}
 
     getpassword() {
@@ -14,4 +14,4 @@ export class User {
 
 }
 
-
+export type UserRole = "user"|"mechanic"|"admin"|"super_admin"

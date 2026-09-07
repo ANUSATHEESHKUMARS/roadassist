@@ -6,7 +6,7 @@ import { otpDto } from "../../application/dtos/otp.js";
 
 
 export class VerifyOtpController implements IVerifyOtpController {
-    constructor(private verifyuseCase: IVerifyOtpUseCase) { }
+    constructor(private verifyuseCase: IVerifyOtpUseCase) {}
      execute = async (req: Request, res: Response): Promise<void> => {
 
         const otpDto: otpDto = req.body

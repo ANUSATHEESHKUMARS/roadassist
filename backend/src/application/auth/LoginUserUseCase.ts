@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../domain/User/repositories/IUserRepository.js";
+import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
 import { IPasswordHasher } from "../contracts/IPasswordHasher.js";
 import { ITokenService } from "../contracts/ITokenService.js";
@@ -10,7 +10,7 @@ export class LoginUserUseCase implements ILoginUserUserCase {
       private passwordHasher : IPasswordHasher,
       private tokenService : ITokenService
     ){}
-     async execute(loginUserDto : LoginUserDTO): Promise<string>{
+     async execute(loginUserDto : LoginUserDTO): Promise<{accesToken : string, refreshToken: string}>{
         const user = await this.userRepository.findbyemail(loginUserDto.email)
         if(!user){
             throw new UnauthorizedError("Invalid email or password", "INVALID_CREDENTIALS")
@@ -19,13 +19,19 @@ export class LoginUserUseCase implements ILoginUserUserCase {
        if(!isValidPassword){
         throw new UnauthorizedError("invalid credentials ...", "INVALID_CREATEDTIALS")
        }
-       const token =  this.tokenService.generateToken({
-        userId : user.userId,
+       const accesToken =  this.tokenService.generateAccesToken({
+        userId : user.userId!,
         email : user.email,
         role: user.role
 
+       }) 
+       const refreshToken = this.tokenService.generateRefreshToken({
+        userId : user.userId!
        })
-       return token
+       return {
+        accesToken,
+        refreshToken
+       }
      }
 }
 

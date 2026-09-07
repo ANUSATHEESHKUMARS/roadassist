@@ -1,4 +1,4 @@
-import { IOtpRepository } from "../../domain/User/repositories/IOtpRepository.js";
+import { IOtpRepository } from "../../domain/repositories/IOtpRepository.js";
 import { BadRequest } from "../../shared/errors/BadRequestError.js";
 import { NotfoundError } from "../../shared/errors/NotFoundError.js";
 import { IOtpService } from "../contracts/IOtpService.js";

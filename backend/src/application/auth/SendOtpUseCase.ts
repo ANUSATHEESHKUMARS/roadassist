@@ -1,8 +1,8 @@
 import { OtpPurpose } from "../../domain/User/entities/Otp.js";
-import { IOtpRepository } from "../../domain/User/repositories/IOtpRepository.js";
 import { IOtpService } from "../contracts/IOtpService.js";
 import { ISendOtpUserUseCase } from "../interfaces/ISendOtpuserUserCase.js";
 import { Otp } from "../../domain/User/entities/Otp.js";
+import { IOtpRepository } from "../../domain/repositories/IOtpRepository.js";
 
 
 export class SendOtpUseCase implements ISendOtpUserUseCase {

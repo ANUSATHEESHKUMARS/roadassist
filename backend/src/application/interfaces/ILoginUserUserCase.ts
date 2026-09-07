@@ -1,6 +1,6 @@
 import { LoginUserDTO } from "../dtos/user.js";
 
 export interface ILoginUserUserCase {
-    execute(loginUserDto:LoginUserDTO):Promise<string>;
+    execute(loginUserDto:LoginUserDTO):Promise<{accesToken:string, refreshToken:string}>;
 }
 

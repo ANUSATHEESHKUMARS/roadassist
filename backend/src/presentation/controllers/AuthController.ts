@@ -22,10 +22,25 @@ export class AuthController implements IAuthController {
     login = async (req: Request, res: Response): Promise<void> =>{
       const loginUserDto : LoginUserDTO = req.body
       console.log(loginUserDto)
-      const token = await this.loginUserUseCase.execute(loginUserDto)
+      const result = await this.loginUserUseCase.execute(loginUserDto)
+
+      res.cookie("accesToken", result.accesToken,{
+        httpOnly:true,
+        secure:process.env.NODE_ENV === "production",
+        sameSite:"strict",
+        maxAge: 15 * 60 * 1000
+      })
+
+      res.cookie("refreshtoken",result.refreshToken,{
+        httpOnly:true,
+        secure : process.env.NODE_ENv === "production",
+        sameSite:"strict",
+        maxAge : 15 * 60 * 1000
+      })
+      console.log()
       res.status(HttpStatusCode.OK).json({
         message : "Login succesfull",
-        token
+        succes : true
       })
     }
 }

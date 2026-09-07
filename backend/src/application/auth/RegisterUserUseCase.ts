@@ -2,7 +2,7 @@
 import { IPasswordHasher } from "../contracts/IPasswordHasher.js";
 import { IRegisterUserUseCase } from "../interfaces/IRegisterUserUseCase.js";
 import { RegisterUserDto } from "../dtos/user.js";
-import { IUserRepository } from "../../domain/User/repositories/IUserRepository.js";
+import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import { IRegisterUserValidator } from "../validators/interfaces/IRegisterUserValidator.js";
 import { User } from "../../domain/User/entities/User.js";
 import { ISendOtpUserUseCase } from "../interfaces/ISendOtpuserUserCase.js";
@@ -32,7 +32,8 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
             registerUserDto.email,
             registerUserDto.phoneNumber,
            hashedPassword,
-           "user"
+           "user",
+           
           )
           await this.userRepository.save(user)
        const otpResponse =  await this.sendOtpUseCase.execute(user.userId , user.email , "EMAIL_VERIFICATION")

@@ -6,10 +6,10 @@ import { RegisterUserValidator } from "../application/validators/RegisterUserVal
 import { MongoOtpRepository } from "../infrastructure/repositories/MongoOtpRepository.js";
 import { MongoUserRepository } from "../infrastructure/repositories/MongoUserRepository.js";
 import { BcryptPasswordHasher } from "../infrastructure/services/BcryptPasswordHasher.js";
-import { JwtTokenService } from "../infrastructure/services/jwtTokenService.js";
 import { OtpService } from "../infrastructure/services/OtpService.js";
 import { AuthController } from "../presentation/controllers/AuthController.js";
 import { VerifyOtpController } from "../presentation/controllers/VerifyOtpController.js";
+import { JwtTokenService } from "../infrastructure/services/JwtTokenService.js";
 
 
 const userRepository = new MongoUserRepository();
