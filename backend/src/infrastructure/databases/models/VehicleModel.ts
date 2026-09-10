@@ -1,7 +1,7 @@
-import mongoose, {Schema  } from "mongoose";
+import mongoose, {Schema  ,Types } from "mongoose";
 
 export interface IVehicleDocument {
-
+    _id: Types.ObjectId,
     userId : string,
     registrationNumber:string,
     brand:string,

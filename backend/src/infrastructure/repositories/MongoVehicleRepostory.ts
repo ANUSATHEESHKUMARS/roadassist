@@ -1,3 +1,4 @@
+import { VehicleMapper } from "../../application/mappers/VehicleMapper.js";
 import { IVehicleRepository } from "../../domain/repositories/IVehicleRepository.js";
 import { Vehicle } from "../../domain/vehilce/Vehilce.js";
 import { VehicleModel } from "../databases/models/VehicleModel.js";
@@ -15,16 +16,7 @@ export class VehicleRepostory implements IVehicleRepository {
             fuelType: vehicle.fuelType,
             color: vehicle.color
         })
-        return new Vehicle(
-            document.userId,
-            document.registrationNumber,
-            document.brand,
-            document.model,
-            document.year,
-            document.fuelType,
-            document.color,
-            document._id.toString()
-        )
+     return VehicleMapper.toDomain(document)
     }
 
 
@@ -32,18 +24,7 @@ export class VehicleRepostory implements IVehicleRepository {
         const document = await VehicleModel.find({
             userId: userId
         })
-        return document.map((document) => {
-            return new Vehicle(
-                document.userId,
-                document.registrationNumber,
-                document.brand,
-                document.model,
-                document.year,
-                document.fuelType,
-                document.color,
-                document._id.toString()
-            )
-        })
+     return document.map((document) =>VehicleMapper.toDomain(document))
     }
 
     async findById(vehicleId: string): Promise<Vehicle | null> {
@@ -51,16 +32,7 @@ export class VehicleRepostory implements IVehicleRepository {
         if (!vehicleDetail) {
             return null
         }
-        return new Vehicle(
-            vehicleDetail.userId,
-            vehicleDetail.registrationNumber,
-            vehicleDetail.brand,
-            vehicleDetail.model,
-            vehicleDetail.year,
-            vehicleDetail.fuelType,
-            vehicleDetail.color,
-            vehicleDetail._id.toString()
-        )
+     return VehicleMapper.toDomain(vehicleDetail)
     }
 
     async update(vehicleId: string, vehicle: Partial<Vehicle>): Promise<Vehicle | null> {
@@ -69,16 +41,7 @@ export class VehicleRepostory implements IVehicleRepository {
             return null
         }
 
-        return new Vehicle(
-            document.userId,
-            document.registrationNumber,
-            document.brand,
-            document.model,
-            document.year,
-            document.fuelType,
-            document.color,
-            document._id.toString()
-        )
+       return VehicleMapper.toDomain(document)
     }
   async delete(vehicleId: string): Promise<boolean> {
       const document = await VehicleModel.findByIdAndDelete(vehicleId)
