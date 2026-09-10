@@ -1,4 +1,4 @@
-import { IUserRepository } from "../../domain/User/repositories/IUserRepository.js";
+import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import { UserModel } from "../databases/models/UserModel.js";
 import { User } from "../../domain/User/entities/User.js";
 
@@ -26,8 +26,10 @@ export class MongoUserRepository implements IUserRepository{
         userDocument.email,
         userDocument.phoneNumber,
         userDocument.password,
-        userDocument.role
+        userDocument.role,
+        userDocument._id.toString()
      )
     }
-    
 }
+
+

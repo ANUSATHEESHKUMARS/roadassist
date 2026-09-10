@@ -1,5 +1,5 @@
 import { Otp, OtpPurpose } from "../../domain/User/entities/Otp.js";
-import { IOtpRepository } from "../../domain/User/repositories/IOtpRepository.js";
+import { IOtpRepository } from "../../domain/repositories/IOtpRepository.js";
 import { OtpModel } from "../databases/models/OtpModel.js";
 
 export class MongoOtpRepository implements IOtpRepository {
@@ -37,7 +37,6 @@ export class MongoOtpRepository implements IOtpRepository {
     async markAsUsed(email: string, purpose: OtpPurpose): Promise<void> {
         await OtpModel.updateOne({email , purpose , used : false} , {$set : {used : true} })
     }
-
 }
 
 

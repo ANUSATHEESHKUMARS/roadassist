@@ -6,7 +6,7 @@ export interface IUserDocuments extends Document {
     email: string,
     phoneNumber: string,
     password:string,
-    role : string
+    role : UserRole
 
 }
 
@@ -30,10 +30,15 @@ const userSchema = new Schema<IUserDocuments>({
     },
     role :{
         type : String,
-        required : true
+        required : true,
+        enum:["user","admin","mechanic"]
     }
 
 })
-
+export type UserRole =
+    | "user"
+    | "mechanic"
+    | "admin"
+    
 
 export const UserModel = model<IUserDocuments>("User",userSchema)

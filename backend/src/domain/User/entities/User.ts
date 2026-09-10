@@ -14,4 +14,4 @@ export class User {
 
 }
 
-export type UserRole = "user"|"mechanic"|"admin"|"super_admin"
+export type UserRole = "user"|"mechanic"|"admin";

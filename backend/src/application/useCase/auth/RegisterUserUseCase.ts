@@ -1,12 +1,13 @@
 
-import { IPasswordHasher } from "../contracts/IPasswordHasher.js";
-import { IRegisterUserUseCase } from "../interfaces/IRegisterUserUseCase.js";
-import { RegisterUserDto } from "../dtos/user.js";
-import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
-import { IRegisterUserValidator } from "../validators/interfaces/IRegisterUserValidator.js";
-import { User } from "../../domain/User/entities/User.js";
-import { ISendOtpUserUseCase } from "../interfaces/ISendOtpuserUserCase.js";
-import { ConflictError } from "../../shared/errors/ConflitError.js";
+import { IPasswordHasher } from "../../contracts/IPasswordHasher.js";
+import { IRegisterUserUseCase } from "../../interfaces/IRegisterUserUseCase.js";
+import { RegisterUserDto } from "../../dtos/user.js";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
+import { IRegisterUserValidator } from "../../validators/interfaces/IRegisterUserValidator.js";
+import { User } from "../../../domain/User/entities/User.js";
+import { ISendOtpUserUseCase } from "../../interfaces/ISendOtpuserUserCase.js";
+import { ConflictError } from "../../../shared/errors/ConflitError.js";
+
 
 export class RegisterUserUseCase implements IRegisterUserUseCase {
     constructor(private passwordHasher: IPasswordHasher, 

@@ -5,7 +5,8 @@ import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
 
 export const authMiddleware = (tokenService: ITokenService) => {
     return (req: Request, res: Response, next: NextFunction): void => {
-        const token = req.cookies.accesToken
+        const token = req.cookies?.accessToken
+      
         if (!token) {
             next(new UnauthorizedError("Authentication required", "AUTHENTICATION_REQUIRED")
             );
@@ -14,6 +15,7 @@ export const authMiddleware = (tokenService: ITokenService) => {
         try {
             const payload = tokenService.verifyAccesToken(token)
             req.user = payload
+            console.log('this is the req', req.user)
             next()
 
         } catch {

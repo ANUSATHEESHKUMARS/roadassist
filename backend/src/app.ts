@@ -3,6 +3,7 @@ import { errorHandlingMiddleware } from './presentation/middlewares/ErrorHandlin
 import createRoutes from './presentation/routes/index.js'
 import express from 'express'
 import cookieParser from 'cookie-parser'
+import vehilceRouter from './presentation/routes/vehicleRoutes.js'
 
 
 const app = express()
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
 
 app.use('/api', createRoutes(authcontroller,verifyotpcontroller))
 
+app.use('/api/vehicle' ,vehilceRouter )
 
 app.use(errorHandlingMiddleware)
 

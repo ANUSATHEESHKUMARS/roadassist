@@ -1,5 +1,4 @@
-import { RegisterUserDto } from "../../dtos/RegisterUserDTO.js";
-
+import { RegisterUserDto } from "../../dtos/user.js";
 export interface IRegisterUserValidator {
     validate(registerUserDto: RegisterUserDto):void;
 }

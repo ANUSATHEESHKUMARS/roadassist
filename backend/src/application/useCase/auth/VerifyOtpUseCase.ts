@@ -1,10 +1,10 @@
-import { IOtpRepository } from "../../domain/repositories/IOtpRepository.js";
-import { BadRequest } from "../../shared/errors/BadRequestError.js";
-import { NotfoundError } from "../../shared/errors/NotFoundError.js";
-import { IOtpService } from "../contracts/IOtpService.js";
-import { IVerifyOtpUseCase } from "../interfaces/IVerifyOtp.js";
-import { otpDto } from "../dtos/otp.js";
 
+import { IOtpRepository } from "../../../domain/repositories/IOtpRepository.js";
+import { BadRequest } from "../../../shared/errors/BadRequestError.js";
+import { NotfoundError } from "../../../shared/errors/NotFoundError.js";
+import { IOtpService } from "../../contracts/IOtpService.js";
+import { IVerifyOtpUseCase } from "../../interfaces/IVerifyOtp.js";
+import { otpDto } from "../../dtos/otp.js";
 
 export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     constructor(private otpRepository: IOtpRepository, private otpService: IOtpService) { }
