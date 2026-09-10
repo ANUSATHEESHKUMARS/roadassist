@@ -16,6 +16,8 @@ import { CreateVehicleController } from "../presentation/controllers/vehicleCont
 import { authMiddleware } from "../presentation/middlewares/authMiddleware.js";
 import { GetVehilceUseCase } from "../application/useCase/vehicle/GetVehicle.js";
 import { GetVehicleByIdUseCase } from "../application/useCase/vehicle/GetVehicleByIdUseCase.js";
+import { UpdateVehicleUseCase } from "../application/useCase/vehicle/UpdatevehicleUseCase.js";
+import { DeleteVehicleUseCase } from "../application/useCase/vehicle/DeleteVehicleUseCase.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -34,17 +36,17 @@ const otpRepository = new MongoOtpRepository()
 
 const otpService = new OtpService()
 
-const sendOtpUseCase  = new SendOtpUseCase( otpRepository ,otpService)
+const sendOtpUseCase = new SendOtpUseCase(otpRepository, otpService)
 
-const registerUserUseCase = new RegisterUserUseCase(passwordHasher , userRepository, registerUserValidator, sendOtpUseCase)
+const registerUserUseCase = new RegisterUserUseCase(passwordHasher, userRepository, registerUserValidator, sendOtpUseCase)
 
-const loginUserUseCase = new LoginUserUseCase(userRepository , passwordHasher ,tokenService )
+const loginUserUseCase = new LoginUserUseCase(userRepository, passwordHasher, tokenService)
 
-const verifyotpUseCase = new VerifyOtpUseCase(otpRepository , otpService)
+const verifyotpUseCase = new VerifyOtpUseCase(otpRepository, otpService)
 
 export const verifyotpcontroller = new VerifyOtpController(verifyotpUseCase)
 
-export const authcontroller  = new AuthController(registerUserUseCase , loginUserUseCase)
+export const authcontroller = new AuthController(registerUserUseCase, loginUserUseCase)
 
 
 
@@ -56,7 +58,16 @@ const getVehicleUseCase = new GetVehilceUseCase(vehiceRepository)
 
 const getVehiclebyIdUseCase = new GetVehicleByIdUseCase(vehiceRepository)
 
-export const createVehicleController = new CreateVehicleController(createVehicleUseCase, getVehicleUseCase,getVehiclebyIdUseCase )
+const updateVehicleUseCase = new UpdateVehicleUseCase(vehiceRepository)
+
+const removeVehicleUseCase = new DeleteVehicleUseCase(vehiceRepository)
+
+export const createVehicleController = new CreateVehicleController(createVehicleUseCase,
+    getVehicleUseCase,
+    getVehiclebyIdUseCase,
+    updateVehicleUseCase,
+    removeVehicleUseCase
+)
 
 
 

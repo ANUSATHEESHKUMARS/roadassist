@@ -8,6 +8,7 @@ export class GetVehicleByIdUseCase implements IGetVehicleBYIdUseCase{
   
   getVehicleById = async(vehicleId: string): Promise<Vehicle | null>=> {
       const vehicle = await this.vehicleRepostory.findById(vehicleId)
+   
       if(!vehicle){
         throw new NotfoundError("vehicle not found" , "VEHICLE_NOT_FOUND")
       }
