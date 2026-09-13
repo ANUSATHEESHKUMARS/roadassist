@@ -18,6 +18,7 @@ import { GetVehilceUseCase } from "../application/useCase/vehicle/GetVehicle.js"
 import { GetVehicleByIdUseCase } from "../application/useCase/vehicle/GetVehicleByIdUseCase.js";
 import { UpdateVehicleUseCase } from "../application/useCase/vehicle/UpdatevehicleUseCase.js";
 import { DeleteVehicleUseCase } from "../application/useCase/vehicle/DeleteVehicleUseCase.js";
+import { EmailService } from "../infrastructure/services/EmailService.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -36,7 +37,9 @@ const otpRepository = new MongoOtpRepository()
 
 const otpService = new OtpService()
 
-const sendOtpUseCase = new SendOtpUseCase(otpRepository, otpService)
+const emailService = new EmailService()
+
+const sendOtpUseCase = new SendOtpUseCase(otpRepository, otpService , emailService)
 
 const registerUserUseCase = new RegisterUserUseCase(passwordHasher, userRepository, registerUserValidator, sendOtpUseCase)
 

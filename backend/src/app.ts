@@ -4,7 +4,7 @@ import createRoutes from './presentation/routes/index.js'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import vehilceRouter from './presentation/routes/vehicleRoutes.js'
-
+import cors from 'cors'
 
 const app = express()
 
@@ -15,7 +15,10 @@ app.use((req, res, next) => {
 
 app.use(express.json())
 app.use(cookieParser())
-
+app.use(cors({
+    origin:"http://localhost:5173",
+    credentials:true
+}))
 app.get('/', (req, res) => {
     console.log(' ROOT ROUTE REACHED')
 
