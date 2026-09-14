@@ -60,16 +60,12 @@
 }
 
 /* RoadAssist Global Theme */
-
 :root {
     --background: #060709;
     --foreground: #ffffff;
 
     --card: #0d0e12;
     --card-foreground: #ffffff;
-
-    --popover: #0d0e12;
-    --popover-foreground: #ffffff;
 
     --primary: #ff3b30;
     --primary-foreground: #ffffff;
@@ -89,22 +85,7 @@
     --input: #1a1c24;
     --ring: #ff3b30;
 
-    --chart-1: #ff3b30;
-    --chart-2: #a1a1aa;
-    --chart-3: #71717a;
-    --chart-4: #52525b;
-    --chart-5: #27272a;
-
     --radius: 0.625rem;
-
-    --sidebar: #0d0e12;
-    --sidebar-foreground: #ffffff;
-    --sidebar-primary: #ff3b30;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #141214;
-    --sidebar-accent-foreground: #ffffff;
-    --sidebar-border: #1a1c24;
-    --sidebar-ring: #ff3b30;
 }
 
 /* Dark mode uses the same RoadAssist theme */

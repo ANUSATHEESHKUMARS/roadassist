@@ -6,8 +6,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import type { RegisterFormType } from "@/types/formType";
 import { register } from "@/services/authService";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+
+const navigate = useNavigate();
 
 
   const [showPassword, setShowpasword] = useState(false)
@@ -32,8 +35,8 @@ export default function Register() {
 
 
 
-  const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
 
     const newError = {
       fullName: '',
@@ -79,11 +82,26 @@ export default function Register() {
       phoneNumber:formData.phoneNumber,
       password:formData.password
     }
+console.log("REQUEST DATA:", requestData);
 
-    const response = await register(requestData)
-    console.log(response)
+try {
+  console.log("REQUEST DATA:", requestData);
+
+  const response = await register(requestData);
+
+   navigate('/verify-otp' , {state : {email : formData.email}})
+
+  console.log("REGISTER SUCCESS:", response);
+
+} catch (error: any) {
+
+  console.log("REGISTER FAILED");
+  console.log("STATUS:", error.response?.status);
+  console.log("BACKEND ERROR:", error.response?.data);
+
+}
   }
-
+ console.log(formData)
   return (
 
     <div className="min-h-screen w-full bg-[#080808] flex items-center justify-center p-4 sm:p-6 lg:p-10 font-sans text-neutral-100">
@@ -194,10 +212,14 @@ export default function Register() {
                 type="email"
                 placeholder="email@example.com"
                 value={formData.email}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  email: e.target.value
-                })}
+               onChange={(e) => {
+  console.log("EMAIL INPUT:", e.target.value);
+
+  setFormData({
+    ...formData,
+    email: e.target.value
+  });
+}}
                 className="h-10 bg-[#0c0c0e] border-neutral-800 text-xs text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-[#ff3b30] focus-visible:border-[#ff3b30]"
               />
 

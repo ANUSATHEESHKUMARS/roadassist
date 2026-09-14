@@ -13,7 +13,7 @@ export class SendOtpUseCase implements ISendOtpUserUseCase {
     async execute(userId: string, email: string, purpose: OtpPurpose): Promise<{ message: string }> {
         const otp = await this.otpService.generateOtp()
         const codeHash = await this.otpService.hashOtp(otp)
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
+        const expiresAt = new Date(Date.now() + 1 * 60 * 1000)
         const otpEntity = new Otp(userId,
             email,
             codeHash,

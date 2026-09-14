@@ -5,6 +5,9 @@ import { IEmailService } from "../../application/contracts/IEmailService.js";
 export class EmailService implements IEmailService{
     private transporter;
     constructor(){
+        console.log("EMAIL USER EXISTS:", !!process.env.EMAIL_USER);
+    console.log("EMAIL PASSWORD EXISTS:", !!process.env.EMAIL_PASSWORD);
+
         this.transporter = nodemailer.createTransport({
             service:"gmail",
             auth:{
@@ -26,7 +29,7 @@ export class EmailService implements IEmailService{
 
                 <h1>${otp}</h1>
 
-                <p>This OTP will expire in 5 minutes.</p>
+                <p>This OTP will expire in 1 minutes.</p>
 
                 <p>If you did not request this, please ignore this email.</p>
             `,
