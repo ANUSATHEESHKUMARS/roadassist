@@ -1,8 +1,8 @@
-import app from './app.js'
 import dotenv from 'dotenv'
-import { connectDB } from './infrastructure/databases/connections.js'
-
 dotenv.config()
+
+const { default : app } = await import("./app.js")
+const { connectDB } = await import('./infrastructure/databases/connections.js')
 
 await connectDB()
 

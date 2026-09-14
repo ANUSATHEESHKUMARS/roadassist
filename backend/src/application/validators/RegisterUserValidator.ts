@@ -25,12 +25,14 @@ export class RegisterUserValidator implements IRegisterUserValidator {
         if (!registerUserDto.phoneNumber?.trim()) {
             throw new BadRequest('Phone number is required', "PHONE_NUMBER_HAVE_DIGITS")
         }
-        if (!/^\d{10}$/.test(registerUserDto.phoneNumber.trim())) {
-            throw new BadRequest(
-                "Phone number must contain exactly 10 digits.",
-                "10_DIGITS_REQUIRED"
-            );
-        }
+       const phoneRegex = /^\+91\d{10}$/;
+
+if (!phoneRegex.test(registerUserDto.phoneNumber.trim())) {
+    throw new BadRequest(
+        "Invalid Indian phone number.",
+        "PHONE_NUMBER_INVALID"
+    );
+}
         if (!registerUserDto.password?.trim()) {
             throw new BadRequest(
                 "Password is required.",

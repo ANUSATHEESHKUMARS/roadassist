@@ -6,11 +6,12 @@ import { IVerifyOtpController } from '../interfaces/IVerifyOtpController.js'
 
 export default function createRoutes(authcontroller : IAuthController, verifyotpcontroller : IVerifyOtpController){
     const router = Router()
-    const authRoutes = createAuthRoutes(authcontroller,verifyotpcontroller )
-    
-    router.use('/auth',authRoutes)
+    console.log("auth route created") 
+    router.use('/auth',createAuthRoutes(authcontroller,verifyotpcontroller))
     return router
 }
+
+
 
 
 

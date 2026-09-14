@@ -6,6 +6,7 @@ import { IVerifyOtpController } from "../interfaces/IVerifyOtpController.js";
 export default function createAuthRoutes(authcontroller : IAuthController, verifyotpcontroller : IVerifyOtpController){
 
 const authRouter = Router();
+    console.log("REGISTER ROUTE CREATED");
 
 authRouter.post('/register', asyncHandler(authcontroller.register))
   

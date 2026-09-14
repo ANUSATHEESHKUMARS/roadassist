@@ -12,11 +12,23 @@ export class AuthController implements IAuthController {
   ){}
     
     register = async (req: Request, res:Response) : Promise<void> => { 
-      console.log('this is controller' ,req.body)
+ console.log("1. CONTROLLER START")
+
+    console.log("REQUEST BODY:", req.body)
+
        const registerUserDto : RegisterUserDto = req.body;
+
+
+    console.log("DTO:", registerUserDto)
+    console.log("DTO EMAIL:", registerUserDto.email)
+    
       const otp =  await this.registerUserUseCase.execute(registerUserDto);
+    console.log("3. USE CASE COMPLETED", otp);
+
        res.status(HttpStatusCode.OK).json({
-        message : "Register succesfull, otp sent to your email", otp
+        message : "Register succesfull, otp sent to your email",
+        succes : true,
+        data : otp
        })
     }
     login = async (req: Request, res: Response): Promise<void> =>{

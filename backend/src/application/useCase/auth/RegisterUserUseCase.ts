@@ -16,13 +16,38 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
         private sendOtpUseCase : ISendOtpUserUseCase
     ){}
     async execute(registerUserDto: RegisterUserDto): Promise<{message : string ;}> {
+  console.log("EMAIL INSIDE USE CASE:", registerUserDto.email)
+
+console.log("🔥 ABOUT TO CALL VALIDATOR")
+
         this.registerUserValidator.validate(registerUserDto);
-        const existingUser = await this.userRepository.findbyemail(registerUserDto.email)
-       
-        if(existingUser){
-            throw new ConflictError("user already exists","USER_ALREADY_EXISTS")
-        }
-        const hashedPassword = await this.passwordHasher.hash(registerUserDto.password)
+
+console.log("🔥 VALIDATOR COMPLETED")
+
+console.log("🔥 ABOUT TO CALL FIND BY EMAIL")
+      const existingUser = await this.userRepository.findbyemail(
+    registerUserDto.email
+);
+console.log("🔥 FIND BY EMAIL COMPLETED")
+console.log("EXISTING USER:", existingUser)
+
+if (existingUser) {
+    console.log("USER ALREADY EXISTS");
+    throw new ConflictError(
+        "user already exists",
+        "USER_ALREADY_EXISTS"
+    );
+}
+
+console.log("NO EXISTING USER");
+const hashedPassword = await this.passwordHasher.hash(
+    registerUserDto.password
+);
+
+console.log("8. PASSWORD HASH COMPLETED");        
+
+        console.log("7. PASSWORD HASHED");
+
           console.log('Validation passed')
           console.log(registerUserDto)
           const user = new User(
@@ -33,9 +58,13 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
            "user",
            
           )
-          await this.userRepository.save(user)
-       const otpResponse =  await this.sendOtpUseCase.execute(user.userId , user.email , "EMAIL_VERIFICATION")
-       console.log(otpResponse)
+           const  savedUser =  await this.userRepository.save(user)
+
+          console.log("8. USER SAVED", savedUser);
+
+console.log("9. BEFORE OTP");
+       const otpResponse =  await this.sendOtpUseCase.execute(savedUser.userId , savedUser.email , "EMAIL_VERIFICATION")
+       console.log(otpResponse ,"otp completed" )
           return {message : "success " ,
            }
 
