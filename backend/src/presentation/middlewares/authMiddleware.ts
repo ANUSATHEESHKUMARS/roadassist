@@ -22,4 +22,4 @@ export const authMiddleware = (tokenService: ITokenService) => {
             next(new UnauthorizedError("Invald or expired access token", "INVALID_ACCES_TOKEN"))
         }
     }
-}
+} 

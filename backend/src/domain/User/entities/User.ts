@@ -4,9 +4,13 @@ export class User {
         public fullName: string,
         public email: string,
         public phoneNumber: string,
-        private password: string,
+        private password: string | undefined,
         public role: UserRole,
-        public userId?: string,) {}
+        public userId?: string,
+        public googleId?:string,
+        public authProvider:AuthProvider = "LOCAL"
+    
+    ) {}
 
     getpassword() {
         return this.password
@@ -15,3 +19,4 @@ export class User {
 }
 
 export type UserRole = "user"|"mechanic"|"admin";
+export type AuthProvider = "LOCAL"|"GOOGLE"

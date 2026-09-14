@@ -14,6 +14,8 @@ authRouter.post('/login', asyncHandler(authcontroller.login))
 
 authRouter.post('/verifyotp' , asyncHandler(verifyotpcontroller.execute))
 
+authRouter.post('/google' , asyncHandler(authcontroller.googleLogin))
+
 return authRouter
 
 }

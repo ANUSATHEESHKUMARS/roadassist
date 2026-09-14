@@ -81,6 +81,7 @@ export default function VerifyOtp({
 
     console.log("OTP VERIFICATION SUCCESS:", response);
 
+    navigate('/user')
     if (onSuccess) {
       onSuccess();
     }

@@ -19,6 +19,10 @@ import { GetVehicleByIdUseCase } from "../application/useCase/vehicle/GetVehicle
 import { UpdateVehicleUseCase } from "../application/useCase/vehicle/UpdatevehicleUseCase.js";
 import { DeleteVehicleUseCase } from "../application/useCase/vehicle/DeleteVehicleUseCase.js";
 import { EmailService } from "../infrastructure/services/EmailService.js";
+import { GetUserUseCase } from "../application/useCase/admin/GetUserUseCase.js";
+import { AdminController } from "../presentation/controllers/admin/AdminController.js";
+import { GoogleAuthService } from "../infrastructure/services/GoogleAuthService.js";
+import { GoogleLoginUseCase } from "../application/useCase/auth/GoogleLoginUseCase.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -49,7 +53,6 @@ const verifyotpUseCase = new VerifyOtpUseCase(otpRepository, otpService)
 
 export const verifyotpcontroller = new VerifyOtpController(verifyotpUseCase)
 
-export const authcontroller = new AuthController(registerUserUseCase, loginUserUseCase)
 
 
 
@@ -72,5 +75,15 @@ export const createVehicleController = new CreateVehicleController(createVehicle
     removeVehicleUseCase
 )
 
+const googleAuthService = new GoogleAuthService()
 
+const googleLoginUseCase = new GoogleLoginUseCase(googleAuthService , 
+    userRepository,
+    tokenService
+)
 
+const getUserUseCase = new GetUserUseCase(userRepository)
+
+export const adminController = new AdminController(getUserUseCase)
+
+export const authcontroller = new AuthController(registerUserUseCase, loginUserUseCase, googleLoginUseCase)

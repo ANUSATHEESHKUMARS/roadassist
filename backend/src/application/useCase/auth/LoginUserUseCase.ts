@@ -18,7 +18,19 @@ export class LoginUserUseCase implements ILoginUserUserCase {
         if(!user){
             throw new UnauthorizedError("Invalid email or password", "INVALID_CREDENTIALS")
         }
-       const isValidPassword = await this.passwordHasher.compare(loginUserDto.password , user.getpassword())
+const password = user.getpassword();
+
+if (!password) {
+    throw new UnauthorizedError(
+        "Invalid email or password",
+        "INVALID_CREDENTIALS"
+    );
+}
+
+const isValidPassword = await this.passwordHasher.compare(
+    loginUserDto.password,
+    password
+);
        if(!isValidPassword){
         throw new UnauthorizedError("invalid credentials ...", "INVALID_CREATEDTIALS")
        }
@@ -29,7 +41,6 @@ export class LoginUserUseCase implements ILoginUserUserCase {
 
        }) 
 
-       console.log('acces token is this bro' , accessToken)
     
        const refreshToken = this.tokenService.generateRefreshToken({
         userId : user.userId!

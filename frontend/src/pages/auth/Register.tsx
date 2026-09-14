@@ -388,7 +388,8 @@ try {
             {/* Login Link */}
             <p className="text-center text-[11px] text-neutral-400 pt-2">
               Already have an account?{" "}
-              <span className="text-[#ff3b30] font-medium cursor-pointer hover:underline">
+              <span className="text-[#ff3b30] font-medium cursor-pointer hover:underline"
+              onClick={() => navigate('/login')}>
                 Login
               </span>
             </p>

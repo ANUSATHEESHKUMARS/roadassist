@@ -4,10 +4,10 @@ import type { RegisterRequest } from "@/types/auth";
 
 
 export const register = async (data: RegisterRequest) => {
-    console.log("auth service ", data)
-    const response = await apiClient.post('/auth/register', data)
-    console.log(response)
-    return response.data
+  console.log("auth service ", data)
+  const response = await apiClient.post('/auth/register', data)
+  console.log(response)
+  return response.data
 }
 export const verifyOtp = async (data: {
   email: string;
@@ -22,3 +22,15 @@ export const verifyOtp = async (data: {
   return response.data;
 };
 
+export const login = async (data: { email: string, password: string }) => {
+  const response = await apiClient.post('/auth/login', data)
+  return response.data
+}
+
+export const googleLogin = async (idToken: string) => {
+    const response = await apiClient.post("/auth/google", {
+        idToken
+    });
+
+    return response.data;
+};

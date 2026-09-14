@@ -4,11 +4,12 @@ import { LoginUserDTO, RegisterUserDto } from "../../application/dtos/user.js";
 import { IAuthController } from "../interfaces/IAuthController.js";
 import { ILoginUserUserCase } from "../../application/interfaces/ILoginUserUserCase.js";
 import { HttpStatusCode } from "../../application/enum/httpCodes.js";
-
+import { IGoogleLoginUseCase } from "../../application/interfaces/IGoogleLoginUseCase.js";
 
 export class AuthController implements IAuthController {
   constructor(private registerUserUseCase : IRegisterUserUseCase,
-    private loginUserUseCase : ILoginUserUserCase
+    private loginUserUseCase : ILoginUserUserCase,
+    private googleLoginUseCase : IGoogleLoginUseCase
   ){}
     
     register = async (req: Request, res:Response) : Promise<void> => { 
@@ -54,5 +55,28 @@ export class AuthController implements IAuthController {
         succes : true
       })
     }
+
+     googleLogin = async (req: Request, res: Response): Promise<void> => {
+
+    const { idToken } = req.body;
+
+    const result = await this.googleLoginUseCase.execute(idToken);
+
+    res.cookie("accessToken", result.accessToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax"
+    });
+
+    res.cookie("refreshToken", result.refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax"
+    });
+
+    res.status(200).json({
+        message: "Google login successful"
+    });
+}
 }
 

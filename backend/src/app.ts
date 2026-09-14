@@ -5,6 +5,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import vehilceRouter from './presentation/routes/vehicleRoutes.js'
 import cors from 'cors'
+import adminRouter from './presentation/routes/adminRoutes.js'
 
 const app = express()
 
@@ -29,8 +30,10 @@ app.get('/', (req, res) => {
 
 app.use('/api', createRoutes(authcontroller,verifyotpcontroller))
 
-app.use('/api/vehicle' ,vehilceRouter )
+app.use('/api/admin' , adminRouter)
 
+app.use('/api/vehicle' ,vehilceRouter )
+    
 app.use(errorHandlingMiddleware)
 
 export default app
