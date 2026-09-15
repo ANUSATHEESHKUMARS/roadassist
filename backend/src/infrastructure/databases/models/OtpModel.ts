@@ -6,9 +6,9 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 
 export interface IOtpDocument extends Document {
-    userId :Types.ObjectId,
     email: string,
     codeHash: string,
+
       purpose:
         | "EMAIL_VERIFICATION"
         | "PHONE_VERIFICATION"
@@ -24,10 +24,6 @@ export interface IOtpDocument extends Document {
 const otpSchema = new Schema<IOtpDocument>(
     {
 
-        userId : {
-            type : Schema.Types.ObjectId,
-            required : true
-        },
         email : {
             type : String,
             required : true,

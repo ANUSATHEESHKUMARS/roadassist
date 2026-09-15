@@ -5,9 +5,19 @@ import { NotfoundError } from "../../../shared/errors/NotFoundError.js";
 import { IOtpService } from "../../contracts/IOtpService.js";
 import { IVerifyOtpUseCase } from "../../interfaces/IVerifyOtp.js";
 import { otpDto } from "../../dtos/otp.js";
+import { IPendingRegistrationRepository } from "../../../domain/repositories/IPendingRegistration.js";
+import { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
+import { User } from "../../../domain/User/entities/User.js";
+
 
 export class VerifyOtpUseCase implements IVerifyOtpUseCase {
-    constructor(private otpRepository: IOtpRepository, private otpService: IOtpService) { }
+    constructor(private otpRepository: IOtpRepository, 
+        private otpService: IOtpService,
+        private pendingRegistrationRepository : IPendingRegistrationRepository,
+        private userRepository : IUserRepository
+    ) { }
+
+
     async verify(verifyotpDto : otpDto): Promise<{ message: string; }> {
         const otpRecord = await this.otpRepository.findByEmailAndPurpose(verifyotpDto.email, verifyotpDto.purpose)
         if(!otpRecord){
@@ -28,7 +38,25 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
             throw new BadRequest("Invalid otp" , "INVALID_OTP")
         }
         await this.otpRepository.markAsUsed(verifyotpDto.email , verifyotpDto.purpose)
-console.log('succes aayi monee')
+        console.log('succes aayi monee')
+
+        const pendingRegistration = await this.pendingRegistrationRepository.findByEmail(verifyotpDto.email)
+
+        if(!pendingRegistration){
+            throw new NotfoundError("Pending registration not found", "PENDING_REGISTRATION_NOT_FOUND")
+        }
+        const user = new User(
+            pendingRegistration.fullName,
+            pendingRegistration.email,
+            pendingRegistration.phoneNumber,
+            pendingRegistration.getPassword(),
+            "user"
+        )
+
+        const savedUser = await this.userRepository.save(user)
+
+        await this.pendingRegistrationRepository.deleteByEmail(verifyotpDto.email)
+        console.log("User Created" , savedUser.userId)
         return { message : "OTP verification succesfull"}
     }
 }

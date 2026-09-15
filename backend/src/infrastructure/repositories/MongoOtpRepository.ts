@@ -1,4 +1,3 @@
-import { truncate } from "fs";
 import { Otp, OtpPurpose } from "../../domain/User/entities/Otp.js";
 import { IOtpRepository } from "../../domain/repositories/IOtpRepository.js";
 import { OtpModel } from "../databases/models/OtpModel.js";
@@ -7,7 +6,7 @@ export class MongoOtpRepository implements IOtpRepository {
 
     async save(otp: Otp): Promise<void> {
         await OtpModel.create({
-            userId: otp.userId,
+           
             email: otp.email,
             codeHash: otp.codeHash,
             purpose: otp.purpose,
@@ -19,11 +18,11 @@ export class MongoOtpRepository implements IOtpRepository {
         })
     }
     async findByEmailAndPurpose(email: string, purpose: OtpPurpose): Promise<Otp | null> {
-        const otpDocument = await OtpModel.findOne({ email, purpose})
+        const otpDocument = await OtpModel.findOne({ email, purpose, used:false}).sort({createdAt :-1})
         if (!otpDocument) {
             return null
         }
-        return new Otp(otpDocument.userId.toString(),
+        return new Otp(
             otpDocument.email,
             otpDocument.codeHash,
             otpDocument.purpose,

@@ -9,12 +9,16 @@ import { IOtpRepository } from "../../../domain/repositories/IOtpRepository.js";
 import { IEmailService } from "../../contracts/IEmailService.js";
 
 export class SendOtpUseCase implements ISendOtpUserUseCase {
-    constructor(private readonly otpRepository: IOtpRepository, private readonly otpService: IOtpService , private emailService : IEmailService     ) { }
-    async execute(userId: string, email: string, purpose: OtpPurpose): Promise<{ message: string }> {
+    
+    constructor(private readonly otpRepository: IOtpRepository,
+         private readonly otpService: IOtpService ,
+          private emailService : IEmailService     ) { }
+
+    async execute( email: string, purpose: OtpPurpose): Promise<{ message: string }> {
         const otp = await this.otpService.generateOtp()
         const codeHash = await this.otpService.hashOtp(otp)
         const expiresAt = new Date(Date.now() + 1 * 60 * 1000)
-        const otpEntity = new Otp(userId,
+        const otpEntity = new Otp(
             email,
             codeHash,
             purpose,

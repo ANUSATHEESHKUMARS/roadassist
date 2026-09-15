@@ -24,6 +24,7 @@ import { AdminController } from "../presentation/controllers/admin/AdminControll
 import { GoogleAuthService } from "../infrastructure/services/GoogleAuthService.js";
 import { GoogleLoginUseCase } from "../application/useCase/auth/GoogleLoginUseCase.js";
 import { ResentOtpUseCase } from "../application/useCase/auth/ResendOtpUseCase.js";
+import { RedisPendingRegistrationRepository } from "../infrastructure/repositories/RedisPendingRegistrationRepository.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -46,13 +47,26 @@ const emailService = new EmailService()
 
 const sendOtpUseCase = new SendOtpUseCase(otpRepository, otpService, emailService)
 
-const resendOtpUseCase = new ResentOtpUseCase(otpRepository, otpService, emailService, userRepository)
 
-const registerUserUseCase = new RegisterUserUseCase(passwordHasher, userRepository, registerUserValidator, sendOtpUseCase)
+const pendingRegistrationRepository = new RedisPendingRegistrationRepository()
+
+const resendOtpUseCase = new ResentOtpUseCase(otpRepository, otpService, emailService, pendingRegistrationRepository)
+
+const registerUserUseCase = new RegisterUserUseCase(
+    passwordHasher,
+    userRepository,
+    registerUserValidator,
+    sendOtpUseCase,
+    pendingRegistrationRepository
+)
 
 const loginUserUseCase = new LoginUserUseCase(userRepository, passwordHasher, tokenService)
 
-const verifyotpUseCase = new VerifyOtpUseCase(otpRepository, otpService)
+const verifyotpUseCase = new VerifyOtpUseCase(otpRepository, 
+    otpService
+    ,pendingRegistrationRepository, 
+    userRepository
+)
 
 export const verifyotpcontroller = new VerifyOtpController(verifyotpUseCase)
 

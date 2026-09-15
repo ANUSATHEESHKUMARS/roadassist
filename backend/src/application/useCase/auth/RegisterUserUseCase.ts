@@ -4,32 +4,36 @@ import { IRegisterUserUseCase } from "../../interfaces/IRegisterUserUseCase.js";
 import { RegisterUserDto } from "../../dtos/user.js";
 import { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
 import { IRegisterUserValidator } from "../../validators/interfaces/IRegisterUserValidator.js";
-import { User } from "../../../domain/User/entities/User.js";
 import { ISendOtpUserUseCase } from "../../interfaces/ISendOtpuserUserCase.js";
 import { ConflictError } from "../../../shared/errors/ConflitError.js";
+import { IPendingRegistrationRepository } from "../../../domain/repositories/IPendingRegistration.js";
+import { PendingRegistration } from "../../../domain/User/entities/PendingRegistration.js";
 
 
 export class RegisterUserUseCase implements IRegisterUserUseCase {
-    constructor(private passwordHasher: IPasswordHasher,
+
+    constructor(
+        private passwordHasher: IPasswordHasher,
         private userRepository: IUserRepository,
         private registerUserValidator: IRegisterUserValidator,
-        private sendOtpUseCase: ISendOtpUserUseCase
+        private sendOtpUseCase: ISendOtpUserUseCase,
+        private pendingRegistrationRepository: IPendingRegistrationRepository
     ) { }
     async execute(registerUserDto: RegisterUserDto): Promise<{ message: string; }> {
-        console.log("EMAIL INSIDE USE CASE:", registerUserDto.email)
-
-        console.log("ABOUT TO CALL VALIDATOR")
 
         this.registerUserValidator.validate(registerUserDto);
 
-        console.log(" VALIDATOR COMPLETED")
+        console.log("2. AFTER VALIDATOR");
 
-        console.log(" ABOUT TO CALL FIND BY EMAIL")
+console.log("3. BEFORE FIND BY EMAIL");
         const existingUser = await this.userRepository.findbyemail(
             registerUserDto.email
         );
-        console.log(" FIND BY EMAIL COMPLETED")
-        console.log("EXISTING USER:", existingUser)
+        console.log("4. AFTER FIND BY EMAIL");
+console.log("EMAIL CHECKED:", registerUserDto.email);
+console.log("EXISTING USER:", existingUser);
+
+
 
         if (existingUser) {
             console.log("USER ALREADY EXISTS");
@@ -39,35 +43,27 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
             );
         }
 
-        console.log("NO EXISTING USER");
         const hashedPassword = await this.passwordHasher.hash(
             registerUserDto.password
         );
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
 
-        console.log("8. PASSWORD HASH COMPLETED");
 
-        console.log("7. PASSWORD HASHED");
-
-        console.log('Validation passed')
-        console.log(registerUserDto)
-        const user = new User(
+        const pendingRegistration = new PendingRegistration(
             registerUserDto.fullName,
             registerUserDto.email,
             registerUserDto.phoneNumber,
             hashedPassword,
-            "user",
-
+            expiresAt
         )
-        const savedUser = await this.userRepository.save(user)
 
-        console.log("8. USER SAVED", savedUser);
 
-        console.log("9. BEFORE OTP");
+        await this.pendingRegistrationRepository.save(pendingRegistration)
 
-        const otpResponse = await this.sendOtpUseCase.execute(savedUser.userId, savedUser.email, "EMAIL_VERIFICATION")
-        console.log(otpResponse, "otp completed")
+        await this.sendOtpUseCase.execute(registerUserDto.email, "EMAIL_VERIFICATION")
+
         return {
-            message: "success "
+            message: "Registration succesfull and otp sent to your sent "
         }
     }
 }
