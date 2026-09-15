@@ -1,3 +1,4 @@
+import { truncate } from "fs";
 import { Otp, OtpPurpose } from "../../domain/User/entities/Otp.js";
 import { IOtpRepository } from "../../domain/repositories/IOtpRepository.js";
 import { OtpModel } from "../databases/models/OtpModel.js";
@@ -36,6 +37,9 @@ export class MongoOtpRepository implements IOtpRepository {
     }
     async markAsUsed(email: string, purpose: OtpPurpose): Promise<void> {
         await OtpModel.updateOne({email , purpose , used : false} , {$set : {used : true} })
+    }
+    async invalidateOtp(email: string, purpose: OtpPurpose): Promise<void> {
+        await OtpModel.updateMany({email , purpose , used:false},{$set : {used : true}})
     }
 }
 

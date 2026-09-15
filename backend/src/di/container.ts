@@ -23,6 +23,7 @@ import { GetUserUseCase } from "../application/useCase/admin/GetUserUseCase.js";
 import { AdminController } from "../presentation/controllers/admin/AdminController.js";
 import { GoogleAuthService } from "../infrastructure/services/GoogleAuthService.js";
 import { GoogleLoginUseCase } from "../application/useCase/auth/GoogleLoginUseCase.js";
+import { ResentOtpUseCase } from "../application/useCase/auth/ResendOtpUseCase.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -43,7 +44,9 @@ const otpService = new OtpService()
 
 const emailService = new EmailService()
 
-const sendOtpUseCase = new SendOtpUseCase(otpRepository, otpService , emailService)
+const sendOtpUseCase = new SendOtpUseCase(otpRepository, otpService, emailService)
+
+const resendOtpUseCase = new ResentOtpUseCase(otpRepository, otpService, emailService, userRepository)
 
 const registerUserUseCase = new RegisterUserUseCase(passwordHasher, userRepository, registerUserValidator, sendOtpUseCase)
 
@@ -77,7 +80,7 @@ export const createVehicleController = new CreateVehicleController(createVehicle
 
 const googleAuthService = new GoogleAuthService()
 
-const googleLoginUseCase = new GoogleLoginUseCase(googleAuthService , 
+const googleLoginUseCase = new GoogleLoginUseCase(googleAuthService,
     userRepository,
     tokenService
 )
@@ -86,4 +89,14 @@ const getUserUseCase = new GetUserUseCase(userRepository)
 
 export const adminController = new AdminController(getUserUseCase)
 
-export const authcontroller = new AuthController(registerUserUseCase, loginUserUseCase, googleLoginUseCase)
+export const authcontroller = new AuthController(registerUserUseCase,
+    loginUserUseCase,
+    googleLoginUseCase,
+    resendOtpUseCase
+)
+
+
+
+
+
+

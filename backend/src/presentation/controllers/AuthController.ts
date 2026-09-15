@@ -5,11 +5,16 @@ import { IAuthController } from "../interfaces/IAuthController.js";
 import { ILoginUserUserCase } from "../../application/interfaces/ILoginUserUserCase.js";
 import { HttpStatusCode } from "../../application/enum/httpCodes.js";
 import { IGoogleLoginUseCase } from "../../application/interfaces/IGoogleLoginUseCase.js";
+import { CommonResponse } from "../../shared/types/CommonResponse.js";
+import { ResendOtpDto } from "../../application/dtos/resentOtp.js";
+import { IResendOtpUseCase } from "../../application/interfaces/IResendOtpUseCase.js";
+
 
 export class AuthController implements IAuthController {
   constructor(private registerUserUseCase : IRegisterUserUseCase,
     private loginUserUseCase : ILoginUserUserCase,
-    private googleLoginUseCase : IGoogleLoginUseCase
+    private googleLoginUseCase : IGoogleLoginUseCase,
+    private resendOtpUseCase : IResendOtpUseCase
   ){}
     
     register = async (req: Request, res:Response) : Promise<void> => { 
@@ -20,18 +25,16 @@ export class AuthController implements IAuthController {
        const registerUserDto : RegisterUserDto = req.body;
 
 
-    console.log("DTO:", registerUserDto)
-    console.log("DTO EMAIL:", registerUserDto.email)
     
       const otp =  await this.registerUserUseCase.execute(registerUserDto);
-    console.log("3. USE CASE COMPLETED", otp);
 
-       res.status(HttpStatusCode.OK).json({
-        message : "Register succesfull, otp sent to your email",
-        succes : true,
-        data : otp
-       })
+      const response : CommonResponse = {
+        success : true,
+        message : "registration succes"
+      }
+      res.status(HttpStatusCode.CREATED).json(response)
     }
+
     login = async (req: Request, res: Response): Promise<void> =>{
       const loginUserDto : LoginUserDTO = req.body
   
@@ -50,10 +53,11 @@ export class AuthController implements IAuthController {
         sameSite:"strict",
         maxAge : 7 * 24 * 60 * 60 *  1000
       })
-      res.status(HttpStatusCode.OK).json({
-        message : "Login succesfull",
-        succes : true
-      })
+      const response : CommonResponse = {
+        success:true,
+        message:"login success"
+      }
+      res.status(HttpStatusCode.OK).json(response)
     }
 
      googleLogin = async (req: Request, res: Response): Promise<void> => {
@@ -74,9 +78,16 @@ export class AuthController implements IAuthController {
         sameSite: "lax"
     });
 
-    res.status(200).json({
-        message: "Google login successful"
-    });
+  const response : CommonResponse = {
+    success : true,
+    message:"login succes"
+  }
+  res.status(HttpStatusCode.OK).json(response)
 }
+resentOtp = async (req: Request, res: Response): Promise<void> =>{
+   const data : ResendOtpDto = req.body
+   const response = await this.resendOtpUseCase.execute(data)
+   res.status(HttpStatusCode.OK).json(response)
+ }
 }
 

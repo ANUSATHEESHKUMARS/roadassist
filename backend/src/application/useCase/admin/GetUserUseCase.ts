@@ -3,6 +3,7 @@ import { GetUsersResponseDto } from "../../dtos/admin.js";
 import { IGetUserUseCase } from "../../interfaces/admin/IGetUserUseCase.js";
 
 
+
 export class GetUserUseCase implements IGetUserUseCase{
     constructor(private userRepository : IUserRepository){}
   async execute(): Promise<GetUsersResponseDto[]> {
@@ -16,3 +17,9 @@ export class GetUserUseCase implements IGetUserUseCase{
       }))
   }
 }
+
+
+
+
+
+

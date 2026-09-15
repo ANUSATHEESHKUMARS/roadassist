@@ -2,7 +2,7 @@ import { HttpStatusCode } from "../../../application/enum/httpCodes.js";
 import { IGetUserUseCase } from "../../../application/interfaces/admin/IGetUserUseCase.js";
 import { IAdminUserController } from "../../interfaces/IAdminUserController.js";
 import { Request , Response } from "express";
-
+import { CommonResponse } from "../../../shared/types/CommonResponse.js";
 
 export class AdminController implements IAdminUserController{
     constructor(private  getUserUseCase : IGetUserUseCase){}

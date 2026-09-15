@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OtpInput } from "@/components/auth/OtpInput";
-import { verifyOtp } from "@/services/authService";
+import { verifyOtp, resendOtp } from "@/services/authService";
 import { useLocation , useNavigate } from "react-router-dom";
 
 
@@ -33,17 +33,22 @@ export default function VerifyOtp({
   const email = location.state?.email || ""
 
   const [otp, setOtp] = useState<string>("");
-  const [timeLeft, setTimeLeft] = useState<number>(58);
+  const [timeLeft, setTimeLeft] = useState<number>(60);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Timer countdown
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [timeLeft]);
+useEffect(() => {
+  if (timeLeft <= 0) {
+    return;
+  }
+
+  const interval = setInterval(() => {
+    setTimeLeft((prev) => prev - 1);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [timeLeft]);
+
 
   const formatTimer = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -51,12 +56,28 @@ export default function VerifyOtp({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const handleResendOtp = () => {
-    if (timeLeft > 0) return;
-    // Trigger resend logic
-    setTimeLeft(58);
-    setOtp("");
-  };
+ const handleResendOtp = async () =>{
+  if(timeLeft > 0 || !email || isSubmitting){
+    return
+  }
+  try{
+    setIsSubmitting(true)
+
+    const response = await resendOtp({
+      email , 
+      purpose:"EMAIL_VERIFICATION"
+    })
+    console.log("resend otp succes", response)
+    setTimeLeft(60);
+    setOtp("")
+  }catch(error : any){
+    console.log("resend otp failed")
+    console.log(error.response?.status)
+    console.log(error.response?.data)
+  }finally {
+    setIsSubmitting(false)
+  }
+ }
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
   e.preventDefault();

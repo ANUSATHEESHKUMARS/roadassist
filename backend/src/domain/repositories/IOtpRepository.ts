@@ -4,6 +4,7 @@ export interface IOtpRepository {
     findByEmailAndPurpose(email : string , purpose : OtpPurpose): Promise<Otp | null>
     incrementAttemps(email : string , purpose : OtpPurpose):Promise<void>
     markAsUsed(email : string , purpose : OtpPurpose):Promise<void>
+    invalidateOtp(email:string, purpose:OtpPurpose):Promise<void>
 }
 
 
