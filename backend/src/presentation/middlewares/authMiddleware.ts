@@ -13,7 +13,7 @@ export const authMiddleware = (tokenService: ITokenService) => {
             return
         }
         try {
-            const payload = tokenService.verifyAccesToken(token)
+            const payload = tokenService.verifyAccessToken(token)
             req.user = payload
             console.log('this is the req', req.user)
             next()

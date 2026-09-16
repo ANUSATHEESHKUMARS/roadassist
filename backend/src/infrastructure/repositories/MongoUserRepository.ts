@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import { UserModel } from "../databases/models/UserModel.js";
 import { User , UserRole , AuthProvider} from "../../domain/User/entities/User.js";
-
+import { UserMapper } from "../../application/mappers/UserMapper.js";
 
 
 export class MongoUserRepository implements IUserRepository {
@@ -46,29 +46,12 @@ export class MongoUserRepository implements IUserRepository {
       if (!userDocument) {
          return null
       }
-      return new User(userDocument.fullName,
-         userDocument.email,
-         userDocument.phoneNumber,
-         userDocument.password,
-         userDocument.role,
-         userDocument._id.toString(),
-         userDocument.googleId,
-         userDocument.authProvider
-      )
+      return UserMapper.toDomain(userDocument)
    }
    async findAll(): Promise<User[]> {
       const users = await UserModel.find().select("-password")
       return users.map((user) => {
-         return new User(
-            user.fullName,
-            user.email,
-            user.phoneNumber,
-            undefined,
-            user.role,
-            user._id.toString(),
-          user.googleId,
-          user.authProvider
-         )
+         return UserMapper.toDomain(user)
       })
    }
    async createGoogleUser(data: { fullName: string; email: string; googleId: string; }): Promise<User> {
@@ -79,16 +62,7 @@ export class MongoUserRepository implements IUserRepository {
          googleId:data.googleId,
          authProvider:"GOOGLE"
       })
-       return new User(
-        userDocument.fullName,
-        userDocument.email,
-        userDocument.phoneNumber,
-        userDocument.password,
-        userDocument.role,
-        userDocument._id.toString(),
-        userDocument.googleId,
-        userDocument.authProvider
-    );
+      return UserMapper.toDomain(userDocument)
    }
 
 }

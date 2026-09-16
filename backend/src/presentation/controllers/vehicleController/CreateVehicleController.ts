@@ -18,15 +18,35 @@ export class CreateVehicleController implements ICreateVehicleController {
       private removeVehicleUseCase : IRemoveVehicleUseCase) {}
 
    createVehilce = async (req: Request, res: Response): Promise<void> => {
-      const vehilceDto: VehicleDto = req.body
-      const userId = req.user!.userId;
-      const vehicle = await this.createVehicleUseCase.execute(vehilceDto, userId)
-      res.status(HttpStatusCode.CREATED).json({
-         succes: true,
-         message: "Vehicle create succesfully",
-         data: vehicle
-      })
-   }
+
+      console.log("CONTROLLER REACHED");
+console.log("FILES:", req.files);
+    const vehilceDto: VehicleDto = req.body;
+
+    const userId = req.user!.userId;
+
+    const files = req.files as {
+        vehicleImage?: Express.Multer.File[];
+        insuranceCertificateImage?: Express.Multer.File[];
+        pucCertificateImage?: Express.Multer.File[];
+    };
+
+    const vehicle = await this.createVehicleUseCase.execute(
+        vehilceDto,
+        userId,
+        {
+            vehicleImage: files.vehicleImage?.[0],
+            insuranceCertificateImage: files.insuranceCertificateImage?.[0],
+            pucCertificateImage: files.pucCertificateImage?.[0]
+        }
+    );
+
+    res.status(HttpStatusCode.CREATED).json({
+        succes: true,
+        message: "Vehicle create succesfully",
+        data: vehicle
+    });
+};
    getVehilce = async (req: Request, res: Response): Promise<void> => {
       const userId = req.user!.userId
     
@@ -55,7 +75,21 @@ export class CreateVehicleController implements ICreateVehicleController {
       const vehicleId = req.params.vehicleId
       const userId = req.user!.userId
       const dataToUpdate: UpdateVehicleDto = req.body
-      const change = await this.updateVehicleUseCase.updateVehicele(vehicleId, userId, dataToUpdate)
+
+       const files = req.files as {
+        vehicleImage?: Express.Multer.File[];
+        insuranceCertificateImage?: Express.Multer.File[];
+        pucCertificateImage?: Express.Multer.File[];
+    };
+      const change = await this.updateVehicleUseCase.updateVehicele(vehicleId,
+          userId,
+           dataToUpdate,
+          {
+            vehicleImage: files.vehicleImage?.[0],
+            insuranceCertificateImage: files.insuranceCertificateImage?.[0],
+            pucCertificateImage: files.pucCertificateImage?.[0]
+        }
+      )
       res.status(HttpStatusCode.OK).json({
          message: "vehicle details updated",
          succes: true,

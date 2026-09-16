@@ -26,6 +26,8 @@ import { GoogleLoginUseCase } from "../application/useCase/auth/GoogleLoginUseCa
 import { ResentOtpUseCase } from "../application/useCase/auth/ResendOtpUseCase.js";
 import { RedisPendingRegistrationRepository } from "../infrastructure/repositories/RedisPendingRegistrationRepository.js";
 import { CookieService } from "../infrastructure/services/CookieService.js";
+import { VehicleValidator } from "../application/validators/VehicleValidator.js";
+import { CloudinaryStorageService } from "../infrastructure/services/cloudinary/CloudinaryStorageService.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -79,13 +81,17 @@ export const verifyotpcontroller = new VerifyOtpController(verifyotpUseCase,
 
 const vehiceRepository = new VehicleRepostory()
 
-const createVehicleUseCase = new CreateVehicleUseCase(vehiceRepository)
+const vehicleValidator = new VehicleValidator()
+
+const fileStorageService = new CloudinaryStorageService()
+
+const createVehicleUseCase = new CreateVehicleUseCase(vehiceRepository,vehicleValidator,fileStorageService)
 
 const getVehicleUseCase = new GetVehilceUseCase(vehiceRepository)
 
 const getVehiclebyIdUseCase = new GetVehicleByIdUseCase(vehiceRepository)
 
-const updateVehicleUseCase = new UpdateVehicleUseCase(vehiceRepository)
+const updateVehicleUseCase = new UpdateVehicleUseCase(vehiceRepository, fileStorageService)
 
 const removeVehicleUseCase = new DeleteVehicleUseCase(vehiceRepository)
 

@@ -38,6 +38,8 @@ export class AuthController implements IAuthController {
     }
 
     login = async (req: Request, res: Response): Promise<void> =>{
+          console.log("CONTROLLER FILES:", req.files);
+
       const loginUserDto : LoginUserDTO = req.body
   
       const result = await this.loginUserUseCase.execute(loginUserDto)

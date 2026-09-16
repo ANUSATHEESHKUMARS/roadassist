@@ -1,34 +1,42 @@
 import { VehicleMapper } from "../../application/mappers/VehicleMapper.js";
 import { IVehicleRepository } from "../../domain/repositories/IVehicleRepository.js";
 import { Vehicle } from "../../domain/vehilce/Vehilce.js";
-import { VehicleModel } from "../databases/models/VehicleModel.js";
+import { IVehicleDocument, VehicleModel } from "../databases/models/VehicleModel.js";
+import { MongoBasRepository } from "./MongoBaseRepostory.js";
 
 
-export class VehicleRepostory implements IVehicleRepository {
-
+export class VehicleRepostory extends MongoBasRepository<IVehicleDocument> implements IVehicleRepository {
+constructor(){
+    super(VehicleModel)
+}
     async create(vehicle: Vehicle): Promise<Vehicle> {
-        const document = await VehicleModel.create({
+        const document = await this.createDocument({
             userId: vehicle.userId,
             registrationNumber: vehicle.registrationNumber,
+            vehicleType:vehicle.vehicleType,
             brand: vehicle.brand,
             model: vehicle.model,
             year: vehicle.year,
             fuelType: vehicle.fuelType,
-            color: vehicle.color
+            color: vehicle.color,
+            vehicleImage:vehicle.vehicleImage,
+            insuranceCertificateImage:vehicle.insuranceCertificateImage,
+            pucCertificateImage:vehicle.pucCertificateImage
+
         })
      return VehicleMapper.toDomain(document)
     }
 
 
     async findByUserId(userId: string): Promise<Vehicle[]> {
-        const document = await VehicleModel.find({
+        const document = await this.model.find({
             userId: userId
         })
      return document.map((document) =>VehicleMapper.toDomain(document))
     }
 
     async findById(vehicleId: string): Promise<Vehicle | null> {
-        const vehicleDetail = await VehicleModel.findById(vehicleId)
+        const vehicleDetail = await this.findByIdDocument(vehicleId)
         if (!vehicleDetail) {
             return null
         }
@@ -36,7 +44,7 @@ export class VehicleRepostory implements IVehicleRepository {
     }
 
     async update(vehicleId: string, vehicle: Partial<Vehicle>): Promise<Vehicle | null> {
-        const document = await VehicleModel.findByIdAndUpdate(vehicleId, vehicle, { new: true, runValidators: true })
+        const document = await this.updateDocument(vehicleId, vehicle)
         if (!document) {
             return null
         }
@@ -44,11 +52,14 @@ export class VehicleRepostory implements IVehicleRepository {
        return VehicleMapper.toDomain(document)
     }
   async delete(vehicleId: string): Promise<boolean> {
-      const document = await VehicleModel.findByIdAndDelete(vehicleId)
-      if(!document){
-        return false
-      }
-      return true
-  }
+      const document = await this.model.findByIdAndDelete(vehicleId)
+      
+    if (!document) {
+        return false;
+    }
+
+    return true;
+}
+  
 }
 
