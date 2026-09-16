@@ -34,7 +34,7 @@ const isValidPassword = await this.passwordHasher.compare(
        if(!isValidPassword){
         throw new UnauthorizedError("invalid credentials ...", "INVALID_CREATEDTIALS")
        }
-       const accessToken =  this.tokenService.generateAccesToken({
+       const accessToken =  this.tokenService.generateAccessToken({
         userId : user.userId!,
         email : user.email,
         role: user.role

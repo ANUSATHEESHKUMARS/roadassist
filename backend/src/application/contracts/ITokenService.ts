@@ -3,9 +3,9 @@ import { RefreshTokenPayload } from "../types/RefreshTokenPayload.js";
 
 
 export interface ITokenService{
-    generateAccesToken(payload : TokenPayload):string;
+    generateAccessToken(payload : TokenPayload):string;
     generateRefreshToken(payload : RefreshTokenPayload): string;
-    verifyAccesToken(token : string):TokenPayload;
+    verifyAccessToken(token : string):TokenPayload;
     verifyRefreshToken(token : string):RefreshTokenPayload;
     
 }

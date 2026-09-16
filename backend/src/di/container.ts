@@ -25,6 +25,7 @@ import { GoogleAuthService } from "../infrastructure/services/GoogleAuthService.
 import { GoogleLoginUseCase } from "../application/useCase/auth/GoogleLoginUseCase.js";
 import { ResentOtpUseCase } from "../application/useCase/auth/ResendOtpUseCase.js";
 import { RedisPendingRegistrationRepository } from "../infrastructure/repositories/RedisPendingRegistrationRepository.js";
+import { CookieService } from "../infrastructure/services/CookieService.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -65,12 +66,15 @@ const loginUserUseCase = new LoginUserUseCase(userRepository, passwordHasher, to
 const verifyotpUseCase = new VerifyOtpUseCase(otpRepository, 
     otpService
     ,pendingRegistrationRepository, 
-    userRepository
+    userRepository,
+    tokenService
 )
 
-export const verifyotpcontroller = new VerifyOtpController(verifyotpUseCase)
+const cookieService = new CookieService()
 
-
+export const verifyotpcontroller = new VerifyOtpController(verifyotpUseCase,
+    cookieService
+)
 
 
 const vehiceRepository = new VehicleRepostory()
@@ -106,7 +110,8 @@ export const adminController = new AdminController(getUserUseCase)
 export const authcontroller = new AuthController(registerUserUseCase,
     loginUserUseCase,
     googleLoginUseCase,
-    resendOtpUseCase
+    resendOtpUseCase,
+    cookieService
 )
 
 

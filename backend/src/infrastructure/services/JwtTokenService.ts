@@ -5,11 +5,11 @@ import { TokenPayload } from '../../application/types/TokenPayload.js'
 import { RefreshTokenPayload } from '../../application/types/RefreshTokenPayload.js'
 
 export class JwtTokenService implements ITokenService {
-    generateAccesToken(payload: TokenPayload): string {
+    generateAccessToken(payload: TokenPayload): string {
         return jwt.sign(
             payload,
             process.env.ACCESS_TOKEN_SECRET_KEY!,{
-                expiresIn : "15min"
+                expiresIn : "15m"
             }
         )
     }
@@ -22,7 +22,7 @@ export class JwtTokenService implements ITokenService {
             }
         )
     }
-    verifyAccesToken(token: string): TokenPayload {
+    verifyAccessToken(token: string): TokenPayload {
         return jwt.verify(
             token,
             process.env.ACCESS_TOKEN_SECRET_KEY!,

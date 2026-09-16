@@ -8,13 +8,15 @@ import { IGoogleLoginUseCase } from "../../application/interfaces/IGoogleLoginUs
 import { CommonResponse } from "../../shared/types/CommonResponse.js";
 import { ResendOtpDto } from "../../application/dtos/resentOtp.js";
 import { IResendOtpUseCase } from "../../application/interfaces/IResendOtpUseCase.js";
+import { ICookieService } from "../../application/contracts/ICookieService.js";
 
 
 export class AuthController implements IAuthController {
   constructor(private registerUserUseCase : IRegisterUserUseCase,
     private loginUserUseCase : ILoginUserUserCase,
     private googleLoginUseCase : IGoogleLoginUseCase,
-    private resendOtpUseCase : IResendOtpUseCase
+    private resendOtpUseCase : IResendOtpUseCase,
+    private cookieService : ICookieService
   ){}
     
     register = async (req: Request, res:Response) : Promise<void> => { 
@@ -26,7 +28,7 @@ export class AuthController implements IAuthController {
 
 
     
-      const otp =  await this.registerUserUseCase.execute(registerUserDto);
+      await this.registerUserUseCase.execute(registerUserDto);
 
       const response : CommonResponse = {
         success : true,
@@ -40,19 +42,30 @@ export class AuthController implements IAuthController {
   
       const result = await this.loginUserUseCase.execute(loginUserDto)
 
-      res.cookie("accessToken", result.accessToken,{
-        httpOnly:true,
-        secure:process.env.NODE_ENV === "production",
-        sameSite:"strict",
-        maxAge: 15 * 60 * 1000
-      })
-     
-      res.cookie("refreshtoken",result.refreshToken,{
-        httpOnly:true,
-        secure : process.env.NODE_ENV === "production",
-        sameSite:"strict",
-        maxAge : 7 * 24 * 60 * 60 *  1000
-      })
+     this.cookieService.setCookie(
+        res,
+        "accessToken",
+        result.accessToken,
+        {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000
+        }
+    );
+
+    this.cookieService.setCookie(
+        res,
+        "refreshToken",
+        result.refreshToken,
+        {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        }
+    );
+      
       const response : CommonResponse = {
         success:true,
         message:"login success"

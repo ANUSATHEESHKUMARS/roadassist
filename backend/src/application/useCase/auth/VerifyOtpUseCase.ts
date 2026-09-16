@@ -8,17 +8,18 @@ import { otpDto } from "../../dtos/otp.js";
 import { IPendingRegistrationRepository } from "../../../domain/repositories/IPendingRegistration.js";
 import { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
 import { User } from "../../../domain/User/entities/User.js";
-
+import { ITokenService } from "../../contracts/ITokenService.js";
 
 export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     constructor(private otpRepository: IOtpRepository, 
         private otpService: IOtpService,
         private pendingRegistrationRepository : IPendingRegistrationRepository,
-        private userRepository : IUserRepository
+        private userRepository : IUserRepository,
+        private tokenService : ITokenService
     ) { }
 
 
-    async verify(verifyotpDto : otpDto): Promise<{ message: string; }> {
+    async verify(verifyotpDto : otpDto): Promise<{ message: string; accessToken : string , refreshToken :string}> {
         const otpRecord = await this.otpRepository.findByEmailAndPurpose(verifyotpDto.email, verifyotpDto.purpose)
         if(!otpRecord){
             throw new NotfoundError("Otp not found..","OTP_NOT_FOUND")
@@ -55,9 +56,13 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
 
         const savedUser = await this.userRepository.save(user)
 
+
+        const accessToken = this.tokenService.generateAccessToken({userId : savedUser.userId! , email: savedUser.email ,role:savedUser.role})
+
+        const refreshToken = this.tokenService.generateRefreshToken({userId:savedUser.userId!})
         await this.pendingRegistrationRepository.deleteByEmail(verifyotpDto.email)
         console.log("User Created" , savedUser.userId)
-        return { message : "OTP verification succesfull"}
+        return { message : "OTP verification succesfull" , accessToken , refreshToken}
     }
 }
 

@@ -43,7 +43,7 @@ export class GoogleLoginUseCase implements IGoogleLoginUseCase {
         }
 
         const accessToken =
-            this.tokenService.generateAccesToken({
+            this.tokenService.generateAccessToken({
                 userId: user.userId!,
                 email: user.email,
                 role: user.role

@@ -1,5 +1,5 @@
 import { otpDto } from "../dtos/otp.js";
 
 export interface IVerifyOtpUseCase {
- verify(otpDto :otpDto):Promise<{message : string}>
+ verify(otpDto :otpDto):Promise<{message : string , accessToken:string , refreshToken:string}>
 }
