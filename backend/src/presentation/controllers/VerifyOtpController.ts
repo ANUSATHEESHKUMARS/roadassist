@@ -12,7 +12,6 @@ export class VerifyOtpController implements IVerifyOtpController {
     execute = async (req: Request, res: Response): Promise<void> => {
         const otpDto: otpDto = req.body
         const result = await this.verifyuseCase.verify(otpDto)
-        console.log("TOKENS:", result);
         this.cookieService.setCookie( res, "accessToken", result.accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",

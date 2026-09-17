@@ -17,7 +17,7 @@ vehilceRouter.patch('/:vehicleId' , auth ,  upload.fields([
         { name: "pucCertificateImage", maxCount: 1 }
     ]),createVehicleController.updateVehicleById )
 
-// vehilceRouter.delete('/:vehicleId' , auth , createVehicleController.removeVehicleById )
+vehilceRouter.delete('/:vehicleId' , auth , createVehicleController.removeVehicleById )
 vehilceRouter.post(
     "/create",
     auth,

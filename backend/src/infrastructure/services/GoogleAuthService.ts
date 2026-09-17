@@ -17,7 +17,6 @@ export class GoogleAuthService implements IGoogleAuthService {
 
         const clientId = process.env.GOOGLE_CLIENT_ID;
 
-        // Server configuration error
         if (!clientId) {
             throw new Error(
                 "GOOGLE_CLIENT_ID is not configured"
@@ -75,12 +74,10 @@ export class GoogleAuthService implements IGoogleAuthService {
 
         } catch (error) {
 
-            // Don't replace our own application errors
             if (error instanceof UnauthorizedError) {
                 throw error;
             }
 
-            // Google token verification failed
             throw new UnauthorizedError(
                 "Invalid or expired Google token",
                 "INVALID_GOOGLE_TOKEN"

@@ -28,6 +28,8 @@ import { RedisPendingRegistrationRepository } from "../infrastructure/repositori
 import { CookieService } from "../infrastructure/services/CookieService.js";
 import { VehicleValidator } from "../application/validators/VehicleValidator.js";
 import { CloudinaryStorageService } from "../infrastructure/services/cloudinary/CloudinaryStorageService.js";
+import { GetCurrentUserUseCase } from "../application/useCase/auth/GetCurrentUserUseCase.js";
+import { Logger } from "../infrastructure/logger/logger.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -95,6 +97,10 @@ const updateVehicleUseCase = new UpdateVehicleUseCase(vehiceRepository, fileStor
 
 const removeVehicleUseCase = new DeleteVehicleUseCase(vehiceRepository)
 
+const logger = new Logger()
+
+
+
 export const createVehicleController = new CreateVehicleController(createVehicleUseCase,
     getVehicleUseCase,
     getVehiclebyIdUseCase,
@@ -113,11 +119,14 @@ const getUserUseCase = new GetUserUseCase(userRepository)
 
 export const adminController = new AdminController(getUserUseCase)
 
+const getCurrentUserUseCase = new GetCurrentUserUseCase()
 export const authcontroller = new AuthController(registerUserUseCase,
     loginUserUseCase,
     googleLoginUseCase,
     resendOtpUseCase,
-    cookieService
+    cookieService,
+    getCurrentUserUseCase
+
 )
 
 

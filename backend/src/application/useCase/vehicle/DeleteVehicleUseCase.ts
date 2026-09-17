@@ -21,3 +21,4 @@ export class DeleteVehicleUseCase implements IRemoveVehicleUseCase{
         return "Vehicle deleted succesfully"
     }
 }
+

@@ -23,15 +23,10 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
 
         this.registerUserValidator.validate(registerUserDto);
 
-        console.log("2. AFTER VALIDATOR");
 
-console.log("3. BEFORE FIND BY EMAIL");
         const existingUser = await this.userRepository.findbyemail(
             registerUserDto.email
         );
-        console.log("4. AFTER FIND BY EMAIL");
-console.log("EMAIL CHECKED:", registerUserDto.email);
-console.log("EXISTING USER:", existingUser);
 
 
 

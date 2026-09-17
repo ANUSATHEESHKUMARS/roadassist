@@ -9,6 +9,8 @@ import { CommonResponse } from "../../shared/types/CommonResponse.js";
 import { ResendOtpDto } from "../../application/dtos/resentOtp.js";
 import { IResendOtpUseCase } from "../../application/interfaces/IResendOtpUseCase.js";
 import { ICookieService } from "../../application/contracts/ICookieService.js";
+import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
+import { GetCurrentUserUseCase } from "../../application/useCase/auth/GetCurrentUserUseCase.js";
 
 
 export class AuthController implements IAuthController {
@@ -16,16 +18,14 @@ export class AuthController implements IAuthController {
     private loginUserUseCase : ILoginUserUserCase,
     private googleLoginUseCase : IGoogleLoginUseCase,
     private resendOtpUseCase : IResendOtpUseCase,
-    private cookieService : ICookieService
+    private cookieService : ICookieService,
+    private getCurrentUserUseCase : GetCurrentUserUseCase
   ){}
     
     register = async (req: Request, res:Response) : Promise<void> => { 
- console.log("1. CONTROLLER START")
 
-    console.log("REQUEST BODY:", req.body)
 
        const registerUserDto : RegisterUserDto = req.body;
-
 
     
       await this.registerUserUseCase.execute(registerUserDto);
@@ -104,5 +104,25 @@ resentOtp = async (req: Request, res: Response): Promise<void> =>{
    const response = await this.resendOtpUseCase.execute(data)
    res.status(HttpStatusCode.OK).json(response)
  }
+
+
+ getCurrentUser = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+
+    if (!req.user) {
+        throw new UnauthorizedError(
+            "Authentication required",
+            "AUTHENTICATION_REQUIRED"
+        );
+    }
+    const user = await this.getCurrentUserUseCase.execute(req.user);
+
+ res.status(200).json({
+        success: true,
+        data: user
+    });
+};
 }
 

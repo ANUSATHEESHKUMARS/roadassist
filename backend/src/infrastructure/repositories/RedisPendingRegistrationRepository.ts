@@ -56,3 +56,4 @@ export class RedisPendingRegistrationRepository implements IPendingRegistrationR
         await redisClient.del(key);
     }
 }
+

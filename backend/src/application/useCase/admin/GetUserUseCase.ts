@@ -13,7 +13,7 @@ export class GetUserUseCase implements IGetUserUseCase{
         fullName:user.fullName,
         email:user.email,
         phoneNumber:user.phoneNumber,
-        role:user.role
+       
       }))
   }
 }

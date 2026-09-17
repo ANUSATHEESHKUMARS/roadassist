@@ -20,6 +20,8 @@ authRouter.post('/google' , asyncHandler(authcontroller.googleLogin))
 
 authRouter.post('/resend' , asyncHandler(authcontroller.resentOtp))
 
+authRouter.get('/auth/me' , asyncHandler(authcontroller.getCurrentUser))
+
 return authRouter
 
 }

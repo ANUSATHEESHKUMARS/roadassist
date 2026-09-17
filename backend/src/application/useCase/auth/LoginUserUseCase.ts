@@ -8,48 +8,52 @@ import { ILoginUserUserCase } from "../../interfaces/ILoginUserUserCase.js"
 
 
 export class LoginUserUseCase implements ILoginUserUserCase {
-    constructor(private userRepository:IUserRepository,
-      private passwordHasher : IPasswordHasher,
-      private tokenService : ITokenService
-    ){}
+    constructor(private userRepository: IUserRepository,
+        private passwordHasher: IPasswordHasher,
+        private tokenService: ITokenService
+    ) { }
 
-     async execute(loginUserDto : LoginUserDTO): Promise<{accessToken : string, refreshToken: string}>{
+    async execute(loginUserDto: LoginUserDTO): Promise<{ accessToken: string, refreshToken: string }> {
         const user = await this.userRepository.findbyemail(loginUserDto.email)
-        if(!user){
+        if (!user) {
             throw new UnauthorizedError("Invalid email or password", "INVALID_CREDENTIALS")
         }
-const password = user.getpassword();
+        const password = user.getpassword();
 
-if (!password) {
-    throw new UnauthorizedError(
-        "Invalid email or password",
-        "INVALID_CREDENTIALS"
-    );
-}
+        if (!password) {
+            throw new UnauthorizedError(
+                "Invalid email or password",
+                "INVALID_CREDENTIALS"
+            );
+        }
 
-const isValidPassword = await this.passwordHasher.compare(
-    loginUserDto.password,
-    password
-);
-       if(!isValidPassword){
-        throw new UnauthorizedError("invalid credentials ...", "INVALID_CREATEDTIALS")
-       }
-       const accessToken =  this.tokenService.generateAccessToken({
-        userId : user.userId!,
-        email : user.email,
-        role: user.role
+        const isValidPassword = await this.passwordHasher.compare(
+            loginUserDto.password,
+            password
+        );
 
-       }) 
+        console.log("PASSWORD VALID:", isValidPassword);
 
-    
-       const refreshToken = this.tokenService.generateRefreshToken({
-        userId : user.userId!
-       })
+        if (!isValidPassword) {
+            throw new UnauthorizedError("invalid credentials ...", "INVALID_CREATEDTIALS")
+        }
+        const accessToken = this.tokenService.generateAccessToken({
+            userId: user.userId!,
+            email: user.email,
+            role: user.role
 
-       return {
-        accessToken,
-        refreshToken
-       }
-     }
+        })
+
+
+        const refreshToken = this.tokenService.generateRefreshToken({
+            userId: user.userId!
+        })
+        console.log("ACCESS TOKEN GENERATED");
+        console.log("REFRESH TOKEN GENERATED");
+        return {
+            accessToken,
+            refreshToken
+        }
+    }
 }
 
