@@ -7,10 +7,14 @@ import { useState } from "react";
 import type { RegisterFormType } from "@/types/formType";
 import { register } from "@/services/authService";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import type { CredentialResponse } from "@react-oauth/google";
+import apiClient from "@/services/apiClient";
+
 
 export default function Register() {
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
 
   const [showPassword, setShowpasword] = useState(false)
@@ -35,7 +39,7 @@ const navigate = useNavigate();
 
 
 
-  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     const newError = {
@@ -66,8 +70,8 @@ const navigate = useNavigate();
     }
 
     if (!formData.acceptedTerms) {
-    newError.acceptedTerms = "You must accept the Terms & Conditions";
-}
+      newError.acceptedTerms = "You must accept the Terms & Conditions";
+    }
     setError(newError)
 
     const hasError = Object.values(newError).some((error) => error !== "")
@@ -77,31 +81,52 @@ const navigate = useNavigate();
     }
 
     const requestData = {
-      fullName : formData.fullName,
-      email : formData.email,
-      phoneNumber:formData.phoneNumber,
-      password:formData.password
+      fullName: formData.fullName,
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      password: formData.password
     }
-console.log("REQUEST DATA:", requestData);
+    console.log("REQUEST DATA:", requestData);
 
-try {
-  console.log("REQUEST DATA:", requestData);
+    try {
 
-  const response = await register(requestData);
+      const response = await register(requestData);
 
-   navigate('/verify-otp' , {state : {email : formData.email}})
+      navigate('/verify-otp', { state: { email: formData.email } })
 
-  console.log("REGISTER SUCCESS:", response);
 
-} catch (error: any) {
+    } catch (error: any) {
 
-  console.log("REGISTER FAILED");
-  console.log("STATUS:", error.response?.status);
-  console.log("BACKEND ERROR:", error.response?.data);
+      console.log("REGISTER FAILED");
+      console.log("STATUS:", error.response?.status);
+      console.log("BACKEND ERROR:", error.response?.data);
 
-}
+    }
   }
- console.log(formData)
+  console.log(formData)
+const handleGoogleRegister = async (response: CredentialResponse) => {
+  try {
+    const idToken = response.credential;
+
+    if (!idToken) {
+      console.log("Google ID token not received");
+      return;
+    }
+
+    const result = await apiClient.post("/auth/google", {
+      idToken
+    });
+
+    navigate('/user')
+    console.log("Google registration successful:", result.data);
+
+  } catch (error: any) {
+    console.log("Google registration failed");
+    console.log(error.response?.status);
+    console.log(error.response?.data);
+  }
+};
+  
   return (
 
     <div className="min-h-screen w-full bg-[#080808] flex items-center justify-center p-4 sm:p-6 lg:p-10 font-sans text-neutral-100">
@@ -198,7 +223,7 @@ try {
               {error.fullName && (
                 <p className="text-xs text-red-500">
                   {error.fullName}
-                  </p>
+                </p>
               )}
             </div>
 
@@ -212,14 +237,14 @@ try {
                 type="email"
                 placeholder="email@example.com"
                 value={formData.email}
-               onChange={(e) => {
-  console.log("EMAIL INPUT:", e.target.value);
+                onChange={(e) => {
+                  console.log("EMAIL INPUT:", e.target.value);
 
-  setFormData({
-    ...formData,
-    email: e.target.value
-  });
-}}
+                  setFormData({
+                    ...formData,
+                    email: e.target.value
+                  });
+                }}
                 className="h-10 bg-[#0c0c0e] border-neutral-800 text-xs text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-[#ff3b30] focus-visible:border-[#ff3b30]"
               />
 
@@ -358,7 +383,7 @@ try {
               </span>
             </div>
 
-            {/* Google Authentication Button */}
+            {/* Google Authentication Button
             <Button
               type="button"
               variant="outline"
@@ -383,13 +408,19 @@ try {
                 />
               </svg>
               <span>Continue with Google</span>
-            </Button>
+            </Button> */}
 
+                <GoogleLogin
+    onSuccess={handleGoogleRegister}
+    onError={() => {
+        console.log("Google Login Failed");
+    }}
+/>
             {/* Login Link */}
             <p className="text-center text-[11px] text-neutral-400 pt-2">
               Already have an account?{" "}
               <span className="text-[#ff3b30] font-medium cursor-pointer hover:underline"
-              onClick={() => navigate('/login')}>
+                onClick={() => navigate('/login')}>
                 Login
               </span>
             </p>

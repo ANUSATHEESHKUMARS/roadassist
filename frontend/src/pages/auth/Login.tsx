@@ -45,6 +45,7 @@ export default function Login() {
         })
         console.log("login succes ayyii" , response)
         navigate('/user')
+
     }catch(error : any){
      console.log("login failed")
      console.log(error.response?.status)
@@ -68,6 +69,7 @@ export default function Login() {
         const result = await apiClient.post("/auth/google", {
             idToken
         });
+        navigate('/user')
 
         console.log("Google login successful:", result.data);
 
