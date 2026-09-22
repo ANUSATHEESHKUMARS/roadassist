@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 import { Breadcrumb } from "@/components/layout/user/Breadcrumb";
 import { VehicleCard } from "@/components/vehicle/VehicleCard";
 import { AddVehicleCard } from "@/components/vehicle/AddVehicleCard";
@@ -8,12 +8,15 @@ import { getVehicles } from "@/services/authService";
 import type { Vehicle } from "@/types/user/vehicle";
 
 export default function MyVehiclesPage() {
+
+  const navigate = useNavigate()
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   const handleViewDetails = (id: string): void => {
-    console.log("View vehicle details:", id);
+    console.log('cliked the handle navigation')
+    navigate(`/vehicles/${id}`)
   };
 
   const fetchVehicles = async () => {
@@ -26,6 +29,7 @@ export default function MyVehiclesPage() {
       console.log("Vehicles response:", response);
 
       setVehicles(response.vehicles);
+      console.log("FIRST VEHICLE:", response.vehicles[0]);
 
     } catch (error: any) {
   console.error("FAILED TO FETCH VEHICLES");

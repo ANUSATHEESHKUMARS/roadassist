@@ -11,7 +11,7 @@ export class Vehicle {
         public vehicleImage?: string,
         public insuranceCertificateImage?: string,
         public pucCertificateImage?: string,
-        public vehicleId?: string
+        public id?: string
     ) { }
 }
 

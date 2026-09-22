@@ -64,7 +64,7 @@ console.log("FILES:", req.files);
 
       const vehicleId = req.params.vehicleId
       const getvehiclebyId = await this.getvehiclebyIdUseCase.getVehicleById(vehicleId)
-      console.log("4dsf",getvehiclebyId)
+      console.log("succes ayiii",getvehiclebyId)
       res.status(HttpStatusCode.OK).json({
          succes: true,
          getvehiclebyId

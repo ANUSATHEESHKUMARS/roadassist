@@ -35,6 +35,7 @@ export interface Vehicle {
 }
 
 export interface VehicleFormData {
+
   registrationNumber: string;
 
   vehicleType: VehicleType;
@@ -54,4 +55,9 @@ export interface VehicleFormData {
   insuranceCertificateImage?: File | null;
 
   pucCertificateImage?: File | null;
+}
+
+export interface VehicleApiResponse {
+  succes: boolean;
+  getvehiclebyId: Vehicle;
 }

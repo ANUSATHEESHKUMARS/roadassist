@@ -1,6 +1,6 @@
 import apiClient from "./apiClient";
 
-import type { VehicleFormData } from "@/types/user/vehicle";
+import type { Vehicle, VehicleApiResponse, VehicleFormData } from "@/types/user/vehicle";
 
 export const createVehicle = async (data: VehicleFormData) => {
   const formData = new FormData();
@@ -38,3 +38,41 @@ export const createVehicle = async (data: VehicleFormData) => {
 
   return response.data;
 };
+
+export const getVehicleById = async (
+  vehicleId: string
+): Promise<Vehicle> => {
+
+  const response = await apiClient.get<VehicleApiResponse>(
+    `/vehicle/${vehicleId}`
+  );
+
+  console.log("DETAIL API RESPONSE:", response.data);
+
+  const vehicle = response.data.getvehiclebyId;
+
+  console.log("DETAIL VEHICLE:", vehicle);
+
+  return vehicle;
+};
+
+
+export const updateVehicle = async (
+  vehicleId: string,
+  formData: FormData
+): Promise<Vehicle> => {
+  const response = await apiClient.patch<VehicleApiResponse>(
+    `/vehicle/${vehicleId}`,
+    formData
+  );
+
+  return response.data.getvehiclebyId;
+};
+
+
+export const deleteVehicle = async (
+  VehicleId : string
+):Promise<void> =>{
+    await apiClient.delete(`/vehicle/${VehicleId}`)
+}
+
