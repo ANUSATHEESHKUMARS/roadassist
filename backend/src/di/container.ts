@@ -30,6 +30,7 @@ import { VehicleValidator } from "../application/validators/VehicleValidator.js"
 import { CloudinaryStorageService } from "../infrastructure/services/cloudinary/CloudinaryStorageService.js";
 import { GetCurrentUserUseCase } from "../application/useCase/auth/GetCurrentUserUseCase.js";
 import { Logger } from "../infrastructure/logger/logger.js";
+import { MongoAdminUserRepository } from "../infrastructure/repositories/MongoAdminUserRepository.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -115,7 +116,9 @@ const googleLoginUseCase = new GoogleLoginUseCase(googleAuthService,
     tokenService
 )
 
-const getUserUseCase = new GetUserUseCase(userRepository)
+const adminUserRepository = new MongoAdminUserRepository()
+
+const getUserUseCase = new GetUserUseCase(adminUserRepository)
 
 export const adminController = new AdminController(getUserUseCase)
 

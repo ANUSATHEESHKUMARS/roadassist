@@ -8,7 +8,8 @@ export interface IUserDocuments extends Document {
     password: string,
     role: UserRole,
     googleId?: string,
-    authProvider: AuthProvider
+    authProvider: AuthProvider,
+    status: UserStatus,
 
 }
 
@@ -44,7 +45,14 @@ const userSchema = new Schema<IUserDocuments>({
         type:String,
         enum:["LOCAL","GOOGLE"],
         default:"LOCAL"
+    },
+    status:{
+        type: String,
+        required:true,
+        enum:["active" , "blocked"],
+        default :"active"
     }
+
 
 
 })
@@ -56,5 +64,10 @@ export type UserRole =
 export type AuthProvider =
     | "LOCAL"
     | "GOOGLE"
+
+
+export type UserStatus = 
+    |"active"
+    |"blocked"
 
 export const UserModel = model<IUserDocuments>("User", userSchema)

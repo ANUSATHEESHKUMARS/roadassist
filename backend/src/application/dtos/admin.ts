@@ -3,4 +3,5 @@ export interface GetUsersResponseDto {
     fullName: string;
     email: string;
     phoneNumber: string;
+    status : "active" | "blocked"
 }
