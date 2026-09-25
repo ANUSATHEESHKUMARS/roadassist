@@ -19,10 +19,9 @@ export class AuthController implements IAuthController {
     private resendOtpUseCase: IResendOtpUseCase,
     private cookieService: ICookieService,
     private getCurrentUserUseCase: GetCurrentUserUseCase
-  ) { }
+  ) {}
 
   register = async (req: Request, res: Response): Promise<void> => {
-
 
     const registerUserDto: RegisterUserDto = req.body;
 

@@ -4,7 +4,13 @@ import { UserModel } from "../databases/models/UserModel.js";
 
 export class MongoAdminUserRepository implements IAdminUserRepository {
 
-    async findAllUser(search?: string): Promise<AdminUser[]> {
+    async findAllUser(search: string | undefined,
+        page: number,
+        limit: number
+    ): Promise<{
+        users: AdminUser[];
+        totalRecords: number
+    }> {
 
         const filter: Record<string, unknown> = {}
 
@@ -14,20 +20,35 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
                 $options: "i"
             }
         }
+        const skip = (page - 1) * limit
 
-        const users = await UserModel.find()
+        const [users , totalRecords ] = await Promise.all([
+            UserModel
+            .find(filter)
             .select('-password')
-            .lean()
+            .skip(skip)
+            .limit(limit)
+            .lean(),
 
-        return users.map((user) => ({
-            userId: user._id.toString(),
-            fullName: user.fullName,
-            email: user.email,
+            UserModel.countDocuments(filter)
+        ]);
+
+        const mappedUser: AdminUser[] = users.map((user) =>({
+            userId:user._id.toString(),
+            fullName :user.fullName,
+            email : user.email,
             phoneNumber: user.phoneNumber,
-            role: user.role,
-            authProvider: user.authProvider,
-            status: user.status
+            role:user.role,
+            authProvider:user.authProvider,
+            status:user.status
+
+
         }))
+
+      return  {
+        users:mappedUser,
+        totalRecords
+      }
     }
 }
 

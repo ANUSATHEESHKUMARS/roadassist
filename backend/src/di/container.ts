@@ -68,9 +68,9 @@ const registerUserUseCase = new RegisterUserUseCase(
 
 const loginUserUseCase = new LoginUserUseCase(userRepository, passwordHasher, tokenService)
 
-const verifyotpUseCase = new VerifyOtpUseCase(otpRepository, 
+const verifyotpUseCase = new VerifyOtpUseCase(otpRepository,
     otpService
-    ,pendingRegistrationRepository, 
+    , pendingRegistrationRepository,
     userRepository,
     tokenService
 )
@@ -88,7 +88,7 @@ const vehicleValidator = new VehicleValidator()
 
 const fileStorageService = new CloudinaryStorageService()
 
-const createVehicleUseCase = new CreateVehicleUseCase(vehiceRepository,vehicleValidator,fileStorageService)
+const createVehicleUseCase = new CreateVehicleUseCase(vehiceRepository, vehicleValidator, fileStorageService)
 
 const getVehicleUseCase = new GetVehilceUseCase(vehiceRepository)
 

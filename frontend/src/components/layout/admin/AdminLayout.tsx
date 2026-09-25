@@ -1,17 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminHeader } from "@/components/admin/layout/AdminHeader";
 
 export const AdminLayout: React.FC = () => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     return (
         <div className="min-h-screen bg-background text-foreground flex">
 
-            <AdminSidebar />
+            <AdminSidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+            />
 
             <div className="flex-1 flex flex-col min-w-0">
 
-                <AdminHeader />
+                <AdminHeader
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
                     <div className="max-w-7xl mx-auto w-full">
