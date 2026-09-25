@@ -6,7 +6,7 @@ interface GetAdminUserResponse{
     data : AdminUser[]
 }
 
-export const getAdminUser = async (): Promise<AdminUser[]> =>{
-    const response = await apiClient.get<GetAdminUserResponse>('/admin/users')
+export const getAdminUser = async (search? : string): Promise<AdminUser[]> =>{
+    const response = await apiClient.get<GetAdminUserResponse>('/admin/users',{params: {search}})
     return response.data.data
 }

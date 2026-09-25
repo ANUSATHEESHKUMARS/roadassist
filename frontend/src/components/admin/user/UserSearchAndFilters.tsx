@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 interface UserSearchAndFiltersProps {
+  onSearch: (search:string) => void
   searchQuery?: string;
   roleFilter?: string;
   statusFilter?: string;
@@ -11,10 +12,12 @@ interface UserSearchAndFiltersProps {
 }
 
 export const UserSearchAndFilters: React.FC<UserSearchAndFiltersProps> = ({
+  onSearch,
   searchQuery = "",
   roleFilter = "all",
   statusFilter = "all",
   providerFilter = "all",
+
 }) => {
   return (
     <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-card border border-border/80 rounded-xl p-3 shadow-xs">
@@ -25,6 +28,7 @@ export const UserSearchAndFilters: React.FC<UserSearchAndFiltersProps> = ({
           type="text"
           defaultValue={searchQuery}
           placeholder="Search by name, ID, email, or phone number..."
+          onChange={(e) => onSearch(e.target.value)}
           className="pl-9 h-9 bg-input border-border text-xs text-foreground placeholder:text-muted-foreground rounded-lg focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary w-full"
         />
       </div>

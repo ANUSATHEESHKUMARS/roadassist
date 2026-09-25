@@ -12,17 +12,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { OtpInput } from "@/components/auth/OtpInput";
 import { verifyOtp, resendOtp } from "@/services/authService";
-import { useLocation , useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getApiErrorMessage } from "@/api/apiError";
 
 
 interface VerifyOtpProps {
- 
+
   onBack?: () => void;
   onSuccess?: () => void;
 }
 
 export default function VerifyOtp({
- 
+
   onBack,
   onSuccess,
 }: VerifyOtpProps) {
@@ -35,19 +36,26 @@ export default function VerifyOtp({
   const [otp, setOtp] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState<number>(60);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [apiError, setApiError] = useState('')
 
   // Timer countdown
-useEffect(() => {
-  if (timeLeft <= 0) {
-    return;
-  }
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      return;
+    }
 
-  const interval = setInterval(() => {
-    setTimeLeft((prev) => prev - 1);
-  }, 1000);
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000);
 
-  return () => clearInterval(interval);
-}, [timeLeft]);
+    return () => clearInterval(interval);
+  }, [timeLeft]);
 
 
   const formatTimer = (seconds: number) => {
@@ -56,67 +64,66 @@ useEffect(() => {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
- const handleResendOtp = async () =>{
-  if(timeLeft > 0 || !email || isSubmitting){
-    return
-  }
-  try{
-    setIsSubmitting(true)
+  const handleResendOtp = async () => {
+    if (timeLeft > 0 || !email || isSubmitting) {
+      return
+    }
+    try {
+      setIsSubmitting(true)
 
-    const response = await resendOtp({
-      email , 
-      purpose:"EMAIL_VERIFICATION"
-    })
-    console.log("resend otp succes", response)
-    setTimeLeft(60);
-    setOtp("")
-  }catch(error : any){
-    console.log("resend otp failed")
-    console.log(error.response?.status)
-    console.log(error.response?.data)
-  }finally {
-    setIsSubmitting(false)
+      const response = await resendOtp({
+        email,
+        purpose: "EMAIL_VERIFICATION"
+      })
+      console.log("resend otp succes", response)
+      setTimeLeft(60);
+      setOtp("")
+    } catch (error: any) {
+      console.log("resend otp failed")
+      console.log(error.response?.status)
+      console.log(error.response?.data)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
- }
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (otp.length !== 6 || isSubmitting) {
-    return;
-  }
-
-  if (!email) {
-    console.log("Email is missing");
-    return;
-  }
-
-  setIsSubmitting(true);
-
-  try {
-    const response = await verifyOtp({
-      email,
-      otp,
-      purpose: "EMAIL_VERIFICATION",
-    });
-
-    console.log("OTP VERIFICATION SUCCESS:", response);
-
-    navigate('/user')
-    if (onSuccess) {
-      onSuccess();
+    if (otp.length !== 6 || isSubmitting) {
+      return;
     }
 
-  } catch (error: any) {
+    if (!email) {
+      console.log("Email is missing");
+      return;
+    }
 
-    console.log("OTP VERIFICATION FAILED");
-    console.log("STATUS:", error.response?.status);
-    console.log("ERROR:", error.response?.data);
+    setIsSubmitting(true);
 
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+    try {
+      const response = await verifyOtp({
+        email,
+        otp,
+        purpose: "EMAIL_VERIFICATION",
+      });
+
+      console.log("OTP VERIFICATION SUCCESS:", response);
+
+      navigate('/user')
+      if (onSuccess) {
+        onSuccess();
+      }
+
+    } catch (error: unknown) {
+      console.log(error)
+      const message = getApiErrorMessage(error)
+      setApiError(message)
+
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
@@ -143,7 +150,7 @@ useEffect(() => {
       {/* ================= MAIN CONTENT ================= */}
       <main className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
-          
+
           {/* LEFT SIDE: Visual Placeholder & Secure Messaging */}
           <div className="hidden lg:flex flex-col items-center text-center p-6 space-y-6">
             <div className="w-full max-w-sm aspect-square bg-card border border-border/80 rounded-2xl p-6 flex flex-col justify-between shadow-lg relative overflow-hidden">
@@ -201,7 +208,7 @@ useEffect(() => {
           {/* RIGHT SIDE: OTP Verification Card */}
           <div className="flex justify-center">
             <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-xl">
-              
+
               {/* Security Shield Icon */}
               <div className="flex justify-center mb-5">
                 <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center border border-border">
@@ -211,6 +218,11 @@ useEffect(() => {
 
               {/* Card Headings */}
               <div className="text-center space-y-2 mb-6">
+                {apiError && (
+                  <p className="text-sm text-destructive">
+                    {apiError}
+                  </p>
+                )}
                 <h1 className="text-xl font-bold tracking-tight text-card-foreground">
                   Verify Your Email Address
                 </h1>
@@ -234,16 +246,30 @@ useEffect(() => {
 
                 {/* Expiry & Resend OTP Actions */}
                 <div className="flex flex-col items-center space-y-2 text-xs">
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>Code expires in:</span>
-                    <span className="font-semibold text-foreground">
-                      {formatTimer(timeLeft)}
-                    </span>
-                  </div>
+
+                  {timeLeft > 0 ? (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+
+                      <span>Code expires in:</span>
+
+                      <span className="font-semibold text-foreground">
+                        {formatTimer(timeLeft)}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-destructive">
+                      <Clock className="h-3.5 w-3.5" />
+
+                      <span className="font-semibold">
+                        OTP expired
+                      </span>
+                    </div>
+                  )}
 
                   <div className="text-muted-foreground">
-                    Didn&apos;t receive the code?{" "}
+                    Didn't receive the code?{" "}
+
                     <button
                       type="button"
                       onClick={handleResendOtp}
@@ -253,8 +279,8 @@ useEffect(() => {
                       Resend OTP
                     </button>
                   </div>
-                </div>
 
+                </div>
                 {/* Submit Button */}
                 <Button
                   type="submit"

@@ -116,7 +116,7 @@ export class AuthController implements IAuthController {
         "AUTHENTICATION_REQUIRED"
       );
     }
-    const currentUser = await this.getCurrentUserUseCase.execute(req.user);
+    const currentUser = await this.getCurrentUserUseCase.execute(req.user!.userId);
 
     res.status(200).json({
       success: true,

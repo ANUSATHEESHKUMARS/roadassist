@@ -13,13 +13,13 @@ export default function AdminUserPage () {
   const [isloading , setIsLoading] = useState(true)
   const [error , setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchUsers = async () =>{
+
+   const fetchUsers = async (seachValue = "") =>{
       try{
         setIsLoading(true)
         setError(null);
 
-        const data = await getAdminUser();
+        const data = await getAdminUser(seachValue);
 
         setUsers(data)
       }catch(error){
@@ -29,6 +29,8 @@ export default function AdminUserPage () {
         setIsLoading(false)
       }
     }
+  useEffect(() => {
+   
     fetchUsers()
   },[])
 
@@ -66,7 +68,7 @@ export default function AdminUserPage () {
             <UserStatsCards stats={stats} />
 
             {/* Search / Filters */}
-            <UserSearchAndFilters />
+            <UserSearchAndFilters onSearch={fetchUsers} />
 
             {/* Real Users */}
             <UserTable

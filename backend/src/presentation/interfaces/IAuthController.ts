@@ -6,6 +6,7 @@ export interface IAuthController {
     googleLogin(req: Request, res: Response): Promise<void>;
     resentOtp(req: Request, res: Response): Promise<void>;
     getCurrentUser(req: Request, res: Response): Promise<void>;
+    
 
 }
 

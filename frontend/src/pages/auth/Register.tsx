@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
 import apiClient from "@/services/apiClient";
+import { getApiErrorMessage } from "@/api/apiError";
 
 
 export default function Register() {
@@ -18,6 +19,7 @@ export default function Register() {
 
 
   const [showPassword, setShowpasword] = useState(false)
+  const [apiError, setApiError] = useState('')
 
   const [error, setError] = useState({
     fullName: "",
@@ -41,7 +43,7 @@ export default function Register() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-
+    setApiError('')
     const newError = {
       fullName: '',
       email: "",
@@ -89,8 +91,7 @@ export default function Register() {
     console.log("REQUEST DATA:", requestData);
 
     try {
-
-      const response = await register(requestData);
+      await register(requestData);
 
       navigate('/verify-otp', { state: { email: formData.email } })
 
@@ -100,33 +101,34 @@ export default function Register() {
       console.log("REGISTER FAILED");
       console.log("STATUS:", error.response?.status);
       console.log("BACKEND ERROR:", error.response?.data);
-
+      const meesage = getApiErrorMessage(error);
+      setApiError(meesage)
     }
   }
   console.log(formData)
-const handleGoogleRegister = async (response: CredentialResponse) => {
-  try {
-    const idToken = response.credential;
+  const handleGoogleRegister = async (response: CredentialResponse) => {
+    try {
+      const idToken = response.credential;
 
-    if (!idToken) {
-      console.log("Google ID token not received");
-      return;
+      if (!idToken) {
+        console.log("Google ID token not received");
+        return;
+      }
+
+      const result = await apiClient.post("/auth/google", {
+        idToken
+      });
+
+      navigate('/user')
+      console.log("Google registration successful:", result.data);
+
+    } catch (error: any) {
+      console.log("Google registration failed");
+      console.log(error.response?.status);
+      console.log(error.response?.data);
     }
+  };
 
-    const result = await apiClient.post("/auth/google", {
-      idToken
-    });
-
-    navigate('/user')
-    console.log("Google registration successful:", result.data);
-
-  } catch (error: any) {
-    console.log("Google registration failed");
-    console.log(error.response?.status);
-    console.log(error.response?.data);
-  }
-};
-  
   return (
 
     <div className="min-h-screen w-full bg-[#080808] flex items-center justify-center p-4 sm:p-6 lg:p-10 font-sans text-neutral-100">
@@ -204,6 +206,13 @@ const handleGoogleRegister = async (response: CredentialResponse) => {
           {/* Registration Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
+            {apiError && (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3">
+                <p className="text-xs text-destructive">
+                  {apiError}
+                </p>
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label htmlFor="fullName" className="text-xs font-medium text-neutral-300">
                 Full Name
@@ -410,12 +419,12 @@ const handleGoogleRegister = async (response: CredentialResponse) => {
               <span>Continue with Google</span>
             </Button> */}
 
-                <GoogleLogin
-    onSuccess={handleGoogleRegister}
-    onError={() => {
-        console.log("Google Login Failed");
-    }}
-/>
+            <GoogleLogin
+              onSuccess={handleGoogleRegister}
+              onError={() => {
+                console.log("Google Login Failed");
+              }}
+            />
             {/* Login Link */}
             <p className="text-center text-[11px] text-neutral-400 pt-2">
               Already have an account?{" "}

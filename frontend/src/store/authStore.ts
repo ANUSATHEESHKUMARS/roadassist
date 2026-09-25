@@ -3,24 +3,24 @@ import { create } from "zustand";
 
 interface AuthState {
     user: AuthUser | null;
-    isAuthenticated:boolean;
-    setUser:(user:AuthUser) =>void
-    logout:()=>void
+    isAuthenticated: boolean;
+    setUser: (user: AuthUser) => void
+    logout: () => void
 }
 
-export const useAuthStore  = create<AuthState>((set) =>({
-    user:null,
-    isAuthenticated:false,
-    setUser:(user) =>
+export const useAuthStore = create<AuthState>((set) => ({
+    user: null,
+    isAuthenticated: false,
+    setUser: (user) =>
         set({
             user,
-            isAuthenticated:true
+            isAuthenticated: true
         }),
-        logout:()=> 
-            set({
-                user:null,
-                isAuthenticated:false
-            })
+    logout: () =>
+        set({
+            user: null,
+            isAuthenticated: false
+        })
 }))
 
 

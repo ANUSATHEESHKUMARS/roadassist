@@ -8,4 +8,5 @@ export interface IUserRepository{
         email : string,
         googleId:string,
     }):Promise<User>
+    findById(userId : string): Promise<User | null>
 }

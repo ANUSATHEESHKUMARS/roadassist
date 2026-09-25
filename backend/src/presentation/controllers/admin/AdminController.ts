@@ -6,7 +6,8 @@ import { Request , Response } from "express";
 export class AdminController implements IAdminUserController{
     constructor(private  getUserUseCase : IGetUserUseCase){}
   getUsers = async (req: Request , res:Response): Promise<void> => {
-     const users = await this.getUserUseCase.execute();
+   const search = typeof req.query.search === "string"? req.query.search : undefined
+     const users = await this.getUserUseCase.execute(search);
      res.status(HttpStatusCode.OK).json({
         success : true,
         data : users
