@@ -2,6 +2,7 @@ import { Router } from "express";
 import { IAuthController } from "../interfaces/IAuthController.js";
 import { asyncHandler } from "../../shared/helper/asyncHandler.js";
 import { IVerifyOtpController } from "../interfaces/IVerifyOtpController.js";
+import { auth } from '../../di/container.js'
 
 export default function createAuthRoutes(
     authcontroller : IAuthController,
@@ -20,7 +21,7 @@ authRouter.post('/google' , asyncHandler(authcontroller.googleLogin))
 
 authRouter.post('/resend' , asyncHandler(authcontroller.resentOtp))
 
-authRouter.get('/auth/me' , asyncHandler(authcontroller.getCurrentUser))
+authRouter.get('/me' , auth, asyncHandler(authcontroller.getCurrentUser))
 
 return authRouter
 

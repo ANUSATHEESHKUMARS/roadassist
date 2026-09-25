@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuthStore } from "@/store/authStore";
 import {
   Mail,
   Lock,
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { login } from "@/services/authService";
+import { login , getCurrentUser} from "@/services/authService";
 import { data } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
@@ -29,7 +30,7 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [isSubmitting , setIsSubmitting] = useState<boolean>(false)
 
-
+ const setUser = useAuthStore((state) =>state.setUser)
   const navigate = useNavigate()
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,7 +45,18 @@ export default function Login() {
             email, password
         })
         console.log("login succes ayyii" , response)
+       const userResponse = await getCurrentUser()
+
+       console.log('current user', userResponse);
+
+       const user = userResponse.data;
+
+       setUser(user)
+       if(user.role === "admin"){
+        navigate('/admin/users')
+       }else{
         navigate('/user')
+       }
 
     }catch(error : any){
      console.log("login failed")

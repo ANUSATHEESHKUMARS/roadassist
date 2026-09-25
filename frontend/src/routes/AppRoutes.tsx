@@ -10,6 +10,8 @@ import { UserLayout } from "@/components/layout/user/UserLayout";
 import { Navigate, Route, Routes } from "react-router-dom";
 import VehicleDetailsPage from "@/pages/user/VehicleDetail";
 import EditVehiclePage from "@/components/layout/user/EditVehiclePage";
+import AdminUserPage from "@/pages/admin/AdminUserpage";
+import AdminLayout from "@/layouts/AdminLayout";
 
 export const AppRoutes = () => {
   return (
@@ -40,11 +42,11 @@ export const AppRoutes = () => {
 
 
       <Route
-          path="vehicles/:vehicleId"
-          element={<VehicleDetailsPage />}
-        />
+        path="vehicles/:vehicleId"
+        element={<VehicleDetailsPage />}
+      />
 
-        <Route path="vehicles/:vehicleId/edit" element={<EditVehiclePage/>}/>
+      <Route path="vehicles/:vehicleId/edit" element={<EditVehiclePage />} />
 
       {/* Old dashboard URL */}
       <Route
@@ -67,7 +69,10 @@ export const AppRoutes = () => {
           />
         }
       />
-
+<Route path="/admin" element={<AdminLayout />}>
+    <Route path="users" element={<AdminUserPage />} />
+</Route>      
     </Routes>
   );
 };
+

@@ -123,6 +123,7 @@ const getUserUseCase = new GetUserUseCase(adminUserRepository)
 export const adminController = new AdminController(getUserUseCase)
 
 const getCurrentUserUseCase = new GetCurrentUserUseCase()
+
 export const authcontroller = new AuthController(registerUserUseCase,
     loginUserUseCase,
     googleLoginUseCase,
