@@ -34,7 +34,7 @@ const userSchema = new Schema<IUserDocuments>({
     role: {
         type: String,
         required: true,
-        enum: ["user", "admin", "mechanic"]
+        enum: ["user", "mechanic", "admin", "superadmin"]
     },
     googleId:{
         type:String,
@@ -60,6 +60,7 @@ export type UserRole =
     | "user"
     | "mechanic"
     | "admin"
+    |"superadmin"
 
 export type AuthProvider =
     | "LOCAL"

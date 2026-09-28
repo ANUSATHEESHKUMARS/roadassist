@@ -1,8 +1,11 @@
+export type RegisterationRole = "user"|"admin"
+
 export interface RegisterUserDto {
     fullName: string,
     email: string,
     phoneNumber: string,
-    password : string
+    password : string,
+    role : RegisterationRole
 } 
 
 

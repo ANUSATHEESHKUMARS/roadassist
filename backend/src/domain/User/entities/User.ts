@@ -18,5 +18,5 @@ export class User {
 
 }
 
-export type UserRole = "user"|"mechanic"|"admin";
+export type UserRole = "user"|"mechanic"|"admin" | "superadmin";
 export type AuthProvider = "LOCAL"|"GOOGLE"

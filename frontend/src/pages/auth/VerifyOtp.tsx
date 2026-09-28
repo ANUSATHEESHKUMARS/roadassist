@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OtpInput } from "@/components/auth/OtpInput";
-import { verifyOtp, resendOtp } from "@/services/authService";
+import { verifyOtp, resendOtp, getCurrentUser } from "@/services/authService";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getApiErrorMessage } from "@/api/apiError";
 
@@ -110,9 +110,20 @@ export default function VerifyOtp({
 
       console.log("OTP VERIFICATION SUCCESS:", response);
 
-      navigate('/user')
+
+      const userResponse = await getCurrentUser()
+
+      const user = userResponse.data
+
+      console.log("verified user:", user)
+
+      if (user.role == 'admin') {
+        navigate('/admin/users')
+      } else {
+        navigate('/user')
+      }
       if (onSuccess) {
-        onSuccess();
+        onSuccess()
       }
 
     } catch (error: unknown) {

@@ -11,39 +11,39 @@ import { User } from "../../../domain/User/entities/User.js";
 import { ITokenService } from "../../contracts/ITokenService.js";
 
 export class VerifyOtpUseCase implements IVerifyOtpUseCase {
-    constructor(private otpRepository: IOtpRepository, 
+    constructor(private otpRepository: IOtpRepository,
         private otpService: IOtpService,
-        private pendingRegistrationRepository : IPendingRegistrationRepository,
-        private userRepository : IUserRepository,
-        private tokenService : ITokenService
+        private pendingRegistrationRepository: IPendingRegistrationRepository,
+        private userRepository: IUserRepository,
+        private tokenService: ITokenService
     ) { }
 
 
-    async verify(verifyotpDto : otpDto): Promise<{ message: string; accessToken : string , refreshToken :string}> {
+    async verify(verifyotpDto: otpDto): Promise<{ message: string; accessToken: string, refreshToken: string }> {
         const otpRecord = await this.otpRepository.findByEmailAndPurpose(verifyotpDto.email, verifyotpDto.purpose)
-        if(!otpRecord){
-            throw new NotfoundError("Otp not found..","OTP_NOT_FOUND")
+        if (!otpRecord) {
+            throw new NotfoundError("Otp not found..", "OTP_NOT_FOUND")
         }
-        if(otpRecord.expiresAt < new Date()){
-            throw new BadRequest("otp time out" , "OTP_TIME_OUT")
+        if (otpRecord.expiresAt < new Date()) {
+            throw new BadRequest("otp time out", "OTP_TIME_OUT")
         }
-        if(otpRecord.used){
-            throw new BadRequest("otp has alredy been used","OTP_ALREADY_USED")
+        if (otpRecord.used) {
+            throw new BadRequest("otp has alredy been used", "OTP_ALREADY_USED")
         }
-        if(otpRecord.attempts >= 5){
-            throw new BadRequest("Too many attempts","TO_MANY_ATTEMPTS")
+        if (otpRecord.attempts >= 5) {
+            throw new BadRequest("Too many attempts", "TO_MANY_ATTEMPTS")
         }
-        const isValid = await this.otpService.compareOtp(verifyotpDto.otp ,otpRecord.codeHash )
-        if(!isValid){
-            await this.otpRepository.incrementAttemps(verifyotpDto.email , verifyotpDto.purpose)
-            throw new BadRequest("Invalid otp" , "INVALID_OTP")
+        const isValid = await this.otpService.compareOtp(verifyotpDto.otp, otpRecord.codeHash)
+        if (!isValid) {
+            await this.otpRepository.incrementAttemps(verifyotpDto.email, verifyotpDto.purpose)
+            throw new BadRequest("Invalid otp", "INVALID_OTP")
         }
-        await this.otpRepository.markAsUsed(verifyotpDto.email , verifyotpDto.purpose)
+        await this.otpRepository.markAsUsed(verifyotpDto.email, verifyotpDto.purpose)
         console.log('succes aayi monee')
 
         const pendingRegistration = await this.pendingRegistrationRepository.findByEmail(verifyotpDto.email)
 
-        if(!pendingRegistration){
+        if (!pendingRegistration) {
             throw new NotfoundError("Pending registration not found", "PENDING_REGISTRATION_NOT_FOUND")
         }
         const user = new User(
@@ -51,18 +51,18 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
             pendingRegistration.email,
             pendingRegistration.phoneNumber,
             pendingRegistration.getPassword(),
-            "user"
+            pendingRegistration.role
         )
 
         const savedUser = await this.userRepository.save(user)
 
 
-        const accessToken = this.tokenService.generateAccessToken({userId : savedUser.userId! , email: savedUser.email ,role:savedUser.role})
+        const accessToken = this.tokenService.generateAccessToken({ userId: savedUser.userId!, email: savedUser.email, role: savedUser.role })
 
-        const refreshToken = this.tokenService.generateRefreshToken({userId:savedUser.userId!})
+        const refreshToken = this.tokenService.generateRefreshToken({ userId: savedUser.userId! })
         await this.pendingRegistrationRepository.deleteByEmail(verifyotpDto.email)
-        console.log("User Created" , savedUser.userId)
-        return { message : "OTP verification succesfull" , accessToken , refreshToken}
+        console.log("User Created", savedUser.userId)
+        return { message: "OTP verification succesfull", accessToken, refreshToken }
     }
 }
 

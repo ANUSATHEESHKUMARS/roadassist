@@ -18,6 +18,7 @@ export class RedisPendingRegistrationRepository implements IPendingRegistrationR
                 email: data.email,
                 phoneNumber: data.phoneNumber,
                 passwordHash: data.getPassword(),
+                role:data.role,
                 expiresAt: data.expiresAt
             }),
             {
@@ -45,6 +46,7 @@ export class RedisPendingRegistrationRepository implements IPendingRegistrationR
             parsedData.email,
             parsedData.phoneNumber,
             parsedData.passwordHash,
+            parsedData.role,
             new Date(parsedData.expiresAt)
         );
     }

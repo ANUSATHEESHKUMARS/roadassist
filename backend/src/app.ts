@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser'
 import vehilceRouter from './presentation/routes/vehicleRoutes.js'
 import cors from 'cors'
 import adminRouter from './presentation/routes/adminRoutes.js'
+import superadminRouter from './presentation/routes/superAdminRoutes.js'
 
 const app = express()
 
@@ -34,6 +35,11 @@ app.use('/api/admin' , adminRouter)
 
 app.use('/api/vehicle' ,vehilceRouter )
     
+
+app.use('/api/superadmin' , superadminRouter
+
+)
+
 app.use(errorHandlingMiddleware)
 
 export default app
