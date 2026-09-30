@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
+import { useToast } from "@/components/ui/toast/ToastProvider";
 import {
   Mail,
   Lock,
@@ -22,6 +23,8 @@ import type { CredentialResponse } from "@react-oauth/google";
 import apiClient from "@/services/apiClient";
 
 export default function Login() {
+
+  const {showToast} = useToast()
   // Minimal UI form state
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -54,6 +57,8 @@ console.log("LOGIN ROLE:", user.role);
 
 setUser(user);
 
+showToast("Login successful", "success");
+
 if (user.role === "superadmin") {
     console.log("GOING TO SUPER ADMIN");
     navigate("/superadmin/admins", { replace: true });
@@ -68,6 +73,11 @@ if (user.role === "superadmin") {
       console.log("login failed");
       console.log(error.response?.status);
       console.log("error", error.response?.data);
+
+       showToast(
+    "Login failed. Please check your credentials.",
+    "error"
+  );
     } finally {
       setIsSubmitting(false);
     }

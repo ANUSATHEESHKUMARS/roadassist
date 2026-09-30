@@ -11,6 +11,7 @@ import { IResendOtpUseCase } from "../../application/interfaces/IResendOtpUseCas
 import { ICookieService } from "../../application/contracts/ICookieService.js";
 import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
 import { GetCurrentUserUseCase } from "../../application/useCase/auth/GetCurrentUserUseCase.js";
+import { IRefreshTokenUseCase } from "../../application/interfaces/IRefreshTokenUseCase.js";
 
 export class AuthController implements IAuthController {
   constructor(private registerUserUseCase: IRegisterUserUseCase,
@@ -18,8 +19,9 @@ export class AuthController implements IAuthController {
     private googleLoginUseCase: IGoogleLoginUseCase,
     private resendOtpUseCase: IResendOtpUseCase,
     private cookieService: ICookieService,
-    private getCurrentUserUseCase: GetCurrentUserUseCase
-  ) {}
+    private getCurrentUserUseCase: GetCurrentUserUseCase,
+    private refreshTokenUseCase : IRefreshTokenUseCase
+  ) { }
 
   register = async (req: Request, res: Response): Promise<void> => {
 
@@ -122,5 +124,46 @@ export class AuthController implements IAuthController {
       data: currentUser
     });
   };
+  logout = async (req: Request, res: Response): Promise<void> => {
+    this.cookieService.clear(res, "accessToken");
+    this.cookieService.clear(res, "refreshToken");
+    const response: CommonResponse = {
+      success: true,
+      message: "logout success"
+    };
+    res.status(HttpStatusCode.OK).json(response)
+  }
+
+
+  refreshToken = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+
+    const refreshToken = req.cookies.refreshToken;
+
+    const accessToken =
+        await this.refreshTokenUseCase.execute(refreshToken);
+
+    this.cookieService.setCookie(
+        res,
+        "accessToken",
+        accessToken,
+        {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000
+        }
+    );
+
+    const response: CommonResponse = {
+        success: true,
+        message: "Access token refreshed successfully"
+    };
+
+    res.status(HttpStatusCode.OK).json(response);
+};
 }
+
 

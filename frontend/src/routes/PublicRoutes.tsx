@@ -4,6 +4,9 @@ import { useAuthStore } from "@/store/authStore";
 const PublicRoute = () => {
     const user = useAuthStore((state) => state.user);
 
+        console.log("PUBLIC ROUTE USER:", user);
+
+
     if (user) {
         if (user.role === "superadmin") {
             return <Navigate to="/superadmin/admins" replace />;

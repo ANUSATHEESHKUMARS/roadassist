@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useToast } from "@/components/ui/toast/ToastProvider";
 import {
     Car,
     Calendar,
@@ -22,6 +23,7 @@ import { deleteVehicle, getVehicleById } from "@/services/VehicleService";
 import { DeleteVehicleDialog } from "@/components/vehicle/VehicleDelete";
 
 export default function VehicleDetailsPage() {
+    const {showToast} = useToast()
     const { vehicleId } = useParams<{ vehicleId: string }>();
     const navigate = useNavigate();
     
@@ -42,12 +44,14 @@ export default function VehicleDetailsPage() {
 
             await deleteVehicle(vehicleId);
 
+            showToast("vehicle deleted succesfully","success")
             navigate('/user/vehicles')
-
+         
 
 
         } catch (error) {
             console.error("failed to delete vehicle", error)
+            showToast("failed to delete vehicle","error")
         } finally {
             setIsDeleting(false)
         }

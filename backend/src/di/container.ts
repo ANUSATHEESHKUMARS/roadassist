@@ -34,6 +34,7 @@ import { GetAdminUseCase } from "../application/useCase/superadmin/GetAdminUseCa
 import { SuperAdminController } from "../presentation/controllers/superadmin/SuperAdminController.js";
 import { MongoSuperAdminRepository } from "../infrastructure/repositories/MongoSuperAdminRepository.js";
 import { S3StorageService } from "../infrastructure/services/s3/s3StorageService.js";
+import { RefreshTokenUseCase } from "../application/useCase/RefreshTokenUseCase.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -133,12 +134,15 @@ export const adminController = new AdminController(getUserUseCase)
 
 const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository)
 
+
+const refreshTokenUseCase = new RefreshTokenUseCase(userRepository , tokenService)
 export const authcontroller = new AuthController(registerUserUseCase,
     loginUserUseCase,
     googleLoginUseCase,
     resendOtpUseCase,
     cookieService,
-    getCurrentUserUseCase
+    getCurrentUserUseCase,
+    refreshTokenUseCase
 
 )
 

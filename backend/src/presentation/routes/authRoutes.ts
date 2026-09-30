@@ -5,25 +5,29 @@ import { IVerifyOtpController } from "../interfaces/IVerifyOtpController.js";
 import { auth } from '../../di/container.js'
 
 export default function createAuthRoutes(
-    authcontroller : IAuthController,
-     verifyotpcontroller : IVerifyOtpController
-    ){
+    authcontroller: IAuthController,
+    verifyotpcontroller: IVerifyOtpController
+) {
 
-const authRouter = Router();
+    const authRouter = Router();
 
-authRouter.post('/register', asyncHandler(authcontroller.register))
-  
-authRouter.post('/login', asyncHandler(authcontroller.login))
+    authRouter.post('/register', asyncHandler(authcontroller.register))
 
-authRouter.post('/verifyotp' , asyncHandler(verifyotpcontroller.execute))
+    authRouter.post('/login', asyncHandler(authcontroller.login))
 
-authRouter.post('/google' , asyncHandler(authcontroller.googleLogin))
+    authRouter.post('/verifyotp', asyncHandler(verifyotpcontroller.execute))
 
-authRouter.post('/resend' , asyncHandler(authcontroller.resentOtp))
+    authRouter.post('/google', asyncHandler(authcontroller.googleLogin))
 
-authRouter.get('/me' , auth, asyncHandler(authcontroller.getCurrentUser))
+    authRouter.post('/resend', asyncHandler(authcontroller.resentOtp))
 
-return authRouter
+    authRouter.get('/me', auth, asyncHandler(authcontroller.getCurrentUser))
+
+    authRouter.post('/logout', asyncHandler(authcontroller.logout))
+
+    authRouter.post('/refresh', asyncHandler(authcontroller.refreshToken))
+    
+    return authRouter
 
 }
 

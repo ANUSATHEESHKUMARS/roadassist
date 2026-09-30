@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { useToast } from "../ui/toast/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { getApiErrorMessage } from "@/api/apiError";
 import { createVehicle } from "@/services/VehicleService";
 
 import type {
@@ -36,6 +36,7 @@ const formatLabel = (value: string): string => {
 
 export const VehicleForm: React.FC = () => {
   const navigate = useNavigate();
+  const {showToast} = useToast()
 
   const [formData, setFormData] = useState<VehicleFormData>({
     vehicleType: "car",
@@ -73,6 +74,7 @@ export const VehicleForm: React.FC = () => {
       const response = await createVehicle(formData);
 
       console.log("Vehicle created successfully:", response);
+    showToast("Vehicle created successfully", "success");
 
       navigate("/user/vehicles");
     }catch (error: any) {
@@ -81,6 +83,10 @@ export const VehicleForm: React.FC = () => {
   console.error("DATA:", error.response?.data);
   console.error("MESSAGE:", error.message);
   console.error("FULL ERROR:", error);
+
+    const message = getApiErrorMessage(error);
+
+    showToast(message, "error");
 }finally {
       setIsSubmitting(false);
     }

@@ -8,7 +8,21 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+
 
 export interface HeaderProps {
   title?: string;
@@ -25,6 +39,8 @@ export interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+
+
   title,
   subtitle,
   userName = 'User',
@@ -37,6 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSettingsClick,
   onLogoutClick,
 }) => {
+
+  const [logoutDialogOpen, setLogoutDialogOpen] = React.useState(false);
   const getInitials = (name: string): string => {
     return name
       .split(' ')
@@ -86,11 +104,10 @@ export const Header: React.FC<HeaderProps> = ({
           variant="ghost"
           size="icon"
           onClick={onNotificationClick}
-          aria-label={`View notifications${
-            unreadNotificationsCount > 0
-              ? ` (${unreadNotificationsCount} unread)`
-              : ''
-          }`}
+          aria-label={`View notifications${unreadNotificationsCount > 0
+            ? ` (${unreadNotificationsCount} unread)`
+            : ''
+            }`}
           className="relative h-9 w-9 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <Bell className="h-4 w-4" aria-hidden="true" />
@@ -149,18 +166,22 @@ export const Header: React.FC<HeaderProps> = ({
             align="end"
             className="w-56 border-border bg-card text-foreground"
           >
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none text-foreground">
-                  {userName}
-                </p>
-                {userRole && (
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {userRole}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none text-foreground">
+                    {userName}
                   </p>
-                )}
-              </div>
-            </DropdownMenuLabel>
+
+                  {userRole && (
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {userRole}
+                    </p>
+                  )}
+                </div>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
+
             <DropdownMenuSeparator className="bg-border" />
 
             <DropdownMenuItem
@@ -180,9 +201,8 @@ export const Header: React.FC<HeaderProps> = ({
             </DropdownMenuItem>
 
             <DropdownMenuSeparator className="bg-border" />
-
             <DropdownMenuItem
-              onClick={onLogoutClick}
+              onClick={() => setLogoutDialogOpen(true)}
               className="cursor-pointer gap-2 text-xs text-destructive focus:bg-destructive/10 focus:text-destructive"
             >
               <LogOut className="h-3.5 w-3.5" />
@@ -190,6 +210,37 @@ export const Header: React.FC<HeaderProps> = ({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+            <AlertDialog
+      open={logoutDialogOpen}
+      onOpenChange={setLogoutDialogOpen}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Are you sure you want to logout?
+          </AlertDialogTitle>
+
+          <AlertDialogDescription>
+            You will be signed out of your RoadAssist account and
+            redirected to the login page.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <AlertDialogFooter>
+          <AlertDialogCancel>
+            Cancel
+          </AlertDialogCancel>
+
+          <AlertDialogAction
+            onClick={onLogoutClick}
+          >
+            Logout
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
       </div>
     </header>
   );

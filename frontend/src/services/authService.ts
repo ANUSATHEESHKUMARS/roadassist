@@ -44,8 +44,12 @@ export const getVehicles = async () => {
   return response.data;
 };
 
-export const getCurrentUser = async () =>{
+export const getCurrentUser = async () => {
   const response = await apiClient.get('/auth/me')
   return response.data
 }
 
+export const logout = async () => {
+  const response = await apiClient.post('/auth/logout')
+  return response.data
+}

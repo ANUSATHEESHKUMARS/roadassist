@@ -5,8 +5,19 @@ import { ShieldCheck, Users, Settings } from "lucide-react";
 import Sidebar from "@/components/layout/super/Sidebar";
 import Header from "@/components/layout/super/Header";
 import Footer from "@/components/layout/super/Footer";
+import { handleLogout } from "@/utils/logoutHandler";
+import { useNavigate } from "react-router-dom";
 
 const SuperAdminLayout = () => {
+ const navigate = useNavigate()
+
+
+ const onLogout = async () =>{
+    await handleLogout()
+
+    navigate('/login', { replace : true})
+ }
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const superAdminItems = [
@@ -40,6 +51,7 @@ const SuperAdminLayout = () => {
                     userName="Super Admin"
                     userRole="Super Admin"
                     onMenuClick={() => setIsSidebarOpen(true)}
+                    onLogoutClick={onLogout}
                 />
 
                 {/* Page Content */}

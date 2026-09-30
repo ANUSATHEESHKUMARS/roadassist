@@ -11,10 +11,10 @@ import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
 import apiClient from "@/services/apiClient";
 import { getApiErrorMessage } from "@/api/apiError";
-
+import { useToast } from "@/components/ui/toast/ToastProvider";
 export default function Register() {
   const navigate = useNavigate();
-
+  const {showToast} = useToast()
   const [showPassword, setShowpasword] = useState(false);
   const [apiError, setApiError] = useState("");
 
@@ -90,7 +90,7 @@ export default function Register() {
 
     try {
       await register(requestData);
-
+      showToast("otp is sent to ur mail", "success")
       navigate("/verify-otp", { state: { email: formData.email } });
     } catch (error: any) {
       console.log("REGISTER FAILED");

@@ -15,7 +15,7 @@ import { OtpInput } from "@/components/auth/OtpInput";
 import { verifyOtp, resendOtp, getCurrentUser } from "@/services/authService";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getApiErrorMessage } from "@/api/apiError";
-
+import { useToast } from "@/components/ui/toast/ToastProvider";
 
 interface VerifyOtpProps {
 
@@ -30,7 +30,7 @@ export default function VerifyOtp({
   onSuccess,
 }: VerifyOtpProps) {
 
-
+  const { showToast } = useToast()
   const location = useLocation()
   const navigate = useNavigate()
   const setUser = useAuthStore((state) => state.setUser);
@@ -80,12 +80,14 @@ export default function VerifyOtp({
         purpose: "EMAIL_VERIFICATION"
       })
       console.log("resend otp succes", response)
+      showToast(" otp send", "success")
       setTimeLeft(60);
       setOtp("")
     } catch (error: any) {
       console.log("resend otp failed")
       console.log(error.response?.status)
       console.log(error.response?.data)
+      showToast("failed to sending otp", "error")
     } finally {
       setIsSubmitting(false)
     }
@@ -119,6 +121,7 @@ export default function VerifyOtp({
       const user = userResponse.data;
 
       console.log("verified user:", user);
+      showToast("verification success", "success")
       setUser(user)
       if (user.role === "superadmin") {
         navigate("/superadmin/admins", { replace: true });
