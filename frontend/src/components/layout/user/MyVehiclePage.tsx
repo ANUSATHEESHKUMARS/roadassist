@@ -16,7 +16,7 @@ export default function MyVehiclesPage() {
 
   const handleViewDetails = (id: string): void => {
     console.log('cliked the handle navigation')
-    navigate(`/vehicles/${id}`)
+    navigate(`/user/vehicles/${id}`)
   };
 
   const fetchVehicles = async () => {

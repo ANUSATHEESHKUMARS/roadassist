@@ -213,7 +213,7 @@ export default function VehicleDetailsPage() {
                             console.log("EDIT BUTTON CLICKED");
                             console.log("Vehicle ID:", vehicle.id);
 
-                            navigate(`/vehicles/${vehicleId}/edit`);
+                            navigate(`/user/vehicles/${vehicleId}/edit`);
                         }}
                         className="h-9 px-4 text-xs font-medium bg-card border-border hover:bg-muted text-foreground transition-colors"
                     >
