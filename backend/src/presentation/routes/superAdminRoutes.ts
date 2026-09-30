@@ -1,18 +1,19 @@
 import { Router } from "express";
-import { auth } from '../../di/container.js'
+import { auth, superAdminController } from '../../di/container.js'
+import { superAdminOnly } from "../middlewares/superAdminOnly.js";
+
+
+
 const superadminRouter = Router()
 
 
-superadminRouter.get('/dashboard',
+superadminRouter.get('/admins',
     auth,
-    superadminRouter,
-    (req, res) => {
-        res.status(200).json({
-            succes: true,
-            message: "Super Admin dashboard acces granted"
-        })
-    }
+    superAdminOnly,
+    superAdminController.getAdmins
 )
 
 
-export default superadminRouter
+export default superadminRouter;
+
+

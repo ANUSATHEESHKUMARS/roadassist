@@ -5,7 +5,9 @@ export interface AdminUser {
     fullName:string,
     email:string,
     phoneNumber:string,
-    role:"user"|"mechanic"|"admin",
+    role:"user"|"mechanic"|"admin" | 'superadmin'
     authProvider:"LOCAL"|"GOOGLE",
     status:AdminUserStatus
 }
+
+

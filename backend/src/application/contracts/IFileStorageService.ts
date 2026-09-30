@@ -1,10 +1,15 @@
 export interface IFileStorageService {
+
     upload(
-        file:Buffer,
-        folder:string,
-    ):Promise<string>
+        file: Buffer,
+        folder: string
+    ): Promise<string>;
+
+    getUrl(
+        fileKey: string
+    ): Promise<string>;
 
     delete(
-        publicId:string
-    ):Promise<void>
+        fileKey: string
+    ): Promise<void>;
 }

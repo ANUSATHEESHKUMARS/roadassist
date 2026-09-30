@@ -37,6 +37,11 @@ const vehicleSchema = new Schema<IVehicleDocument>({
         required:true,
         trim:true
     },
+    model : {
+        type : String,
+        required:true,
+        trim : true
+    },
     year: {
         type:Number,
         required:true,

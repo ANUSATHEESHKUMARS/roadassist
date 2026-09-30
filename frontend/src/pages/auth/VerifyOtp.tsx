@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/authStore";
 import {
   ArrowLeft,
   ArrowRight,
@@ -24,12 +25,15 @@ interface VerifyOtpProps {
 
 export default function VerifyOtp({
 
+
   onBack,
   onSuccess,
 }: VerifyOtpProps) {
 
+
   const location = useLocation()
   const navigate = useNavigate()
+  const setUser = useAuthStore((state) => state.setUser);
 
   const email = location.state?.email || ""
 
@@ -110,26 +114,29 @@ export default function VerifyOtp({
 
       console.log("OTP VERIFICATION SUCCESS:", response);
 
+      const userResponse = await getCurrentUser();
 
-      const userResponse = await getCurrentUser()
+      const user = userResponse.data;
 
-      const user = userResponse.data
-
-      console.log("verified user:", user)
-
-      if (user.role == 'admin') {
-        navigate('/admin/users')
+      console.log("verified user:", user);
+      setUser(user)
+      if (user.role === "superadmin") {
+        navigate("/superadmin/admins", { replace: true });
+      } else if (user.role === "admin") {
+        navigate("/admin/users", { replace: true });
       } else {
-        navigate('/user')
+        navigate("/user", { replace: true });
       }
+
       if (onSuccess) {
-        onSuccess()
+        onSuccess();
       }
 
     } catch (error: unknown) {
-      console.log(error)
-      const message = getApiErrorMessage(error)
-      setApiError(message)
+      console.log(error);
+
+      const message = getApiErrorMessage(error);
+      setApiError(message);
 
     } finally {
       setIsSubmitting(false);

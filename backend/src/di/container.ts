@@ -27,10 +27,13 @@ import { ResentOtpUseCase } from "../application/useCase/auth/ResendOtpUseCase.j
 import { RedisPendingRegistrationRepository } from "../infrastructure/repositories/RedisPendingRegistrationRepository.js";
 import { CookieService } from "../infrastructure/services/CookieService.js";
 import { VehicleValidator } from "../application/validators/VehicleValidator.js";
-import { CloudinaryStorageService } from "../infrastructure/services/cloudinary/CloudinaryStorageService.js";
 import { GetCurrentUserUseCase } from "../application/useCase/auth/GetCurrentUserUseCase.js";
 import { Logger } from "../infrastructure/logger/logger.js";
 import { MongoAdminUserRepository } from "../infrastructure/repositories/MongoAdminUserRepository.js";
+import { GetAdminUseCase } from "../application/useCase/superadmin/GetAdminUseCase.js";
+import { SuperAdminController } from "../presentation/controllers/superadmin/SuperAdminController.js";
+import { MongoSuperAdminRepository } from "../infrastructure/repositories/MongoSuperAdminRepository.js";
+import { S3StorageService } from "../infrastructure/services/s3/s3StorageService.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -86,21 +89,27 @@ const vehiceRepository = new VehicleRepostory()
 
 const vehicleValidator = new VehicleValidator()
 
-const fileStorageService = new CloudinaryStorageService()
+const s3StorageService = new S3StorageService()
 
-const createVehicleUseCase = new CreateVehicleUseCase(vehiceRepository, vehicleValidator, fileStorageService)
+const createVehicleUseCase = new CreateVehicleUseCase(vehiceRepository, vehicleValidator, s3StorageService)
 
-const getVehicleUseCase = new GetVehilceUseCase(vehiceRepository)
+const getVehicleUseCase = new GetVehilceUseCase(vehiceRepository, s3StorageService)
 
-const getVehiclebyIdUseCase = new GetVehicleByIdUseCase(vehiceRepository)
+const getVehiclebyIdUseCase = new GetVehicleByIdUseCase(vehiceRepository, s3StorageService)
 
-const updateVehicleUseCase = new UpdateVehicleUseCase(vehiceRepository, fileStorageService)
+const updateVehicleUseCase = new UpdateVehicleUseCase(vehiceRepository, s3StorageService)
 
 const removeVehicleUseCase = new DeleteVehicleUseCase(vehiceRepository)
 
 const logger = new Logger()
 
 
+const superAdminRepository = new MongoSuperAdminRepository()
+
+const getAdminUseCase = new GetAdminUseCase(superAdminRepository)
+
+
+export const superAdminController = new SuperAdminController(getAdminUseCase)
 
 export const createVehicleController = new CreateVehicleController(createVehicleUseCase,
     getVehicleUseCase,

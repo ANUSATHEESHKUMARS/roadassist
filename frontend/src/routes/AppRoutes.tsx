@@ -1,54 +1,135 @@
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import VerifyOtp from "@/pages/auth/VerifyOtp";
-import UserLandingPage from "@/pages/user/LandingPage";
 
+import UserLandingPage from "@/pages/user/LandingPage";
 import MyVehiclesPage from "@/components/layout/user/MyVehiclePage";
 import AddVehiclePage from "@/components/layout/user/AddVehiclePage";
+import EditVehiclePage from "@/components/layout/user/EditVehiclePage";
+import VehicleDetailsPage from "@/pages/user/VehicleDetail";
 import { UserLayout } from "@/components/layout/user/UserLayout";
 
-import { Navigate, Route, Routes } from "react-router-dom";
-import VehicleDetailsPage from "@/pages/user/VehicleDetail";
-import EditVehiclePage from "@/components/layout/user/EditVehiclePage";
 import AdminUserPage from "@/pages/admin/AdminUserpage";
 import AdminLayout from "@/layouts/AdminLayout";
 
+import SuperAdminLayout from "@/layouts/SuperAdminLayout";
+import AdminManagementPage from "@/pages/superAdmin/AdminMangementPage";
+
+import ProtectedRoute from "./ProtectedRoutes";
+import RoleRoute from "./RoleRoutes";
+
+import { Navigate, Route, Routes } from "react-router-dom";
+import PublicRoute from "./PublicRoutes";
+
+
 export const AppRoutes = () => {
+
   return (
     <Routes>
 
-      {/* Authentication */}
-      <Route path="/register" element={<Register />} />
-      <Route path="/verify-otp" element={<VerifyOtp />} />
-      <Route path="/login" element={<Login />} />
+      {/* ==================== */}
+      {/* PUBLIC ROUTES        */}
+      {/* ==================== */}
+<Route element={<PublicRoute />}>
+    <Route path="/register" element={<Register />} />
+    <Route path="/verify-otp" element={<VerifyOtp />} />
+    <Route path="/login" element={<Login />} />
+</Route>
 
-      {/* User Landing */}
-      <Route path="/user" element={<UserLandingPage />} />
+      {/* ==================== */}
+      {/* USER ROUTES           */}
+      {/* ==================== */}
 
-      {/* User Application Layout */}
-      <Route path="/user" element={<UserLayout />}>
-
+      <Route
+        element={<ProtectedRoute />}
+      >
         <Route
-          path="vehicles"
-          element={<MyVehiclesPage />}
-        />
+          element={
+            <RoleRoute
+              allowedRoles={["user"]}
+            />
+          }
+        >
 
-        <Route
-          path="vehicles/add"
-          element={<AddVehiclePage />}
-        />
+          <Route
+            path="/user"
+            element={<UserLayout />}
+          >
 
+            {/* /user */}
+            <Route
+              index
+              element={<UserLandingPage />}
+            />
+
+            {/* /user/vehicles */}
+            <Route
+              path="vehicles"
+              element={<MyVehiclesPage />}
+            />
+
+            {/* /user/vehicles/add */}
+            <Route
+              path="vehicles/add"
+              element={<AddVehiclePage />}
+            />
+
+            {/* /user/vehicles/:vehicleId */}
+            <Route
+              path="vehicles/:vehicleId"
+              element={<VehicleDetailsPage />}
+            />
+
+            {/* /user/vehicles/:vehicleId/edit */}
+            <Route
+              path="vehicles/:vehicleId/edit"
+              element={<EditVehiclePage />}
+            />
+
+          </Route>
+
+        </Route>
       </Route>
 
 
-      <Route
-        path="vehicles/:vehicleId"
-        element={<VehicleDetailsPage />}
-      />
+      {/* ==================== */}
+      {/* ADMIN ROUTES         */}
+      {/* ==================== */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<RoleRoute allowedRoles={["admin"]} />}>
 
-      <Route path="vehicles/:vehicleId/edit" element={<EditVehiclePage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route
+              path="users"
+              element={<AdminUserPage />}
+            />
+          </Route>
 
-      {/* Old dashboard URL */}
+        </Route>
+      </Route>
+
+
+      {/* ==================== */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<RoleRoute allowedRoles={["superadmin"]} />}>
+
+          <Route
+            path="/superadmin"
+            element={<SuperAdminLayout />}
+          >
+            <Route
+              path="admins"
+              element={<AdminManagementPage />}
+            />
+          </Route>
+
+        </Route>
+      </Route>
+
+      {/* ==================== */}
+      {/* OLD DASHBOARD URL    */}
+      {/* ==================== */}
+
       <Route
         path="/user/dashboard"
         element={
@@ -59,20 +140,21 @@ export const AppRoutes = () => {
         }
       />
 
-      {/* Unknown routes */}
+
+      {/* ==================== */}
+      {/* UNKNOWN ROUTES       */}
+      {/* ==================== */}
+
       <Route
         path="*"
         element={
           <Navigate
-            to="/user/vehicles"
+            to="/login"
             replace
           />
         }
       />
-<Route path="/admin" element={<AdminLayout />}>
-    <Route path="users" element={<AdminUserPage />} />
-</Route>      
+
     </Routes>
   );
 };
-

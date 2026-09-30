@@ -24,6 +24,7 @@ const navItems: NavItem[] = [
     path: "/admin/users",
     icon: Users,
   },
+  
 ];
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({

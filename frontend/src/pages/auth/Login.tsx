@@ -46,18 +46,24 @@ export default function Login() {
         password,
       });
       console.log("login succes ayyii", response);
-      const userResponse = await getCurrentUser();
+ const userResponse = await getCurrentUser();
+const user = userResponse.data;
 
-      console.log("current user", userResponse);
+console.log("LOGIN USER:", user);
+console.log("LOGIN ROLE:", user.role);
 
-      const user = userResponse.data;
+setUser(user);
 
-      setUser(user);
-      if (user.role === "admin") {
-        navigate("/admin/users");
-      } else {
-        navigate("/user");
-      }
+if (user.role === "superadmin") {
+    console.log("GOING TO SUPER ADMIN");
+    navigate("/superadmin/admins", { replace: true });
+} else if (user.role === "admin") {
+    console.log("GOING TO ADMIN");
+    navigate("/admin/users", { replace: true });
+} else {
+    console.log("GOING TO USER");
+    navigate("/user", { replace: true });
+}
     } catch (error: any) {
       console.log("login failed");
       console.log(error.response?.status);
@@ -66,30 +72,43 @@ export default function Login() {
       setIsSubmitting(false);
     }
   };
+const handleGoogleLogin = async (response: CredentialResponse) => {
+  try {
+    const idToken = response.credential;
 
-  const handleGoogleLogin = async (response: CredentialResponse) => {
-    try {
-      const idToken = response.credential;
-
-      if (!idToken) {
-        console.log("Google ID token not received");
-        return;
-      }
-
-      console.log("Google ID token:", idToken);
-
-      const result = await apiClient.post("/auth/google", {
-        idToken,
-      });
-      navigate("/user");
-
-      console.log("Google login successful:", result.data);
-    } catch (error: any) {
-      console.log("Google login failed");
-      console.log(error.response?.status);
-      console.log(error.response?.data);
+    if (!idToken) {
+      console.log("Google ID token not received");
+      return;
     }
-  };
+
+    const result = await apiClient.post("/auth/google", {
+      idToken,
+    });
+
+    console.log("Google login successful:", result.data);
+
+    const userResponse = await getCurrentUser();
+    const user = userResponse.data;
+
+    console.log("GOOGLE USER:", user);
+    console.log("GOOGLE ROLE:", user.role);
+
+    setUser(user);
+
+    if (user.role === "superadmin") {
+      navigate("/superadmin/admins", { replace: true });
+    } else if (user.role === "admin") {
+      navigate("/admin/users", { replace: true });
+    } else {
+      navigate("/user", { replace: true });
+    }
+
+  } catch (error: any) {
+    console.log("Google login failed");
+    console.log(error.response?.status);
+    console.log(error.response?.data);
+  }
+};
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between bg-[#060709] text-white selection:bg-[#ff3b30] selection:text-white font-sans overflow-x-hidden">
