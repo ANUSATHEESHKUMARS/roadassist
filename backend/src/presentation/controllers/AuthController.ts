@@ -12,6 +12,7 @@ import { ICookieService } from "../../application/contracts/ICookieService.js";
 import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
 import { GetCurrentUserUseCase } from "../../application/useCase/auth/GetCurrentUserUseCase.js";
 import { IRefreshTokenUseCase } from "../../application/interfaces/IRefreshTokenUseCase.js";
+import { ILogger } from "../../application/contracts/ILogger.js";
 
 export class AuthController implements IAuthController {
   constructor(private registerUserUseCase: IRegisterUserUseCase,
@@ -20,7 +21,8 @@ export class AuthController implements IAuthController {
     private resendOtpUseCase: IResendOtpUseCase,
     private cookieService: ICookieService,
     private getCurrentUserUseCase: GetCurrentUserUseCase,
-    private refreshTokenUseCase : IRefreshTokenUseCase
+    private refreshTokenUseCase: IRefreshTokenUseCase,
+    private logger: ILogger
   ) { }
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -30,6 +32,7 @@ export class AuthController implements IAuthController {
 
     await this.registerUserUseCase.execute(registerUserDto);
 
+    this.logger.info(`User registration succesful for email: ${registerUserDto.email}`)
     const response: CommonResponse = {
       success: true,
       message: "registration succes"
@@ -38,12 +41,15 @@ export class AuthController implements IAuthController {
   }
 
   login = async (req: Request, res: Response): Promise<void> => {
-    console.log("CONTROLLER FILES:", req.files);
+
 
     const loginUserDto: LoginUserDTO = req.body
 
     const result = await this.loginUserUseCase.execute(loginUserDto)
 
+    this.logger.info(
+      `User login successful for email: ${loginUserDto.email}`
+    );
     this.cookieService.setCookie(
       res,
       "accessToken",
@@ -138,32 +144,32 @@ export class AuthController implements IAuthController {
   refreshToken = async (
     req: Request,
     res: Response
-): Promise<void> => {
+  ): Promise<void> => {
 
     const refreshToken = req.cookies.refreshToken;
 
     const accessToken =
-        await this.refreshTokenUseCase.execute(refreshToken);
+      await this.refreshTokenUseCase.execute(refreshToken);
 
     this.cookieService.setCookie(
-        res,
-        "accessToken",
-        accessToken,
-        {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 15 * 60 * 1000
-        }
+      res,
+      "accessToken",
+      accessToken,
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 15 * 60 * 1000
+      }
     );
 
     const response: CommonResponse = {
-        success: true,
-        message: "Access token refreshed successfully"
+      success: true,
+      message: "Access token refreshed successfully"
     };
 
     res.status(HttpStatusCode.OK).json(response);
-};
+  };
 }
 
 

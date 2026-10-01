@@ -42,7 +42,6 @@ export default function VerifyOtp({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [apiError, setApiError] = useState('')
 
-  // Timer countdown
   useEffect(() => {
     if (timeLeft <= 0) {
       return;

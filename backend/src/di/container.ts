@@ -142,7 +142,8 @@ export const authcontroller = new AuthController(registerUserUseCase,
     resendOtpUseCase,
     cookieService,
     getCurrentUserUseCase,
-    refreshTokenUseCase
+    refreshTokenUseCase,
+    logger
 
 )
 

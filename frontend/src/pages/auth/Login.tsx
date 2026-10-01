@@ -25,7 +25,8 @@ import apiClient from "@/services/apiClient";
 export default function Login() {
 
   const {showToast} = useToast()
-  // Minimal UI form state
+
+
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);

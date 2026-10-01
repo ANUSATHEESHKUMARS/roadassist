@@ -80,7 +80,6 @@ export default function VehicleDetailsPage() {
         fetchVehicle();
     }, [fetchVehicle]);
 
-    // ================= 1. SKELETON LOADING STATE =================
     if (loading) {
         return (
             <div className="space-y-6 animate-pulse">

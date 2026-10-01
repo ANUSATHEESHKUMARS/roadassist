@@ -27,18 +27,14 @@ export const AppRoutes = () => {
   return (
     <Routes>
 
-      {/* ==================== */}
-      {/* PUBLIC ROUTES        */}
-      {/* ==================== */}
+
 <Route element={<PublicRoute />}>
     <Route path="/register" element={<Register />} />
     <Route path="/verify-otp" element={<VerifyOtp />} />
     <Route path="/login" element={<Login />} />
 </Route>
 
-      {/* ==================== */}
-      {/* USER ROUTES           */}
-      {/* ==================== */}
+  
 
       <Route
         element={<ProtectedRoute />}
@@ -92,9 +88,7 @@ export const AppRoutes = () => {
       </Route>
 
 
-      {/* ==================== */}
-      {/* ADMIN ROUTES         */}
-      {/* ==================== */}
+      
       <Route element={<ProtectedRoute />}>
         <Route element={<RoleRoute allowedRoles={["admin"]} />}>
 
@@ -126,9 +120,7 @@ export const AppRoutes = () => {
         </Route>
       </Route>
 
-      {/* ==================== */}
-      {/* OLD DASHBOARD URL    */}
-      {/* ==================== */}
+    
 
       <Route
         path="/user/dashboard"
@@ -141,9 +133,7 @@ export const AppRoutes = () => {
       />
 
 
-      {/* ==================== */}
-      {/* UNKNOWN ROUTES       */}
-      {/* ==================== */}
+   
 
       <Route
         path="*"

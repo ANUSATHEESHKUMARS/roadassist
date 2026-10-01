@@ -14,7 +14,7 @@ import { getApiErrorMessage } from "@/api/apiError";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 export default function Register() {
   const navigate = useNavigate();
-  const {showToast} = useToast()
+  const { showToast } = useToast()
   const [showPassword, setShowpasword] = useState(false);
   const [apiError, setApiError] = useState("");
 
@@ -84,7 +84,7 @@ export default function Register() {
       email: formData.email,
       phoneNumber: formData.phoneNumber,
       password: formData.password,
-      role : role,
+      role: role,
     };
     console.log("REQUEST DATA:", requestData);
 
@@ -141,7 +141,7 @@ export default function Register() {
 
       {/* Main Centered Composition Container */}
       <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
-        
+
         {/* ================= LEFT SECTION: BRANDING & PLATFORM HIGHLIGHTS ================= */}
         <div className="w-full lg:w-5/12 flex flex-col justify-between py-4 lg:py-8 space-y-8">
           <div>
@@ -199,7 +199,7 @@ export default function Register() {
         {/* ================= RIGHT SECTION: REGISTRATION GLASS CARD ================= */}
         <div className="w-full lg:w-7/12 max-w-xl">
           <div className="relative rounded-2xl bg-[#0d0e12]/90 border border-[#1a1c24] backdrop-blur-xl shadow-2xl p-6 sm:p-9">
-            
+
             {/* Card Header */}
             <div className="mb-6">
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
@@ -220,11 +220,10 @@ export default function Register() {
                 <button
                   type="button"
                   onClick={() => setRole("user")}
-                  className={`flex flex-col text-left p-3.5 rounded-xl border transition-all duration-200 ${
-                    role === "user"
+                  className={`flex flex-col text-left p-3.5 rounded-xl border transition-all duration-200 ${role === "user"
                       ? "border-[#ff3b30] bg-[#ff3b30]/10 shadow-[0_0_15px_rgba(255,59,48,0.15)] ring-1 ring-[#ff3b30]"
                       : "border-[#1a1c24] bg-[#060709]/60 hover:bg-[#1a1c24]/50 text-[#a1a1aa]"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <User className={`h-4 w-4 ${role === "user" ? "text-[#ff3b30]" : "text-[#a1a1aa]"}`} />
@@ -241,11 +240,10 @@ export default function Register() {
                 <button
                   type="button"
                   onClick={() => setRole("admin")}
-                  className={`flex flex-col text-left p-3.5 rounded-xl border transition-all duration-200 ${
-                    role === "admin"
+                  className={`flex flex-col text-left p-3.5 rounded-xl border transition-all duration-200 ${role === "admin"
                       ? "border-[#ff3b30] bg-[#ff3b30]/10 shadow-[0_0_15px_rgba(255,59,48,0.15)] ring-1 ring-[#ff3b30]"
                       : "border-[#1a1c24] bg-[#060709]/60 hover:bg-[#1a1c24]/50 text-[#a1a1aa]"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <ShieldAlert className={`h-4 w-4 ${role === "admin" ? "text-[#ff3b30]" : "text-[#a1a1aa]"}`} />
@@ -326,8 +324,9 @@ export default function Register() {
                 <Input
                   id="mobile"
                   type="tel"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="Enter 10-digit mobile number"
                   value={formData.phoneNumber}
+                  maxLength={10}
                   onChange={(e) =>
                     setFormData({
                       ...formData,

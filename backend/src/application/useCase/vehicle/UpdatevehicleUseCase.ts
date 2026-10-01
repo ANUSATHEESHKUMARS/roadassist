@@ -24,7 +24,6 @@ export class UpdateVehicleUseCase implements IUpdateVehicelUseCase {
         }
 
 
-           // Keep existing image URLs
         let vehicleImageUrl = vehicle.vehicleImage;
         let insuranceCertificateImageUrl = vehicle.insuranceCertificateImage;
         let pucCertificateImageUrl = vehicle.pucCertificateImage;
@@ -37,7 +36,6 @@ export class UpdateVehicleUseCase implements IUpdateVehicelUseCase {
             );
         }
 
-        // Upload new insurance certificate
         if (files.insuranceCertificateImage) {
             insuranceCertificateImageUrl = await this.fileStoregeService.upload(
                 files.insuranceCertificateImage.buffer,
@@ -45,7 +43,6 @@ export class UpdateVehicleUseCase implements IUpdateVehicelUseCase {
             );
         }
 
-        // Upload new PUC certificate
         if (files.pucCertificateImage) {
             pucCertificateImageUrl = await this.fileStoregeService.upload(
                 files.pucCertificateImage.buffer,

@@ -26,6 +26,13 @@ export class VehicleValidator implements IVehiclevalidator{
         }
         const currentYear = new Date().getFullYear();
 
+
+       
+       
+       if(data.year < currentYear - 10){
+        throw new BadRequest("Invalid manufaturing year" , "INVALID MANUFATURING")
+       }
+
    if (data.year < 1900 || data.year > currentYear) {
             throw new BadRequest(
                 "Invalid manufacturing year",

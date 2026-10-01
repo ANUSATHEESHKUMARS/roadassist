@@ -15,3 +15,4 @@ export const connectRedis = async (): Promise<void> => {
 };
 
 export default redisClient;
+
