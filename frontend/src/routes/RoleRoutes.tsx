@@ -16,8 +16,8 @@ const RoleRoute = ({ allowedRoles }: RoleRouteProps) => {
     }
 
     console.log("AUTH USER:", user);
-console.log("USER ROLE:", user.role);
-console.log("ALLOWED ROLES:", allowedRoles);
+    console.log("USER ROLE:", user.role);
+    console.log("ALLOWED ROLES:", allowedRoles);
 
     if (!allowedRoles.includes(user.role)) {
         return <Navigate to="/user" replace />;

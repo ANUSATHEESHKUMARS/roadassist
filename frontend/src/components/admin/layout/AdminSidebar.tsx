@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
+  Images,
   Users,
   Wrench,
   X,
@@ -24,6 +25,12 @@ const navItems: NavItem[] = [
     path: "/admin/users",
     icon: Users,
   },
+  {
+    label: "Media Mangement",
+    path: "/admin/media",
+    icon: Images,
+  },
+  
   
 ];
 

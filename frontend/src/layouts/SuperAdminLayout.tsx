@@ -9,14 +9,14 @@ import { handleLogout } from "@/utils/logoutHandler";
 import { useNavigate } from "react-router-dom";
 
 const SuperAdminLayout = () => {
- const navigate = useNavigate()
+    const navigate = useNavigate()
 
 
- const onLogout = async () =>{
-    await handleLogout()
+    const onLogout = async () => {
+        await handleLogout()
 
-    navigate('/login', { replace : true})
- }
+        navigate('/login', { replace: true })
+    }
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -26,7 +26,7 @@ const SuperAdminLayout = () => {
             href: "/superadmin/admins",
             icon: Users,
         },
-        
+
     ];
 
     return (

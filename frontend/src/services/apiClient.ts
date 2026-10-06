@@ -12,13 +12,26 @@ apiClient.interceptors.response.use(
     },
 
     async (error: AxiosError) => {
-        const originalRequest = error.config as InternalAxiosRequestConfig & {
-            _retry?: boolean;
-        };
+        const originalRequest = error.config as
+            | (InternalAxiosRequestConfig & { _retry?: boolean })
+            | undefined;
 
+        // If there is no request config, just reject
+        if (!originalRequest) {
+            return Promise.reject(error);
+        }
+
+        const isLoginRequest = originalRequest.url?.includes("/auth/login");
+        const isRefreshRequest = originalRequest.url?.includes("/auth/refresh");
+
+        // Don't try to refresh when:
+        // 1. Login itself failed
+        // 2. Refresh itself failed
         if (
             error.response?.status === 401 &&
-            !originalRequest?._retry
+            !originalRequest._retry &&
+            !isLoginRequest &&
+            !isRefreshRequest
         ) {
             originalRequest._retry = true;
 
@@ -28,7 +41,6 @@ apiClient.interceptors.response.use(
                 return apiClient(originalRequest);
 
             } catch (refreshError) {
-
                 useAuthStore.getState().logout();
 
                 window.location.href = "/login";

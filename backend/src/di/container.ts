@@ -35,6 +35,11 @@ import { SuperAdminController } from "../presentation/controllers/superadmin/Sup
 import { MongoSuperAdminRepository } from "../infrastructure/repositories/MongoSuperAdminRepository.js";
 import { S3StorageService } from "../infrastructure/services/s3/s3StorageService.js";
 import { RefreshTokenUseCase } from "../application/useCase/RefreshTokenUseCase.js";
+import { MediaRepository } from "../infrastructure/repositories/MediaRepository.js";
+import { UploadMediaUseCase } from "../application/useCase/media/UploadMediaUseCase.js";
+import { UploadMediaController } from "../presentation/controllers/UploadMediaController.js";
+import { GetMediaUseCase } from "../application/useCase/admin/GetMediaUseCase.js";
+import { DeleteMediaUseCase } from "../application/useCase/admin/DeleteMediaUseCase.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -133,6 +138,25 @@ const getUserUseCase = new GetUserUseCase(adminUserRepository)
 export const adminController = new AdminController(getUserUseCase)
 
 const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository)
+
+
+
+
+const mediaRepository = new MediaRepository()
+
+
+const uploadMediaUseCase = new UploadMediaUseCase(
+    mediaRepository,
+    s3StorageService
+)
+
+const getMediaUseCase = new GetMediaUseCase(mediaRepository,s3StorageService)
+
+const deleteMediaUseCase = new DeleteMediaUseCase(mediaRepository,s3StorageService)
+
+
+export const uploadMediaController = new UploadMediaController(uploadMediaUseCase,getMediaUseCase,deleteMediaUseCase)
+
 
 
 const refreshTokenUseCase = new RefreshTokenUseCase(userRepository , tokenService)

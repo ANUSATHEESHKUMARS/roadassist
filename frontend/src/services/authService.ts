@@ -19,8 +19,13 @@ export const verifyOtp = async (data: {
 };
 
 export const login = async (data: { email: string, password: string }) => {
-  const response = await apiClient.post('/auth/login', data)
+  try{
+    const response = await apiClient.post('/auth/login', data)
   return response.data
+  }catch(error){
+    console.log("login api error", error)
+    throw error
+  }
 }
 
 export const googleLogin = async (idToken: string) => {

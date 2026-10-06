@@ -1,40 +1,59 @@
-import { CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { mockLandingData } from "@/data/landinData";
+import type { LandingPageData } from "@/types/landing";
 
-export default function UserLandingPage() {
-  const navigate = useNavigate();
+// Section Components
+import { LandingNavbar } from "@/components/landing/LandingNavbar";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { ServicesSection } from "@/components/landing/ServicesSection";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { VehicleSupportSection } from "@/components/landing/VehicleSupportSection";
+import { EmergencySection } from "@/components/landing/EmergencySection";
+import { WhyRoadAssistSection } from "@/components/landing/WhyRoadAssistSection";
+import { PremiumSection } from "@/components/landing/PremiumSection";
+import { FinalCTASection } from "@/components/landing/FinalCtASection";
+import { LandingFooter } from "@/components/landing/LandingFooter";
+
+export default function LandingPage() {
+  // Stored in local state, ready for:
+  // useEffect(() => { apiClient.get("/landing").then(res => setLandingData(res.data)); }, []);
+  const [landingData] = useState<LandingPageData>(mockLandingData);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-6">
-      <div className="w-full max-w-md text-center space-y-6">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground overflow-x-hidden">
+      {/* 1. Header / Navbar */}
+      <LandingNavbar data={landingData.nav} />
 
-        <div className="flex justify-center">
-          <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
-            <CheckCircle className="h-10 w-10 text-primary" />
-          </div>
-        </div>
+      <main>
+        {/* 2. Hero Section */}
+        <HeroSection data={landingData.hero} />
 
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold">
-            Welcome to RoadAssist!
-          </h1>
+        {/* 3. Trust Strip */}
 
-          <p className="text-sm text-muted-foreground">
-            Your account has been successfully verified.
-          </p>
-        </div>
+        {/* 4. Services Grid */}
+        <ServicesSection data={landingData.services} />
 
-        <div className="pt-4">
-          <Button
-            onClick={() => navigate("/user/vehicles")}
-            className="px-8"
-          >
-            Continue
-          </Button>
-        </div>
+        {/* 5. How It Works Timeline */}
+        <HowItWorksSection data={landingData.howItWorks} />
 
-      </div>
+        {/* 6. Vehicle Support Matrix */}
+        <VehicleSupportSection data={landingData.vehicles} />
+
+        {/* 7. Emergency Alert Section */}
+        <EmergencySection data={landingData.emergency} />
+
+        {/* 8. Value Proposition & Telemetry Stats */}
+        <WhyRoadAssistSection data={landingData.whyRoadAssist} />
+
+        {/* 9. Premium Tier Showcase */}
+        <PremiumSection data={landingData.premium} />
+
+        {/* 10. Final Call To Action */}
+        <FinalCTASection data={landingData.finalCta} />
+      </main>
+
+      {/* 11. Footer */}
+      <LandingFooter data={landingData.footer} />
     </div>
   );
 }
