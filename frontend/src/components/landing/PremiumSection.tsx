@@ -2,12 +2,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import type { PremiumTierData } from "@/types/landing";
+import type { MediaResponseData } from "@/types/media";
 
 interface PremiumSectionProps {
-  data: PremiumTierData;
+  data: PremiumTierData
+  media?: MediaResponseData
 }
 
-export const PremiumSection: React.FC<PremiumSectionProps> = ({ data }) => {
+export const PremiumSection: React.FC<PremiumSectionProps> = ({ data, media }) => {
   return (
     <section id="membership" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-12">
@@ -53,12 +55,22 @@ export const PremiumSection: React.FC<PremiumSectionProps> = ({ data }) => {
 
         {/* Right: Visual Artwork Managed by S3 */}
         <div className="lg:col-span-5 relative min-h-[300px] lg:min-h-full bg-secondary">
-          <img
-            src={data.imageUrl}
-            alt={data.heading}
-            loading="lazy"
-            className="w-full h-full object-cover object-center brightness-75"
-          />
+          {media?.mediaType === "video" ? (
+            <video
+              src={media.url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          ) : media?.url ? (
+            <img
+              src={media.url}
+              alt="Premium"
+              className="w-full h-full object-cover"
+            />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-card via-transparent to-transparent" />
         </div>
       </div>

@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type{ Vehicle, VehicleType, FuelType } from "@/types/user/vehicle";
+import type { Vehicle, VehicleType, FuelType } from "@/types/user/vehicle";
 import { getVehicleById, updateVehicle } from "@/services/VehicleService";
 
 interface FormErrors {
@@ -86,6 +86,9 @@ export default function EditVehiclePage() {
       setLoading(true);
       setError(null);
       const data = await getVehicleById(vehicleId);
+      console.log("Vehicle image URL:", data.vehicleImage);
+console.log("Insurance certificate URL:", data.insuranceCertificateImage);
+console.log("PUC certificate URL:", data.pucCertificateImage);
       setVehicle(data);
 
       // Pre-fill form fields
@@ -305,7 +308,7 @@ export default function EditVehiclePage() {
 
       {/* Vehicle Edit Form Card */}
       <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-8">
-        
+
         {/* ================= SECTION 1: CORE VEHICLE INFORMATION ================= */}
         <section className="space-y-4">
           <div>
@@ -337,9 +340,8 @@ export default function EditVehiclePage() {
                   if (errors.registrationNumber) setErrors({ ...errors, registrationNumber: undefined });
                 }}
                 placeholder="e.g. KL01AB1234"
-                className={`h-10 bg-input border-border font-mono text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${
-                  errors.registrationNumber ? "border-primary ring-1 ring-primary" : ""
-                }`}
+                className={`h-10 bg-input border-border font-mono text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${errors.registrationNumber ? "border-primary ring-1 ring-primary" : ""
+                  }`}
               />
               {errors.registrationNumber && (
                 <p className="text-[11px] text-primary">{errors.registrationNumber}</p>
@@ -378,9 +380,8 @@ export default function EditVehiclePage() {
                   if (errors.brand) setErrors({ ...errors, brand: undefined });
                 }}
                 placeholder="e.g. BMW, Toyota, Honda"
-                className={`h-10 bg-input border-border text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${
-                  errors.brand ? "border-primary ring-1 ring-primary" : ""
-                }`}
+                className={`h-10 bg-input border-border text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${errors.brand ? "border-primary ring-1 ring-primary" : ""
+                  }`}
               />
               {errors.brand && <p className="text-[11px] text-primary">{errors.brand}</p>}
             </div>
@@ -399,9 +400,8 @@ export default function EditVehiclePage() {
                   if (errors.model) setErrors({ ...errors, model: undefined });
                 }}
                 placeholder="e.g. 320d, Fortuner, Civic"
-                className={`h-10 bg-input border-border text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${
-                  errors.model ? "border-primary ring-1 ring-primary" : ""
-                }`}
+                className={`h-10 bg-input border-border text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${errors.model ? "border-primary ring-1 ring-primary" : ""
+                  }`}
               />
               {errors.model && <p className="text-[11px] text-primary">{errors.model}</p>}
             </div>
@@ -425,9 +425,8 @@ export default function EditVehiclePage() {
                   setYear(Number(e.target.value));
                   if (errors.year) setErrors({ ...errors, year: undefined });
                 }}
-                className={`h-10 bg-input border-border text-xs text-foreground focus-visible:ring-1 focus-visible:ring-primary ${
-                  errors.year ? "border-primary ring-1 ring-primary" : ""
-                }`}
+                className={`h-10 bg-input border-border text-xs text-foreground focus-visible:ring-1 focus-visible:ring-primary ${errors.year ? "border-primary ring-1 ring-primary" : ""
+                  }`}
               />
               {errors.year && <p className="text-[11px] text-primary">{errors.year}</p>}
             </div>
@@ -471,9 +470,8 @@ export default function EditVehiclePage() {
                   if (errors.color) setErrors({ ...errors, color: undefined });
                 }}
                 placeholder="e.g. Alpine White, Phantom Black"
-                className={`h-10 bg-input border-border text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${
-                  errors.color ? "border-primary ring-1 ring-primary" : ""
-                }`}
+                className={`h-10 bg-input border-border text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${errors.color ? "border-primary ring-1 ring-primary" : ""
+                  }`}
               />
               {errors.color && <p className="text-[11px] text-primary">{errors.color}</p>}
             </div>
@@ -496,7 +494,7 @@ export default function EditVehiclePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
-            
+
             {/* 1. Vehicle Photograph */}
             <div className="bg-secondary/40 border border-border rounded-xl p-4 flex flex-col justify-between space-y-3">
               <div className="flex items-center justify-between">
@@ -581,11 +579,12 @@ export default function EditVehiclePage() {
 
               {/* Preview Window */}
               <div className="h-36 w-full rounded-lg bg-input border border-border/80 overflow-hidden relative flex items-center justify-center">
+
                 {insurancePreview || currentInsuranceImage ? (
-                  <img
+                  <iframe
                     src={insurancePreview || currentInsuranceImage}
-                    alt="Insurance certificate"
-                    className="w-full h-full object-cover object-center"
+                    title="Insurance certificate preview"
+                    className="w-full h-full border-0"
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center text-muted-foreground space-y-1">
@@ -593,6 +592,8 @@ export default function EditVehiclePage() {
                     <span className="text-[10px]">No certificate uploaded</span>
                   </div>
                 )}
+
+              
               </div>
 
               {/* Upload Action */}
@@ -646,11 +647,12 @@ export default function EditVehiclePage() {
 
               {/* Preview Window */}
               <div className="h-36 w-full rounded-lg bg-input border border-border/80 overflow-hidden relative flex items-center justify-center">
+
                 {pucPreview || currentPucImage ? (
-                  <img
+                  <iframe
                     src={pucPreview || currentPucImage}
-                    alt="PUC certificate"
-                    className="w-full h-full object-cover object-center"
+                    title="PUC certificate preview"
+                    className="w-full h-full border-0"
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center text-muted-foreground space-y-1">
@@ -658,6 +660,8 @@ export default function EditVehiclePage() {
                     <span className="text-[10px]">No certificate uploaded</span>
                   </div>
                 )}
+
+              
               </div>
 
               {/* Upload Action */}

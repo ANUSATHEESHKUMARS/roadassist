@@ -2,22 +2,23 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import type{ ServiceItem } from "@/types/landing";
+import type { MediaResponseData } from "@/types/media";
 
 interface ServiceCardProps {
   service: ServiceItem;
+  media? : MediaResponseData
 }
 
-export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
+export const ServiceCard: React.FC<ServiceCardProps> = ({ service , media}) => {
   return (
     <div
       className={`group relative rounded-2xl overflow-hidden border border-border bg-card shadow-sm hover:border-border/80 transition-all duration-300 flex flex-col justify-between ${
         service.isFeatured ? "md:col-span-2 md:row-span-2 min-h-[380px]" : "min-h-[280px]"
       }`}
     >
-      {/* Background Image Managed by CMS */}
       <div className="absolute inset-0 z-0">
         <img
-          src={service.imageUrl}
+          src={media?.url ?? service.imageUrl}
           alt={service.title}
           loading="lazy"
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 brightness-[0.38] group-hover:brightness-[0.45]"

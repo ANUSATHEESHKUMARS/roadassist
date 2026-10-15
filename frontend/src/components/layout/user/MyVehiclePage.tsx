@@ -32,12 +32,12 @@ export default function MyVehiclesPage() {
       console.log("FIRST VEHICLE:", response.vehicles[0]);
 
     } catch (error: any) {
-  console.error("FAILED TO FETCH VEHICLES");
-  console.error("STATUS:", error.response?.status);
-  console.error("DATA:", error.response?.data);
-  console.error("MESSAGE:", error.message);
-  console.error("FULL ERROR:", error);
-} finally {
+      console.error("FAILED TO FETCH VEHICLES");
+      console.error("STATUS:", error.response?.status);
+      console.error("DATA:", error.response?.data);
+      console.error("MESSAGE:", error.message);
+      console.error("FULL ERROR:", error);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -49,7 +49,6 @@ export default function MyVehiclesPage() {
   return (
     <div className="min-h-full bg-background text-foreground space-y-6">
 
-      {/* Breadcrumb */}
       <Breadcrumb
         items={[
           {
@@ -58,7 +57,6 @@ export default function MyVehiclesPage() {
         ]}
       />
 
-      {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           My Vehicles
@@ -69,21 +67,18 @@ export default function MyVehiclesPage() {
         </p>
       </div>
 
-      {/* Loading */}
       {isLoading && (
         <div className="text-sm text-muted-foreground">
           Loading vehicles...
         </div>
       )}
 
-      {/* Error */}
       {!isLoading && error && (
         <div className="text-sm text-primary">
           {error}
         </div>
       )}
 
-      {/* Vehicles */}
       {!isLoading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
@@ -95,7 +90,6 @@ export default function MyVehiclesPage() {
             />
           ))}
 
-          {/* Add New Vehicle */}
           <AddVehicleCard to="/user/vehicles/add" />
 
         </div>

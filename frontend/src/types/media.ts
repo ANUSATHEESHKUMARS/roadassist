@@ -1,10 +1,14 @@
 export type MediaSection =
   | "hero"
-  | "about"
   | "services"
+  | "how-it-works"
+  | "vehicles"
+  | "why-roadassist"
+  | "membership"
   | "login"
-  | "register";
+  | "register"
 
+  
 export interface MediaResponseData {
   id: string;
   originalName: string;

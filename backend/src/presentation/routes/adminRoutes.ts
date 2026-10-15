@@ -16,3 +16,4 @@ adminRouter.get('/media',auth , authorizeRoles('admin'),asyncHandler(uploadMedia
 adminRouter.delete('/media/:id' , auth, authorizeRoles("admin") , asyncHandler(uploadMediaController.handleDelete))
 
 export default adminRouter
+

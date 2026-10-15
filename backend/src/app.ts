@@ -7,6 +7,8 @@ import vehilceRouter from './presentation/routes/vehicleRoutes.js'
 import cors from 'cors'
 import adminRouter from './presentation/routes/adminRoutes.js'
 import superadminRouter from './presentation/routes/superAdminRoutes.js'
+import mediaRouter from './presentation/routes/mediaRoutes.js'
+import mechanicRouter from './presentation/routes/mechanicRoutes.js'
 
 const app = express()
 
@@ -36,9 +38,11 @@ app.use('/api/admin' , adminRouter)
 app.use('/api/vehicle' ,vehilceRouter )
     
 
-app.use('/api/superadmin' , superadminRouter
+app.use('/api/superadmin' , superadminRouter)
 
-)
+app.use('/api/media',mediaRouter )
+
+app.use('/api/mechanic-application',mechanicRouter )
 
 app.use(errorHandlingMiddleware)
 

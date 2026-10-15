@@ -29,3 +29,11 @@ export const deleteMedia = async (id : string) => {
 
   return response.data
 }
+
+
+export const getPublicMedia = async () => {
+
+    const response = await apiClient.get("/media");
+    
+    return response.data;
+};

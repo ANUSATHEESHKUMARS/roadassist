@@ -3,19 +3,21 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Activity } from "lucide-react";
 import type { HeroData } from "@/types/landing";
 import { DynamicMedia } from "./DynamicMedia";
+import type { MediaResponseData } from "@/types/media";
 
 interface HeroSectionProps {
   data: HeroData;
+  media?:MediaResponseData
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ data }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ data , media}) => {
   return (
     <section className="relative min-h-[92vh] lg:min-h-screen w-full flex items-center justify-center overflow-hidden bg-background pt-20">
-      {/* Background Dynamic Media with Cinematic Overlays */}
+     
       <div className="absolute inset-0 z-0">
         <DynamicMedia
-          type={data.mediaType}
-          src={data.mediaUrl}
+          type={media?.mediaType ?? data.mediaType}
+          src={media?.url ?? data.mediaType}
           poster={data.posterUrl}
           alt="RoadAssist dynamic background"
           className="w-full h-full object-cover brightness-[0.35] scale-105 transform motion-safe:animate-subtle-zoom"

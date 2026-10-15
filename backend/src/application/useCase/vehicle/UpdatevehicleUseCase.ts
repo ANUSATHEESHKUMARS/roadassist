@@ -28,25 +28,27 @@ export class UpdateVehicleUseCase implements IUpdateVehicelUseCase {
         let insuranceCertificateImageUrl = vehicle.insuranceCertificateImage;
         let pucCertificateImageUrl = vehicle.pucCertificateImage;
 
-        // Upload new vehicle image
         if (files.vehicleImage) {
             vehicleImageUrl = await this.fileStoregeService.upload(
                 files.vehicleImage.buffer,
-                "roadassist/vehicles"
+                "roadassist/vehicles",
+                files.vehicleImage.mimetype
             );
         }
 
         if (files.insuranceCertificateImage) {
             insuranceCertificateImageUrl = await this.fileStoregeService.upload(
                 files.insuranceCertificateImage.buffer,
-                "roadassist/vehicles/insurance"
+                "roadassist/vehicles/insurance",
+                files.insuranceCertificateImage.mimetype
             );
         }
 
         if (files.pucCertificateImage) {
             pucCertificateImageUrl = await this.fileStoregeService.upload(
                 files.pucCertificateImage.buffer,
-                "roadassist/vehicles/puc"
+                "roadassist/vehicles/puc",
+                files.pucCertificateImage.mimetype
             );
         }
 

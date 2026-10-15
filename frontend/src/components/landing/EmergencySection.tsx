@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { AlertCircle, ShieldAlert, ArrowRight } from "lucide-react";
 import type { EmergencySectionData } from "@/types/landing";
 import { DynamicMedia } from "./DynamicMedia";
+import type { MediaResponseData } from "@/types/media";
 
 interface EmergencySectionProps {
   data: EmergencySectionData;
+  media?: MediaResponseData
 }
 
-export const EmergencySection: React.FC<EmergencySectionProps> = ({ data }) => {
+export const EmergencySection: React.FC<EmergencySectionProps> = ({ data , media}) => {
   return (
     <section id="emergency" className="relative py-24 overflow-hidden border-y border-border">
       {/* Background Dynamic Media */}

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import { mockLandingData } from "@/data/landinData";
 import type { LandingPageData } from "@/types/landing";
 
-// Section Components
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { ServicesSection } from "@/components/landing/ServicesSection";
@@ -14,46 +14,106 @@ import { PremiumSection } from "@/components/landing/PremiumSection";
 import { FinalCTASection } from "@/components/landing/FinalCtASection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 
-export default function LandingPage() {
-  // Stored in local state, ready for:
-  // useEffect(() => { apiClient.get("/landing").then(res => setLandingData(res.data)); }, []);
-  const [landingData] = useState<LandingPageData>(mockLandingData);
+import type { MediaResponseData } from "@/types/media";
+import { getPublicMedia } from "@/services/mediaService";
 
+export default function LandingPage() {
+  const [landingData] =
+    useState<LandingPageData>(mockLandingData);
+
+  const [mediaList, setMediaList] =
+    useState<MediaResponseData[]>([]);
+
+  useEffect(() => {
+    const loadMedia = async () => {
+      try {
+        const response = await getPublicMedia();
+        setMediaList(response.data);
+      } catch (error) {
+        console.error(
+          "Failed to load landing media:",
+          error
+        );
+      }
+    };
+
+    loadMedia();
+  }, []);
+
+  const heroMedia = mediaList.find(
+    (media) => media.section === "hero"
+  );
+  const servicesMedia = mediaList.find(
+    (media) => media.section === "services"
+  );
+
+  const howItWorksMedia = mediaList.find(
+    (media) => media.section === "how-it-works"
+  );
+
+  const vehiclesMedia = mediaList.find(
+    (media) => media.section === "vehicles"
+  );
+
+  const whyRoadAssistMedia = mediaList.find(
+    (media) => media.section === "why-roadassist"
+  );
+
+  const membershipMedia = mediaList.find(
+    (media) => media.section === "membership"
+  );
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground overflow-x-hidden">
-      {/* 1. Header / Navbar */}
+
       <LandingNavbar data={landingData.nav} />
 
       <main>
-        {/* 2. Hero Section */}
-        <HeroSection data={landingData.hero} />
 
-        {/* 3. Trust Strip */}
+        <HeroSection
+          data={landingData.hero}
+          media={heroMedia}
+        />
 
-        {/* 4. Services Grid */}
-        <ServicesSection data={landingData.services} />
+        <ServicesSection
+          data={landingData.services}
+          media={servicesMedia}
 
-        {/* 5. How It Works Timeline */}
-        <HowItWorksSection data={landingData.howItWorks} />
+        />
 
-        {/* 6. Vehicle Support Matrix */}
-        <VehicleSupportSection data={landingData.vehicles} />
+        <HowItWorksSection
+          data={landingData.howItWorks}
+          media={howItWorksMedia}
+        />
 
-        {/* 7. Emergency Alert Section */}
-        <EmergencySection data={landingData.emergency} />
+        <VehicleSupportSection
+          data={landingData.vehicles}
+        />
 
-        {/* 8. Value Proposition & Telemetry Stats */}
-        <WhyRoadAssistSection data={landingData.whyRoadAssist} />
+        <EmergencySection
+          data={landingData.emergency}
 
-        {/* 9. Premium Tier Showcase */}
-        <PremiumSection data={landingData.premium} />
 
-        {/* 10. Final Call To Action */}
-        <FinalCTASection data={landingData.finalCta} />
+        />
+
+        <WhyRoadAssistSection
+          data={landingData.whyRoadAssist}
+        />
+
+        <PremiumSection
+          data={landingData.premium}
+          media={membershipMedia}
+
+        />
+
+        <FinalCTASection
+          data={landingData.finalCta}
+
+        />
+
       </main>
 
-      {/* 11. Footer */}
       <LandingFooter data={landingData.footer} />
+
     </div>
   );
 }

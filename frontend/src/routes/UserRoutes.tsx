@@ -17,38 +17,39 @@ export const userRoutes: RouteObject[] = [
       {
         element: <RoleRoute allowedRoles={["user"]} />,
         children: [
+
+          {
+            path: "/user",
+            element: <UserLandingPage />,
+          },
+
           {
             path: "/user",
             element: <UserLayout />,
             children: [
               {
-                index: true,
-                element: <UserLandingPage />,
-              },
-
-              {
                 path: "vehicles",
                 element: <MyVehiclesPage />,
               },
-
               {
                 path: "vehicles/add",
                 element: <AddVehiclePage />,
               },
-
               {
                 path: "vehicles/:vehicleId",
                 element: <VehicleDetailsPage />,
               },
-
               {
                 path: "vehicles/:vehicleId/edit",
                 element: <EditVehiclePage />,
               },
             ],
           },
+
         ],
       },
     ],
   },
 ];
+
+

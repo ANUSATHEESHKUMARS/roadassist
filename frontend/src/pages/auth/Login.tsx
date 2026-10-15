@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 import {
@@ -21,10 +21,17 @@ import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
 import apiClient from "@/services/apiClient";
+import type { MediaResponseData } from "@/types/media";
+
+
+import { getPublicMedia } from "@/services/mediaService";
+
+
+
 
 export default function Login() {
 
-  const {showToast} = useToast()
+  const { showToast } = useToast()
 
 
   const [email, setEmail] = useState<string>("");
@@ -33,11 +40,33 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+
+  const [loginMedia, setLoginMedia] = useState<MediaResponseData | undefined>();
   const setUser = useAuthStore((state) => state.setUser);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const loadLoginMedia = async () => {
+      try {
+        const response = await getPublicMedia();
+
+        const media = response.data.find(
+          (item: MediaResponseData) => item.section === "login"
+        );
+
+        setLoginMedia(media);
+      } catch (error) {
+        console.error("Failed to load login media:", error);
+      }
+    };
+
+    loadLoginMedia();
+  }, []);
+
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
 
     if (isSubmitting) {
       return;
@@ -50,83 +79,86 @@ export default function Login() {
         password,
       });
       console.log("login succes ayyii", response);
- const userResponse = await getCurrentUser();
-const user = userResponse.data;
+      const userResponse = await getCurrentUser();
+      const user = userResponse.data;
 
-console.log("LOGIN USER:", user);
-console.log("LOGIN ROLE:", user.role);
+      console.log("LOGIN USER:", user);
+      console.log("LOGIN ROLE:", user.role);
 
-setUser(user);
+      setUser(user);
 
-showToast("Login successful", "success");
+      showToast("Login successful", "success");
 
-if (user.role === "superadmin") {
-    console.log("GOING TO SUPER ADMIN");
-    navigate("/superadmin/admins", { replace: true });
-} else if (user.role === "admin") {
-    console.log("GOING TO ADMIN");
-    navigate("/admin/users", { replace: true });
-} else {
-    console.log("GOING TO USER");
-    navigate("/user", { replace: true });
-}
+      if (user.role === "superadmin") {
+        console.log("GOING TO SUPER ADMIN");
+        navigate("/superadmin/admins", { replace: true });
+      } else if (user.role === "admin") {
+        console.log("GOING TO ADMIN");
+        navigate("/admin/users", { replace: true });
+      } else {
+        console.log("GOING TO USER");
+        navigate("/user", { replace: true });
+      }
     } catch (error: any) {
       console.log("login failed");
       console.log(error.response?.status);
       console.log("error", error.response?.data);
 
-       showToast(
-    "Login failed. Please check your credentials.",
-    "error"
-  );
+      showToast(
+        "Login failed. Please check your credentials.",
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
-const handleGoogleLogin = async (response: CredentialResponse) => {
-  try {
-    const idToken = response.credential;
+  const handleGoogleLogin = async (response: CredentialResponse) => {
+    try {
+      const idToken = response.credential;
 
-    if (!idToken) {
-      console.log("Google ID token not received");
-      return;
+      if (!idToken) {
+        console.log("Google ID token not received");
+        return;
+      }
+
+      const result = await apiClient.post("/auth/google", {
+        idToken,
+      });
+
+      console.log("Google login successful:", result.data);
+
+      const userResponse = await getCurrentUser();
+      const user = userResponse.data;
+
+      console.log("GOOGLE USER:", user);
+      console.log("GOOGLE ROLE:", user.role);
+
+      setUser(user);
+
+      if (user.role === "superadmin") {
+        navigate("/superadmin/admins", { replace: true });
+      } else if (user.role === "admin") {
+        navigate("/admin/users", { replace: true });
+      } else {
+        navigate("/user", { replace: true });
+      }
+
+    } catch (error: any) {
+      console.log("Google login failed");
+      console.log(error.response?.status);
+      console.log(error.response?.data);
     }
-
-    const result = await apiClient.post("/auth/google", {
-      idToken,
-    });
-
-    console.log("Google login successful:", result.data);
-
-    const userResponse = await getCurrentUser();
-    const user = userResponse.data;
-
-    console.log("GOOGLE USER:", user);
-    console.log("GOOGLE ROLE:", user.role);
-
-    setUser(user);
-
-    if (user.role === "superadmin") {
-      navigate("/superadmin/admins", { replace: true });
-    } else if (user.role === "admin") {
-      navigate("/admin/users", { replace: true });
-    } else {
-      navigate("/user", { replace: true });
-    }
-
-  } catch (error: any) {
-    console.log("Google login failed");
-    console.log(error.response?.status);
-    console.log(error.response?.data);
-  }
-};
+  };
 
   return (
     <div className="relative min-h-screen flex flex-col justify-between bg-[#060709] text-white selection:bg-[#ff3b30] selection:text-white font-sans overflow-x-hidden">
       {/* ================= FULL-PAGE AUTOMOTIVE BACKGROUND & OVERLAYS ================= */}
       <div
         className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none z-0"
-        style={{ backgroundImage: `url('/asset/loginpage.jpg')` }}
+        style={{
+          backgroundImage: `url(${loginMedia?.url ?? "/asset/loginpage.jpg"
+            })`,
+        }}
       />
       {/* Layered cinematic overlays: dark scrim + vignette + radial spotlight */}
       <div className="fixed inset-0 bg-gradient-to-r from-[#060709]/95 via-[#060709]/85 to-[#060709]/95 lg:from-[#060709]/90 lg:via-[#060709]/70 lg:to-[#060709]/95 pointer-events-none z-0" />
@@ -158,7 +190,7 @@ const handleGoogleLogin = async (response: CredentialResponse) => {
       {/* ================= MAIN CONTENT ================= */}
       <main className="relative z-10 flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-12 py-8 lg:py-12">
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-          
+
           {/* ================= LEFT SECTION (BRANDING / MARKETING) ================= */}
           <div className="lg:col-span-6 flex flex-col justify-center space-y-8 text-left max-w-xl mx-auto lg:mx-0">
             {/* Tagline Badge */}

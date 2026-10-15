@@ -40,6 +40,11 @@ import { UploadMediaUseCase } from "../application/useCase/media/UploadMediaUseC
 import { UploadMediaController } from "../presentation/controllers/UploadMediaController.js";
 import { GetMediaUseCase } from "../application/useCase/admin/GetMediaUseCase.js";
 import { DeleteMediaUseCase } from "../application/useCase/admin/DeleteMediaUseCase.js";
+import { MongoMechanicApplicaitonRepository } from "../infrastructure/repositories/MongoMechanicApplicationRepository.js";
+import { MechanicApplicationValidator } from "../application/validators/MechanicApplicationValidaor.js";
+import { SaveMechanicDraftUseCase } from "../application/useCase/mechanic/SaveMechanicApplicaitonDraftuseCase.js";
+import { MechanicApplicationController } from "../presentation/controllers/mechanic/SaveMechanicDraftController.js";
+import { SubmitMechanicApplicationUseCase } from "../application/useCase/mechanic/SubmitMechanicApplication.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -150,16 +155,36 @@ const uploadMediaUseCase = new UploadMediaUseCase(
     s3StorageService
 )
 
-const getMediaUseCase = new GetMediaUseCase(mediaRepository,s3StorageService)
+const getMediaUseCase = new GetMediaUseCase(mediaRepository, s3StorageService)
 
-const deleteMediaUseCase = new DeleteMediaUseCase(mediaRepository,s3StorageService)
-
-
-export const uploadMediaController = new UploadMediaController(uploadMediaUseCase,getMediaUseCase,deleteMediaUseCase)
+const deleteMediaUseCase = new DeleteMediaUseCase(mediaRepository, s3StorageService)
 
 
 
-const refreshTokenUseCase = new RefreshTokenUseCase(userRepository , tokenService)
+
+//mechanic 
+
+const mechanicApplicationRepository = new MongoMechanicApplicaitonRepository()
+
+const mechanicApplicationValidator = new MechanicApplicationValidator()
+
+const saveMechanicDraftUseCase = new SaveMechanicDraftUseCase(
+    mechanicApplicationRepository,
+    mechanicApplicationValidator
+)
+
+
+const submitMechanicApplicationUseCase = new SubmitMechanicApplicationUseCase(mechanicApplicationRepository, mechanicApplicationValidator)
+
+export const mechanicApplicationController = new MechanicApplicationController(saveMechanicDraftUseCase,submitMechanicApplicationUseCase)
+
+
+
+export const uploadMediaController = new UploadMediaController(uploadMediaUseCase, getMediaUseCase, deleteMediaUseCase)
+
+
+
+const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, tokenService)
 export const authcontroller = new AuthController(registerUserUseCase,
     loginUserUseCase,
     googleLoginUseCase,

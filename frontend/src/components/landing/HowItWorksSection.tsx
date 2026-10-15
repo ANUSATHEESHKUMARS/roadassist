@@ -1,11 +1,13 @@
 import React from "react";
 import type{ LandingPageData } from "@/types/landing";
+import type { MediaResponseData } from "@/types/media";
 
 interface HowItWorksProps {
   data: LandingPageData["howItWorks"];
+  media?:MediaResponseData
 }
 
-export const HowItWorksSection: React.FC<HowItWorksProps> = ({ data }) => {
+export const HowItWorksSection: React.FC<HowItWorksProps> = ({ data, media }) => {
   return (
     <section id="how-it-works" className="py-24 bg-card/40 border-y border-border/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

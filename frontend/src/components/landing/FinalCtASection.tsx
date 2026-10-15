@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import type { FinalCTAData } from "@/types/landing";
 import { DynamicMedia } from "./DynamicMedia";
+import type { MediaResponseData } from "@/types/media";
 
 interface FinalCTAProps {
-  data: FinalCTAData;
+  data: FinalCTAData
+  media?:MediaResponseData
 }
 
-export const FinalCTASection: React.FC<FinalCTAProps> = ({ data }) => {
+export const FinalCTASection: React.FC<FinalCTAProps> = ({ data, media }) => {
   return (
     <section className="relative py-28 overflow-hidden border-t border-border">
       {/* Background Media */}

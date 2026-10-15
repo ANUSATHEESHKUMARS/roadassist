@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Wrench, Menu, X, ArrowRight } from "lucide-react";
-import type{ LandingPageData } from "@/types/landing";
+import type { LandingPageData } from "@/types/landing";
+import { useAuthStore } from "@/store/authStore";
+
 
 interface LandingNavbarProps {
   data: LandingPageData["nav"];
@@ -9,6 +11,7 @@ interface LandingNavbarProps {
 
 export const LandingNavbar: React.FC<LandingNavbarProps> = ({ data }) => {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const user = useAuthStore((state) => state.user)
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -21,11 +24,10 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ data }) => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-background/85 backdrop-blur-md border-b border-border/80 shadow-2xl py-3.5"
-          : "bg-transparent py-5"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+        ? "bg-background/85 backdrop-blur-md border-b border-border/80 shadow-2xl py-3.5"
+        : "bg-transparent py-5"
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
@@ -56,21 +58,33 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ data }) => {
           ))}
         </nav>
 
-        {/* Right CTA / Auth Action */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            to={data.loginButton.href}
-            className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3.5 py-2 transition-colors"
-          >
-            {data.loginButton.label}
-          </Link>
-          <Link
-            to={data.ctaButton.href}
-            className="h-9 px-4 rounded-xl bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md hover:shadow-primary/20"
-          >
-            <span>{data.ctaButton.label}</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          {!user ? (
+            <>
+              <Link
+                to={data.loginButton.href}
+                className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3.5 py-2 transition-colors"
+              >
+                {data.loginButton.label}
+              </Link>
+
+              <Link
+                to={data.ctaButton.href}
+                className="h-9 px-4 rounded-xl bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md hover:shadow-primary/20"
+              >
+                <span>{data.ctaButton.label}</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/user/vehicles"
+              className="h-9 px-4 rounded-xl bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold flex items-center gap-1.5 transition-all"
+            >
+              Get My vehicle
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          )}
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -98,22 +112,38 @@ export const LandingNavbar: React.FC<LandingNavbarProps> = ({ data }) => {
                 {link.label}
               </a>
             ))}
+
+
             <div className="pt-4 border-t border-border flex flex-col gap-3">
-              <Link
-                to={data.loginButton.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="h-10 rounded-xl border border-border bg-input text-foreground text-xs font-semibold flex items-center justify-center"
-              >
-                {data.loginButton.label}
-              </Link>
-              <Link
-                to={data.ctaButton.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="h-10 rounded-xl bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center gap-2"
-              >
-                <span>{data.ctaButton.label}</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              {!user ? (
+                <>
+                  <Link
+                    to={data.loginButton.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="h-10 rounded-xl border border-border bg-input text-foreground text-xs font-semibold flex items-center justify-center"
+                  >
+                    {data.loginButton.label}
+                  </Link>
+
+                  <Link
+                    to={data.ctaButton.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="h-10 rounded-xl bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center gap-2"
+                  >
+                    <span>{data.ctaButton.label}</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  to="/user/vehicles"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="h-10 rounded-xl bg-primary text-primary-foreground text-xs font-semibold flex items-center justify-center gap-2"
+                >
+                  Get my vehicles
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              )}
             </div>
           </nav>
         </div>

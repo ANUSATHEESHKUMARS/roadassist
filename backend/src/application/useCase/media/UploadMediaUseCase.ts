@@ -19,7 +19,8 @@ export class UploadMediaUseCase implements IUploadMediaUseCase {
 
         const fileKey = await this.fileStorageService.upload(
             dto.buffer,
-            `landing/${dto.section}`
+            `landing/${dto.section}`,
+            dto.mimeType
         );
 
         try {
@@ -51,3 +52,4 @@ export class UploadMediaUseCase implements IUploadMediaUseCase {
         }
     }
 }
+

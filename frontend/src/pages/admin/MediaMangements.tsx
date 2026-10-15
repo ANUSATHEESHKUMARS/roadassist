@@ -48,10 +48,7 @@ const SECTION_OPTIONS: {
             label: "Hero Section",
             value: "hero",
         },
-        {
-            label: "About Section",
-            value: "about",
-        },
+        
         {
             label: "Services Section",
             value: "services",
@@ -64,6 +61,12 @@ const SECTION_OPTIONS: {
             label: "Register Background",
             value: "register",
         },
+        
+        {
+            label:"premium / Membership",
+            value : "membership"
+        }
+
     ];
 
 

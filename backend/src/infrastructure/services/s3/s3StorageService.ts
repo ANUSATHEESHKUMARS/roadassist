@@ -26,16 +26,19 @@ export class S3StorageService implements IFileStorageService {
 
     async upload(
         file: Buffer,
-        folder: string
+        folder: string,
+        contentType:string
     ): Promise<string> {
 
         const key = `${folder}/${Date.now()}`;
 
         const command = new PutObjectCommand({
-            Bucket: s3Config.bucketName,
-            Key: key,
-            Body: file
-        });
+        Bucket: s3Config.bucketName,
+        Key: key,
+        Body: file,
+        ContentType: contentType,
+        ContentDisposition: "inline"
+    });
 
         await this.s3Client.send(command);
 
@@ -72,3 +75,4 @@ export class S3StorageService implements IFileStorageService {
         await this.s3Client.send(command);
     }
 }
+

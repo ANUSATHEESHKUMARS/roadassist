@@ -2,7 +2,8 @@ export interface IFileStorageService {
 
     upload(
         file: Buffer,
-        folder: string
+        folder: string,
+        contentType:string
     ): Promise<string>;
 
     getUrl(

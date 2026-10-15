@@ -15,6 +15,7 @@ const fileFilter: multer.Options["fileFilter"] = (
         "video/mp4",
         "video/webm",
         "video/quicktime",
+        "application/pdf"
     ];
 
     if (allowedTypes.includes(file.mimetype)) {
