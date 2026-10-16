@@ -13,7 +13,7 @@ export class SaveMechanicDraftUseCase
     constructor(
         private readonly mechanicApplicationRepository: IMechanicApplicationRepository,
         private readonly mechanicApplicationValidator: MechanicApplicationValidator
-    ) {}
+    ) { }
 
     async execute(
         userId: string,
@@ -86,6 +86,10 @@ export class SaveMechanicDraftUseCase
                     dto.serviceAddress ??
                     existingApplication.serviceAddress,
 
+                pincode:
+                    dto.pincode ??
+                    existingApplication.pincode,
+
                 latitude:
                     dto.latitude ?? existingApplication.latitude,
 
@@ -97,11 +101,11 @@ export class SaveMechanicDraftUseCase
                     existingApplication.serviceRadiusKm,
 
                 workshopName:
-                    dto.workshopName ??
+                    dto.workshopName?.trim() ||
                     existingApplication.workshopName,
 
                 workshopAddress:
-                    dto.workshopAddress ??
+                    dto.workshopAddress?.trim() ||
                     existingApplication.workshopAddress,
 
                 documents:

@@ -42,9 +42,7 @@ import { getAdmins } from "@/services/superadmin/superAdmin";
 
 export const AdminManagementPage: React.FC = () => {
 
-    // =========================
-    // STATE
-    // =========================
+ 
 
     const [admins, setAdmins] = useState<AdminUser[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -57,10 +55,7 @@ export const AdminManagementPage: React.FC = () => {
     const [pageSize, setPageSize] = useState(10);
 
 
-    // =========================
-    // FETCH ADMINS
-    // =========================
-
+ 
     const fetchAdmins = async (
         searchValue: string = search,
         page: number = currentPage,

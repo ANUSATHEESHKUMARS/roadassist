@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -38,6 +39,11 @@ const mainNavItems = [
     icon: CreditCard,
     path: "/user/payments",
   },
+  {
+    label: "Become a Mechanic",
+    icon: Wrench,
+    path: "/mechanic/onboarding",
+  },
 ];
 
 const bottomNavItems = [
@@ -56,13 +62,10 @@ const bottomNavItems = [
 export const Sidebar: React.FC = () => {
   return (
     <aside className="w-64 bg-card border-r border-border flex flex-col justify-between h-screen sticky top-0 shrink-0 select-none z-30 hidden md:flex">
-
       {/* Top Section */}
       <div>
-
         {/* Brand */}
         <div className="h-16 px-6 flex items-center gap-2.5 border-b border-border">
-
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
             <Wrench className="h-4 w-4" />
           </div>
@@ -76,12 +79,10 @@ export const Sidebar: React.FC = () => {
               Enterprise
             </span>
           </div>
-
         </div>
 
         {/* Main Navigation */}
         <nav className="p-3 space-y-1">
-
           {mainNavItems.map((item) => {
             const Icon = item.icon;
 
@@ -98,18 +99,15 @@ export const Sidebar: React.FC = () => {
                 }
               >
                 <Icon className="h-4 w-4 shrink-0" />
-
                 <span>{item.label}</span>
               </NavLink>
             );
           })}
-
         </nav>
       </div>
 
       {/* Bottom Navigation */}
       <div className="p-3 border-t border-border space-y-1">
-
         {bottomNavItems.map((item) => {
           const Icon = item.icon;
 
@@ -126,7 +124,6 @@ export const Sidebar: React.FC = () => {
               }
             >
               <Icon className="h-4 w-4 shrink-0" />
-
               <span>{item.label}</span>
             </NavLink>
           );
@@ -138,10 +135,8 @@ export const Sidebar: React.FC = () => {
           className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors text-left"
         >
           <LogOut className="h-4 w-4 shrink-0" />
-
           <span>Logout</span>
         </button>
-
       </div>
     </aside>
   );

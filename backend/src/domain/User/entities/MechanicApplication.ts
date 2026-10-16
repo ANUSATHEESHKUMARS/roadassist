@@ -35,42 +35,39 @@ export interface MechanicDocument {
 }
 
 
-
 export interface MechanicApplicationProps {
-    id?: string
-    userId: string
+  id?: string;
+  userId: string;
 
-    profilePhotoKey?: string
-    experienceYears?: number
-    specialization?: string[]
-    supportedVehicleTypes?: SupportedVehicleType[]
-    serviceOffered?: string[]
-    professionalDescription?: string
+  profilePhotoKey?: string;
+  experienceYears?: number;
+  specialization?: string[];
+  supportedVehicleTypes?: SupportedVehicleType[];
+  serviceOffered?: string[];
+  professionalDescription?: string;
 
+  serviceModel?: MechanicServiceModel;
+  serviceAddress?: string;
+  pincode?: string; 
+  latitude?: number;
+  longitude?: number;
+  serviceRadiusKm?: number;
 
-    serviceModel?: MechanicServiceModel
-    serviceAddress?: string
-    latitude?: number
-    longitude?: number
-    serviceRadiusKm?: number
+  workshopName?: string;
+  workshopAddress?: string;
 
-    workshopName?: string
-    workshopAddress?: string
+  documents?: MechanicDocument[];
 
+  status: MechanicApplicationStatus;
 
-    documents?: MechanicDocument[]
+  submittedAt?: Date;
+  reviewedBy?: string;
+  reviewedAt?: Date;
+  reviewReason?: string;
 
-    status: MechanicApplicationStatus
-
-    submittedAt?: Date
-    reviewedBy?: string
-    reviewedAt?: Date
-    reviewReason?: string
-
-    createdAt?: Date;
-    updatedAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
-
 
 
 export class MechanicApplication {
@@ -125,10 +122,20 @@ export class MechanicApplication {
     get workshopAddress(): string | undefined {
         return this.props.workshopAddress
     }
-    get documents(): MechanicDocument[] {
-        return (this.props.documents ?? []).map(
-            (document) => ({ ...document })
-        )
+   get documents(): MechanicDocument[] {
+    return (this.props.documents ?? []).map((document) => ({
+        documentType: document.documentType,
+        fileKey: document.fileKey,
+        originalName: document.originalName,
+        mimeType: document.mimeType,
+        verificationStatus: document.verificationStatus,
+        ...(document.rejectionReason !== undefined
+            ? { rejectionReason: document.rejectionReason }
+            : {}),
+    }));
+}
+    get pincode(): string | undefined{
+        return this.props.pincode
     }
     get status(): MechanicApplicationStatus {
         return this.props.status

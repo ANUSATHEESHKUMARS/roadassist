@@ -15,6 +15,7 @@ export interface SubmitMechanicApplicationDto {
 
     serviceModel: MechanicServiceModel;
     serviceAddress: string;
+    pincode?:string;
     latitude?: number;
     longitude?: number;
     serviceRadiusKm?: number;

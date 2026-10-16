@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { RegisterFormType } from "@/types/formType";
 import { register } from "@/services/authService";
 import { useNavigate } from "react-router-dom";
@@ -12,11 +12,31 @@ import type { CredentialResponse } from "@react-oauth/google";
 import apiClient from "@/services/apiClient";
 import { getApiErrorMessage } from "@/api/apiError";
 import { useToast } from "@/components/ui/toast/ToastProvider";
+import { getPublicMedia } from "@/services/mediaService";
+import type { MediaResponseData } from "@/types/media";
+
+
 export default function Register() {
   const navigate = useNavigate();
   const { showToast } = useToast()
   const [showPassword, setShowpasword] = useState(false);
   const [apiError, setApiError] = useState("");
+
+
+  const [registerMedia, setRegisterMedia] = useState<MediaResponseData | null>(null)
+
+  useEffect(() => {
+    const loadRegisterMedia = async () => {
+      try {
+        const response = await getPublicMedia()
+        const media = response.data.find((item: MediaResponseData) => item.section == "register");
+        setRegisterMedia(media ?? null)
+      } catch (error) {
+        console.error("Failed to load register background:", error)
+      }
+    }
+    loadRegisterMedia()
+  })
 
   const [role, setRole] = useState<"user" | "admin">("user");
 
@@ -128,12 +148,33 @@ export default function Register() {
   return (
     <div className="relative min-h-screen w-full bg-[#060709] font-sans text-neutral-100 flex items-center justify-center p-4 sm:p-6 lg:p-12 overflow-x-hidden">
       {/* Cinematic Full-Page Automotive Background with Depth Gradients */}
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat z-0 scale-105 transform motion-safe:transition-transform motion-safe:duration-1000"
-        style={{
-          backgroundImage: `url('/asset/repair.jpg')`,
-        }}
-      />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        {registerMedia?.mediaType === "video" ? (
+          <video
+            key={registerMedia.url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/asset/repair.jpg"
+            className="h-full w-full object-cover scale-105"
+          >
+            <source src={registerMedia.url} type={registerMedia.mimeType} />
+          </video>
+        ) : registerMedia?.mediaType === "image" ? (
+          <img
+            src={registerMedia.url}
+            alt="RoadAssist registration background"
+            className="h-full w-full object-cover scale-105"
+          />
+        ) : (
+          <div
+            className="h-full w-full bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: "url('/asset/repair.jpg')" }}
+          />
+        )}
+      </div>
+      
       {/* High-Contrast Dual Darkness Overlay */}
       <div className="fixed inset-0 bg-[#060709]/85 backdrop-blur-[2px] z-0" />
       <div className="fixed inset-0 bg-gradient-to-t from-[#060709] via-[#060709]/60 to-transparent z-0" />
@@ -221,8 +262,8 @@ export default function Register() {
                   type="button"
                   onClick={() => setRole("user")}
                   className={`flex flex-col text-left p-3.5 rounded-xl border transition-all duration-200 ${role === "user"
-                      ? "border-[#ff3b30] bg-[#ff3b30]/10 shadow-[0_0_15px_rgba(255,59,48,0.15)] ring-1 ring-[#ff3b30]"
-                      : "border-[#1a1c24] bg-[#060709]/60 hover:bg-[#1a1c24]/50 text-[#a1a1aa]"
+                    ? "border-[#ff3b30] bg-[#ff3b30]/10 shadow-[0_0_15px_rgba(255,59,48,0.15)] ring-1 ring-[#ff3b30]"
+                    : "border-[#1a1c24] bg-[#060709]/60 hover:bg-[#1a1c24]/50 text-[#a1a1aa]"
                     }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
@@ -241,8 +282,8 @@ export default function Register() {
                   type="button"
                   onClick={() => setRole("admin")}
                   className={`flex flex-col text-left p-3.5 rounded-xl border transition-all duration-200 ${role === "admin"
-                      ? "border-[#ff3b30] bg-[#ff3b30]/10 shadow-[0_0_15px_rgba(255,59,48,0.15)] ring-1 ring-[#ff3b30]"
-                      : "border-[#1a1c24] bg-[#060709]/60 hover:bg-[#1a1c24]/50 text-[#a1a1aa]"
+                    ? "border-[#ff3b30] bg-[#ff3b30]/10 shadow-[0_0_15px_rgba(255,59,48,0.15)] ring-1 ring-[#ff3b30]"
+                    : "border-[#1a1c24] bg-[#060709]/60 hover:bg-[#1a1c24]/50 text-[#a1a1aa]"
                     }`}
                 >
                   <div className="flex items-center gap-2 mb-1">

@@ -28,6 +28,10 @@ export default function LandingPage() {
     const loadMedia = async () => {
       try {
         const response = await getPublicMedia();
+        console.log(
+          "ADMIN MEDIA RECORDS:",
+          JSON.stringify(response.data, null, 2)
+        );
         setMediaList(response.data);
       } catch (error) {
         console.error(
@@ -87,6 +91,8 @@ export default function LandingPage() {
 
         <VehicleSupportSection
           data={landingData.vehicles}
+          media={vehiclesMedia}
+          
         />
 
         <EmergencySection

@@ -30,6 +30,11 @@ export class SubmitMechanicApplicationUseCase
             );
         }
 
+        console.log(
+            "Saved application documents:",
+            JSON.stringify(application.documents, null, 2)
+        );
+
         if (!application.id) {
             throw new BadRequest(
                 "Mechanic application ID is missing.",
@@ -64,7 +69,17 @@ export class SubmitMechanicApplicationUseCase
             serviceOffered: application.serviceOffered,
             serviceModel: serviceModel as MechanicServiceModel,
             serviceAddress: application.serviceAddress ?? "",
-            documents: application.documents,
+            pincode: application.pincode ?? "",
+            documents: application.documents.map((document) => ({
+                documentType: document.documentType,
+                fileKey: document.fileKey,
+                originalName: document.originalName,
+                mimeType: document.mimeType,
+                verificationStatus: document.verificationStatus,
+                ...(document.rejectionReason !== undefined
+                    ? { rejectionReason: document.rejectionReason }
+                    : {}),
+            })),
 
             ...(application.professionalDescription !== undefined
                 ? {
@@ -93,6 +108,10 @@ export class SubmitMechanicApplicationUseCase
                 ? { workshopAddress: application.workshopAddress }
                 : {}),
         };
+        console.log(
+            "Documents immediately before validation:",
+            JSON.stringify(dto.documents, null, 2)
+        );
 
         this.mechanicApplicationValidator.validateSubmission(dto);
 
@@ -124,6 +143,9 @@ export class SubmitMechanicApplicationUseCase
             ...(application.serviceAddress !== undefined
                 ? { serviceAddress: application.serviceAddress }
                 : {}),
+            ...(application.pincode !== undefined
+                ? { pincode: application.pincode }
+                : {}),
 
             ...(application.latitude !== undefined
                 ? { latitude: application.latitude }
@@ -145,7 +167,16 @@ export class SubmitMechanicApplicationUseCase
                 ? { workshopAddress: application.workshopAddress }
                 : {}),
 
-            documents: application.documents,
+            documents: application.documents.map((document) => ({
+                documentType: document.documentType,
+                fileKey: document.fileKey,
+                originalName: document.originalName,
+                mimeType: document.mimeType,
+                verificationStatus: document.verificationStatus,
+                ...(document.rejectionReason !== undefined
+                    ? { rejectionReason: document.rejectionReason }
+                    : {}),
+            })),
             status: "pending",
             submittedAt: new Date(),
 

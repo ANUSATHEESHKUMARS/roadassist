@@ -1,13 +1,31 @@
 import { Router } from "express";
-import { auth, mechanicApplicationController } from "../../di/container.js";
+import {
+  auth,
+  mechanicApplicationController,
+  uploadMediaController,
+} from "../../di/container.js";
 import { asyncHandler } from "../../shared/helper/asyncHandler.js";
+import { uploadMedia } from "../middlewares/uploadMedia.js";
 
-const mechanicRouter = Router()
+const mechanicRouter = Router();
 
-mechanicRouter.patch('/draft' ,auth, asyncHandler(mechanicApplicationController.saveDraft))
-mechanicRouter.post('/submit', auth, asyncHandler(mechanicApplicationController.submitApplication))
+mechanicRouter.patch(
+  "/draft",
+  auth,
+  asyncHandler(mechanicApplicationController.saveDraft)
+);
 
+mechanicRouter.post(
+  "/submit",
+  auth,
+  asyncHandler(mechanicApplicationController.submitApplication)
+);
 
-export default mechanicRouter
+mechanicRouter.post(
+  "/media/upload",
+  auth,
+  uploadMedia.single("file"),
+  asyncHandler(uploadMediaController.handle)
+);
 
-
+export default mechanicRouter;

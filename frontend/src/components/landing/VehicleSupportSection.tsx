@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import type{ LandingPageData } from "@/types/landing";
+import type { LandingPageData } from "@/types/landing";
 import { VehicleCard } from "./VehicleCard";
-
+import type { MediaResponseData } from "@/types/media";
 interface VehicleSupportSectionProps {
   data: LandingPageData["vehicles"];
+  media?: MediaResponseData
 }
 
-export const VehicleSupportSection: React.FC<VehicleSupportSectionProps> = ({ data }) => {
+export const VehicleSupportSection: React.FC<VehicleSupportSectionProps> = ({ data, media }) => {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const currentCategory = data.categories[selectedIndex] || data.categories[0];
 
@@ -38,7 +39,7 @@ export const VehicleSupportSection: React.FC<VehicleSupportSectionProps> = ({ da
         </div>
 
         {/* Right: Large Highlight Preview Managed by CMS */}
-        <div className="lg:col-span-7 h-[420px] lg:h-[500px] rounded-2xl overflow-hidden border border-border bg-card relative shadow-2xl">
+        {/* <div className="lg:col-span-7 h-[420px] lg:h-[500px] rounded-2xl overflow-hidden border border-border bg-card relative shadow-2xl">
           <img
             src={currentCategory.imageUrl}
             alt={currentCategory.name}
@@ -57,7 +58,21 @@ export const VehicleSupportSection: React.FC<VehicleSupportSectionProps> = ({ da
               {currentCategory.description}
             </p>
           </div>
-        </div>
+        </div> */}
+
+        {media?.mediaType === "image" && media.url ? (
+          <img
+            src={media.url}
+            alt="RoadAssist vehicle support"
+            className="w-full h-full object-cover object-center transition-all duration-500 brightness-75"
+          />
+        ) : (
+          <img
+            src={currentCategory.imageUrl}
+            alt={currentCategory.name}
+            className="w-full h-full object-cover object-center transition-all duration-500 brightness-75"
+          />
+        )}
       </div>
     </section>
   );

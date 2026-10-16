@@ -44,7 +44,7 @@ import { MongoMechanicApplicaitonRepository } from "../infrastructure/repositori
 import { MechanicApplicationValidator } from "../application/validators/MechanicApplicationValidaor.js";
 import { SaveMechanicDraftUseCase } from "../application/useCase/mechanic/SaveMechanicApplicaitonDraftuseCase.js";
 import { MechanicApplicationController } from "../presentation/controllers/mechanic/SaveMechanicDraftController.js";
-import { SubmitMechanicApplicationUseCase } from "../application/useCase/mechanic/SubmitMechanicApplication.js";
+import { SubmitMechanicApplicationUseCase } from "../application/useCase/mechanic/SubmitMechanicApplicationUseCase.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -180,7 +180,7 @@ export const mechanicApplicationController = new MechanicApplicationController(s
 
 
 
-export const uploadMediaController = new UploadMediaController(uploadMediaUseCase, getMediaUseCase, deleteMediaUseCase)
+export const uploadMediaController = new UploadMediaController(uploadMediaUseCase, getMediaUseCase, deleteMediaUseCase,s3StorageService)
 
 
 

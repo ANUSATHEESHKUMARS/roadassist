@@ -34,6 +34,8 @@ export const deleteMedia = async (id : string) => {
 export const getPublicMedia = async () => {
 
     const response = await apiClient.get("/media");
+
+    console.log("PUBLIC MEDIA API RESPONSE:", response.data);
     
     return response.data;
 };

@@ -42,7 +42,7 @@ app.use('/api/superadmin' , superadminRouter)
 
 app.use('/api/media',mediaRouter )
 
-app.use('/api/mechanic-application',mechanicRouter )
+app.use('/api/mechanic',mechanicRouter )
 
 app.use(errorHandlingMiddleware)
 
