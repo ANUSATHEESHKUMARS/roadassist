@@ -5,10 +5,9 @@ import type {
   MechanicOnboardingRequest,
   SaveMechanicDraftRequest,
   OnboardingApiResponse,
-  MechanicDocumentType,
 } from "@/types/mechanic/mechanicOnboarding";
 
-
+import type{  MechanicDocumentType } from '../../types/mechanic/common'
 
 export const saveMechanicDraft = async (
   payload: SaveMechanicDraftRequest

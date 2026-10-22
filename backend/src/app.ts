@@ -9,6 +9,7 @@ import adminRouter from './presentation/routes/adminRoutes.js'
 import superadminRouter from './presentation/routes/superAdminRoutes.js'
 import mediaRouter from './presentation/routes/mediaRoutes.js'
 import mechanicRouter from './presentation/routes/mechanicRoutes.js'
+import emergencyRouter from './presentation/routes/emergencyRequestRoute.js'
 
 const app = express()
 
@@ -43,6 +44,9 @@ app.use('/api/superadmin' , superadminRouter)
 app.use('/api/media',mediaRouter )
 
 app.use('/api/mechanic',mechanicRouter )
+
+
+app.use('/api/emergency-requests',emergencyRouter)
 
 app.use(errorHandlingMiddleware)
 

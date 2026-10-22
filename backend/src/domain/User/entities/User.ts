@@ -1,3 +1,4 @@
+export type AccountStatus = "active"| "blocked"
 export class User {
     constructor(
 
@@ -8,7 +9,8 @@ export class User {
         public role: UserRole,
         public userId?: string,
         public googleId?:string,
-        public authProvider:AuthProvider = "LOCAL"
+        public authProvider:AuthProvider = "LOCAL",
+        public status : AccountStatus ="active"
     
     ) {}
 

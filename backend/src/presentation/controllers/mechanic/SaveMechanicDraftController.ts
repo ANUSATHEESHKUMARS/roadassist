@@ -1,8 +1,11 @@
 
 import { Request, Response } from "express";
+import { CommonResponse } from "../../../shared/types/CommonResponse.js";
 import { SaveMechanicApplicationDraftDto } from "../../../application/dtos/mechanic/SavemechanicApplicationDraftDto.js";
 import { ISubmitMechanicApplicationUseCase } from "../../../application/interfaces/mechanic/ISubmitMechanicApplicationUseCase.js";
 import { ISaveMechanicApplicationDraftUseCase } from "../../../application/interfaces/mechanic/ISaveMechanicApplicationDraftUseCase.js";
+import { HttpStatusCode } from "../../../application/enum/httpCodes.js";
+
 
 export class MechanicApplicationController {
     constructor(
@@ -14,10 +17,12 @@ export class MechanicApplicationController {
         const userId = req.user?.userId
 
         if (!userId) {
-            res.status(401).json({
-                success: false,
-                message: "Authentication required",
-            });
+
+            const response : CommonResponse = {
+                success:false,
+                message:"Authentication required"
+            }
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response)
             return;
         }
 
@@ -28,27 +33,29 @@ export class MechanicApplicationController {
             dto
         );
 
-        res.status(200).json({
-            success: true,
-            message: "Mechanic application draft saved successfully",
-            data: application,
-        });
+      const response : CommonResponse <typeof application>= {
+        success:true,
+        message:"Mechanic applicatin draft saved succesfullyy"
+      }
+      res.status(HttpStatusCode.OK).json(response)
     }
     submitApplication = async (req: Request, res: Response): Promise<void> => {
         const userId = req.user?.userId
         if (!userId) {
-            res.status(401).json({
-                success: false,
-                message: "Authentication required"
-            })
+         const response:CommonResponse = {
+            success:false,
+            message:"Authentication required"
+         }
+         res.status(HttpStatusCode.UNAUTHORIZED).json(response)
             return
         }
         const application = await this.submitMechanicApplicationUseCase.execute(userId)
-        res.status(200).json({
+           const response: CommonResponse<typeof application> = {
             success: true,
             message: "Mechanic application submitted successfully",
             data: application,
-        });
+        };
+        res.status(HttpStatusCode.OK).json(response)
     }
 
 }

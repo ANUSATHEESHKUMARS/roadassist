@@ -1,4 +1,4 @@
-import { MechanicApplication } from "../../User/entities/MechanicApplication.js";
+import { MechanicApplication, MechanicApplicationStatus } from "../../User/entities/MechanicApplication.js";
 
 export interface IMechanicApplicationRepository {
 
@@ -13,5 +13,9 @@ export interface IMechanicApplicationRepository {
           application: MechanicApplication
      ): Promise<MechanicApplication | null>;
 
+     findByStatus(status : MechanicApplicationStatus):Promise<MechanicApplication[]>
 
 }
+
+
+

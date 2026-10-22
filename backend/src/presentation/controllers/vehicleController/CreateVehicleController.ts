@@ -8,6 +8,7 @@ import { IGetVehicleBYIdUseCase } from "../../../application/interfaces/vehicle/
 import { UpdateVehicleDto } from "../../../application/dtos/updateVehicleDto.js";
 import { IUpdateVehicelUseCase } from "../../../application/interfaces/vehicle/IUpdateVehicleUsecase.js";
 import { IRemoveVehicleUseCase } from "../../../application/interfaces/vehicle/IRemoveVehicle.js";
+import { CommonResponse } from "../../../shared/types/CommonResponse.js";
 
 export class CreateVehicleController implements ICreateVehicleController {
 
@@ -15,41 +16,42 @@ export class CreateVehicleController implements ICreateVehicleController {
       private getVehicleUseCase: IGetVehicleUseCase,
       private getvehiclebyIdUseCase: IGetVehicleBYIdUseCase,
       private updateVehicleUseCase: IUpdateVehicelUseCase,
-      private removeVehicleUseCase : IRemoveVehicleUseCase) {}
+      private removeVehicleUseCase: IRemoveVehicleUseCase) { }
 
    createVehilce = async (req: Request, res: Response): Promise<void> => {
 
       console.log("CONTROLLER REACHED");
-console.log("FILES:", req.files);
-    const vehilceDto: VehicleDto = req.body;
+      console.log("FILES:", req.files);
+      const vehilceDto: VehicleDto = req.body;
 
-    const userId = req.user!.userId;
+      const userId = req.user!.userId;
 
-    const files = req.files as {
-        vehicleImage?: Express.Multer.File[];
-        insuranceCertificateImage?: Express.Multer.File[];
-        pucCertificateImage?: Express.Multer.File[];
-    };
+      const files = req.files as {
+         vehicleImage?: Express.Multer.File[];
+         insuranceCertificateImage?: Express.Multer.File[];
+         pucCertificateImage?: Express.Multer.File[];
+      };
 
-    const vehicle = await this.createVehicleUseCase.execute(
-        vehilceDto,
-        userId,
-        {
+      const vehicle = await this.createVehicleUseCase.execute(
+         vehilceDto,
+         userId,
+         {
             vehicleImage: files.vehicleImage?.[0],
             insuranceCertificateImage: files.insuranceCertificateImage?.[0],
             pucCertificateImage: files.pucCertificateImage?.[0]
-        }
-    );
+         }
+      );
 
-    res.status(HttpStatusCode.CREATED).json({
-        succes: true,
-        message: "Vehicle create succesfully",
-        data: vehicle
-    });
-};
+      const response: CommonResponse<typeof vehicle> = {
+         success: true,
+         message: "Vehicle create succesfully",
+         data: vehicle
+      }
+      res.status(HttpStatusCode.CREATED).json(response)
+   };
    getVehilce = async (req: Request, res: Response): Promise<void> => {
       const userId = req.user!.userId
-    
+
 
       const findvehicle = await this.getVehicleUseCase.getVehicle(userId)
       res.status(HttpStatusCode.OK).json({
@@ -64,7 +66,7 @@ console.log("FILES:", req.files);
 
       const vehicleId = req.params.vehicleId
       const getvehiclebyId = await this.getvehiclebyIdUseCase.getVehicleById(vehicleId)
-      console.log("succes ayiii",getvehiclebyId)
+      console.log("succes ayiii", getvehiclebyId)
       res.status(HttpStatusCode.OK).json({
          succes: true,
          getvehiclebyId
@@ -76,19 +78,19 @@ console.log("FILES:", req.files);
       const userId = req.user!.userId
       const dataToUpdate: UpdateVehicleDto = req.body
 
-       const files = req.files as {
-        vehicleImage?: Express.Multer.File[];
-        insuranceCertificateImage?: Express.Multer.File[];
-        pucCertificateImage?: Express.Multer.File[];
-    };
+      const files = req.files as {
+         vehicleImage?: Express.Multer.File[];
+         insuranceCertificateImage?: Express.Multer.File[];
+         pucCertificateImage?: Express.Multer.File[];
+      };
       const change = await this.updateVehicleUseCase.updateVehicele(vehicleId,
-          userId,
-           dataToUpdate,
-          {
+         userId,
+         dataToUpdate,
+         {
             vehicleImage: files.vehicleImage?.[0],
             insuranceCertificateImage: files.insuranceCertificateImage?.[0],
             pucCertificateImage: files.pucCertificateImage?.[0]
-        }
+         }
       )
       res.status(HttpStatusCode.OK).json({
          message: "vehicle details updated",
@@ -96,16 +98,18 @@ console.log("FILES:", req.files);
          data: change
       })
    }
-   removeVehicleById = async(req: Request<{vehicleId : string}>, res: Response): Promise<void> => {
+   removeVehicleById = async (req: Request<{ vehicleId: string }>, res: Response): Promise<void> => {
       const userId = req.user!.userId;
       const vehicleId = req.params.vehicleId
-      const deletevehicle = await this.removeVehicleUseCase.deleteById(vehicleId , userId)
-      res.status(HttpStatusCode.OK).json({
-         message : "vehicle removed succesfuly",
-         succes : true,
-         deletevehicle
-         
-      })
+      const deletevehicle = await this.removeVehicleUseCase.deleteById(vehicleId, userId)
+        const response: CommonResponse<typeof deletevehicle> = {
+      success: true,
+      message: "Vehicle removed successfully",
+      data: deletevehicle,
+    };
+
+    res.status(HttpStatusCode.OK).json(response);
+  
    }
 }
 

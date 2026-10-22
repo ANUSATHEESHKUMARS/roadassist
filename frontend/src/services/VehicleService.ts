@@ -76,3 +76,4 @@ export const deleteVehicle = async (
     await apiClient.delete(`/vehicle/${VehicleId}`)
 }
 
+

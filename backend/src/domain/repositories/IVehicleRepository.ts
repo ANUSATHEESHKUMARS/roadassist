@@ -7,3 +7,5 @@ export interface IVehicleRepository {
     update(vehicleId : string , vehicle : Partial<Vehicle>):Promise<Vehicle|null>
     delete(vehicleId: string):Promise<boolean>
 }
+
+

@@ -24,9 +24,7 @@ apiClient.interceptors.response.use(
         const isLoginRequest = originalRequest.url?.includes("/auth/login");
         const isRefreshRequest = originalRequest.url?.includes("/auth/refresh");
 
-        // Don't try to refresh when:
-        // 1. Login itself failed
-        // 2. Refresh itself failed
+        
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&

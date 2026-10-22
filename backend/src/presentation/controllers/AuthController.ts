@@ -14,6 +14,32 @@ import { GetCurrentUserUseCase } from "../../application/useCase/auth/GetCurrent
 import { IRefreshTokenUseCase } from "../../application/interfaces/IRefreshTokenUseCase.js";
 import { ILogger } from "../../application/contracts/ILogger.js";
 
+
+
+
+const ACCESS_TOKEN_MAX_AGE = Number(
+    process.env.ACCESS_TOKEN_MAX_AGE
+);
+
+const REFRESH_TOKEN_MAX_AGE = Number(
+    process.env.REFRESH_TOKEN_MAX_AGE
+);
+
+if (
+    !Number.isSafeInteger(ACCESS_TOKEN_MAX_AGE) ||
+    ACCESS_TOKEN_MAX_AGE <= 0
+) {
+    throw new Error("Invalid ACCESS_TOKEN_MAX_AGE configuration");
+}
+
+if (
+    !Number.isSafeInteger(REFRESH_TOKEN_MAX_AGE) ||
+    REFRESH_TOKEN_MAX_AGE <= 0
+) {
+    throw new Error("Invalid REFRESH_TOKEN_MAX_AGE configuration");
+}
+
+
 export class AuthController implements IAuthController {
   constructor(private registerUserUseCase: IRegisterUserUseCase,
     private loginUserUseCase: ILoginUserUserCase,
@@ -58,7 +84,7 @@ export class AuthController implements IAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 15 * 60 * 1000
+        maxAge: ACCESS_TOKEN_MAX_AGE
       }
     );
 
@@ -70,7 +96,7 @@ export class AuthController implements IAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        maxAge: REFRESH_TOKEN_MAX_AGE
       }
     );
 
@@ -133,6 +159,8 @@ export class AuthController implements IAuthController {
   logout = async (req: Request, res: Response): Promise<void> => {
     this.cookieService.clear(res, "accessToken");
     this.cookieService.clear(res, "refreshToken");
+
+    
     const response: CommonResponse = {
       success: true,
       message: "logout success"
@@ -159,7 +187,7 @@ export class AuthController implements IAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 15 * 60 * 1000
+        maxAge: ACCESS_TOKEN_MAX_AGE
       }
     );
 

@@ -11,7 +11,8 @@ export class UserMapper {
             document.role,
             document._id.toString(),
             document.googleId,
-            document.authProvider
+            document.authProvider,
+            document.status ?? "active"
         )
     }
 }

@@ -1,6 +1,6 @@
 import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import { UserModel } from "../databases/models/UserModel.js";
-import { User, UserRole, AuthProvider } from "../../domain/User/entities/User.js";
+import { User, UserRole, AuthProvider, AccountStatus } from "../../domain/User/entities/User.js";
 import { UserMapper } from "../../application/mappers/UserMapper.js";
 
 
@@ -72,6 +72,15 @@ export class MongoUserRepository implements IUserRepository {
       }
 
       return UserMapper.toDomain(userDocument);
+   }
+   async updateStatus(userId: string, status: AccountStatus): Promise<User | null> {
+      const updatedDocument = await UserModel.findByIdAndUpdate(userId, {
+         $set: { status }
+      }, { new: true, runValidators: true }).exec()
+      if (!updatedDocument) {
+         return null
+      }
+      return UserMapper.toDomain(updatedDocument)
    }
 }
 

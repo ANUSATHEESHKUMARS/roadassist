@@ -33,7 +33,12 @@ import {
 } from "@/services/mechanic/mechanicApplicaitonService";
 
 
-
+import type {
+  MechanicApplicationStatus,
+  MechanicServiceModel,
+  SupportedVehicleType,
+  MechanicDocumentType,
+} from "../../types/mechanic/common";
 
 const INITIAL_DATA: MechanicOnboardingRequest = {
     profilePhotoKey: "",

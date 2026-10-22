@@ -6,6 +6,7 @@ import RoleRoute from "./RoleRoutes";
 import AdminLayout from "@/layouts/AdminLayout";
 import AdminUserPage from "@/pages/admin/AdminUserpage";
 import MediaManagementPage from "@/pages/admin/MediaMangements";
+import AdminManagementPage from "@/pages/superAdmin/AdminMangementPage";
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -25,6 +26,12 @@ export const adminRoutes: RouteObject[] = [
               {
                 path:'media',
                 element: <MediaManagementPage/>
+              // },{
+              //   path:"mechanics",
+              //   element:<AdminManagementPage/>
+              // },{
+              //   path : "mechanic-application",
+              //   element:<MechanicApplicationDetailsPage/>
               }
             ],
           },

@@ -1,6 +1,6 @@
 import { MechanicApplicationMapper } from "../../application/mappers/MechanicApplicationMapper.js";
 import { IMechanicApplicationRepository } from "../../domain/repositories/mechanic/IMechanicApplicationRepository.js";
-import { MechanicApplication } from "../../domain/User/entities/MechanicApplication.js";
+import { MechanicApplication, MechanicApplicationStatus } from "../../domain/User/entities/MechanicApplication.js";
 import { IMechanicApplicationDocument, MechanicApplicationModel } from "../databases/models/MechanicApplicationModel.js";
 import { MongoBasRepository } from "./MongoBaseRepostory.js";
 import { Types } from "mongoose";
@@ -48,5 +48,13 @@ export class MongoMechanicApplicaitonRepository
         }
         return MechanicApplicationMapper.toDomain(document)
     }
+
+    async findByStatus(status: MechanicApplicationStatus): Promise<MechanicApplication[]> {
+        const document = await MechanicApplicationModel.find({ status }).exec()
+
+        return document.map((document) => MechanicApplicationMapper.toDomain(document))
+    }
 }
+
+
 

@@ -45,6 +45,13 @@ import { MechanicApplicationValidator } from "../application/validators/Mechanic
 import { SaveMechanicDraftUseCase } from "../application/useCase/mechanic/SaveMechanicApplicaitonDraftuseCase.js";
 import { MechanicApplicationController } from "../presentation/controllers/mechanic/SaveMechanicDraftController.js";
 import { SubmitMechanicApplicationUseCase } from "../application/useCase/mechanic/SubmitMechanicApplicationUseCase.js";
+import { GetMechanicApplicationUseCase } from "../application/useCase/mechanic/GetMechanicApplicationUseCase.js";
+import { BlockUserUseCase } from "../application/useCase/admin/BlockUserUseCase.js";
+import { UnblockUserUseCase } from "../application/useCase/admin/UnblockUserUseCase.js";
+import { EmergencyRequestRepository } from "../infrastructure/repositories/EmergencyRequestRepository.js";
+import { CreateEmergencyRequestUseCase } from "../application/useCase/emergency/CreateEmergencyRequestUseCase.js";
+import { CreateEmerencyRequestValidator } from "../application/validators/CreateEmergencyRequestValidator.js";
+import { CreateEmergencyRequestController } from "../presentation/controllers/EmergencyRequestController.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -53,7 +60,7 @@ const passwordHasher = new BcryptPasswordHasher();
 
 const tokenService = new JwtTokenService()
 
-export const auth = authMiddleware(tokenService)
+export const auth = authMiddleware(tokenService,userRepository)
 
 const registerUserValidator = new RegisterUserValidator()
 
@@ -140,12 +147,12 @@ const adminUserRepository = new MongoAdminUserRepository()
 
 const getUserUseCase = new GetUserUseCase(adminUserRepository)
 
-export const adminController = new AdminController(getUserUseCase)
 
 const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository)
 
+const blockUserUseCase = new BlockUserUseCase(userRepository)
 
-
+const unblockUserCase = new UnblockUserUseCase(userRepository)
 
 const mediaRepository = new MediaRepository()
 
@@ -164,7 +171,19 @@ const deleteMediaUseCase = new DeleteMediaUseCase(mediaRepository, s3StorageServ
 
 //mechanic 
 
+
+
+
+
 const mechanicApplicationRepository = new MongoMechanicApplicaitonRepository()
+
+const getMechanicApplicatinUseCase = new GetMechanicApplicationUseCase(mechanicApplicationRepository)
+
+
+export const adminController = new AdminController(getUserUseCase,
+     getMechanicApplicatinUseCase,
+    blockUserUseCase,
+unblockUserCase)
 
 const mechanicApplicationValidator = new MechanicApplicationValidator()
 
@@ -173,6 +192,18 @@ const saveMechanicDraftUseCase = new SaveMechanicDraftUseCase(
     mechanicApplicationValidator
 )
 
+//emergency
+
+const emergencyRequestRepository = new EmergencyRequestRepository()
+const createEmergencyRequestValidator = new CreateEmerencyRequestValidator()
+
+const createEmergencyRequestUseCase = new CreateEmergencyRequestUseCase(emergencyRequestRepository,
+    vehiceRepository,
+    createEmergencyRequestValidator
+
+)
+
+export const createEmergencyRequestController = new CreateEmergencyRequestController(createEmergencyRequestUseCase)
 
 const submitMechanicApplicationUseCase = new SubmitMechanicApplicationUseCase(mechanicApplicationRepository, mechanicApplicationValidator)
 

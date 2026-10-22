@@ -12,6 +12,7 @@ interface GetAdminUserResponse {
     }
 }
 
+
 export const getAdminUser = async (search:string =  "",
     page = 1,
     limit = 10
@@ -25,3 +26,4 @@ export const getAdminUser = async (search:string =  "",
     })
     return response.data
 }
+

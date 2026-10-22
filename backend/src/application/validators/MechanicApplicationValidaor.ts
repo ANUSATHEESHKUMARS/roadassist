@@ -153,7 +153,6 @@ export class MechanicApplicationValidator {
 
     this.validateCoordinates(data.latitude, data.longitude);
 
-    // Require workshop details for workshop-based services.
     if (
       data.serviceModel === "workshop" ||
       data.serviceModel === "both"
