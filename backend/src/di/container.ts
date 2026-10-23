@@ -52,6 +52,8 @@ import { EmergencyRequestRepository } from "../infrastructure/repositories/Emerg
 import { CreateEmergencyRequestUseCase } from "../application/useCase/emergency/CreateEmergencyRequestUseCase.js";
 import { CreateEmerencyRequestValidator } from "../application/validators/CreateEmergencyRequestValidator.js";
 import { CreateEmergencyRequestController } from "../presentation/controllers/EmergencyRequestController.js";
+import { UploadEmergencyImagesUseCase } from "../application/useCase/emergency/UploadEmergencyImagesUseCase.js";
+import { UploadEmergencyImagesController } from "../presentation/controllers/UploademergencyImagesController.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -202,6 +204,12 @@ const createEmergencyRequestUseCase = new CreateEmergencyRequestUseCase(emergenc
     createEmergencyRequestValidator
 
 )
+const emergencyImageUploadUseCase = new UploadEmergencyImagesUseCase(s3StorageService)
+
+export const emergencyImageUploadController = new UploadEmergencyImagesController(emergencyImageUploadUseCase)
+
+
+
 
 export const createEmergencyRequestController = new CreateEmergencyRequestController(createEmergencyRequestUseCase)
 
@@ -216,6 +224,7 @@ export const uploadMediaController = new UploadMediaController(uploadMediaUseCas
 
 
 const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, tokenService)
+
 export const authcontroller = new AuthController(registerUserUseCase,
     loginUserUseCase,
     googleLoginUseCase,

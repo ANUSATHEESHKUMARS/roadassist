@@ -4,7 +4,7 @@ import { EmergencyRequest } from "../../../domain/User/entities/EmergencyRequest
 import { ForbiddenError } from "../../../shared/errors/ForbiddenError.js";
 import { UnauthorizedError } from "../../../shared/errors/UnauthorizedError.js";
 import { CreateEmergencyRequestDto } from "../../dtos/CreateEmergencyRequest.js";
-import { ICreateEmergencyRequestUseCase } from "../../interfaces/ICreateEmergencyRequestUseCase.js";
+import { ICreateEmergencyRequestUseCase } from "../../interfaces/IEmergencyRequestUseCase.js";
 import { ICreateEmergencyRequestValidator } from "../../validators/interfaces/ICreateEmergencyRequestValidator.js";
 
 export class CreateEmergencyRequestUseCase implements ICreateEmergencyRequestUseCase {
@@ -39,7 +39,10 @@ export class CreateEmergencyRequestUseCase implements ICreateEmergencyRequestUse
 
                 })
             },
-            dto.issueDescription.trim(),
+            dto.emergencyIssueCategory,
+            dto.issueTitle.trim(),
+            dto.issueDescription?.trim(),
+            dto.issueImages ?? [],
             "pending",
             null
         )
@@ -49,3 +52,5 @@ export class CreateEmergencyRequestUseCase implements ICreateEmergencyRequestUse
         return this.emergencyRequestRespository.create(emergencyRequest)
     }
 }
+
+

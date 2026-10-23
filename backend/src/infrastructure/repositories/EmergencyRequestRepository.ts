@@ -17,7 +17,12 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
                     address: request.location.address
                 }),
             },
-            issueDescription: request.issueDescription,
+            emergencyIssueCategory: request.emergencyIssueCategory,
+            issueTitle: request.issueTitle,
+            ...(request.issueDescription !== undefined && {
+                issueDescription: request.issueDescription
+            }),
+            issueImages: request.issueImages,
             status: request.status,
             assignedMechanicId: request.assignedMechanicId
                 ? new Types.ObjectId(request.assignedMechanicId) :
@@ -52,3 +57,7 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
     }
 }
 
+
+
+
+ 

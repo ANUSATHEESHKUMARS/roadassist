@@ -1,3 +1,4 @@
+import { EmergencyIssueCategory } from "../../domain/User/entities/EmergencyRequest.js";
 
 export interface CreateEmergencyRequestDto {
     vehicleId: string,
@@ -6,6 +7,9 @@ export interface CreateEmergencyRequestDto {
         longitude: number,
         address?: string
     };
+    emergencyIssueCategory:EmergencyIssueCategory;
+    issueTitle:string;
     issueDescription: string
+    issueImages?:string[]
 }
 

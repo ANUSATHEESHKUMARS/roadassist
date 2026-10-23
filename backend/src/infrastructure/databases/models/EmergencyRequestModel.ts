@@ -1,4 +1,5 @@
 import { model, Schema, Types, Document } from "mongoose";
+import { EmergencyIssueCategory } from "../../../domain/User/entities/EmergencyRequest.js";
 
 export type EmergencyRequestStatus =
 
@@ -18,7 +19,10 @@ export interface IEmergencyRequestDocument extends Document {
         longitude: number;
         address?: string
     }
+    emergencyIssueCategory: EmergencyIssueCategory;
+    issueTitle: string;
     issueDescription: string;
+    issueImages: string[];
     status: EmergencyRequestStatus;
     assignedMechanicId: Types.ObjectId | null;
 
@@ -34,10 +38,10 @@ const emergencyRequestSchema = new Schema<IEmergencyRequestDocument>({
         required: true,
         index: true
     },
-    vehicleId : {
-        type:Schema.Types.ObjectId,
-        ref:"Vehicle",
-        required:true
+    vehicleId: {
+        type: Schema.Types.ObjectId,
+        ref: "Vehicle",
+        required: true
     },
     location: {
         latitude: {
@@ -57,12 +61,45 @@ const emergencyRequestSchema = new Schema<IEmergencyRequestDocument>({
             trim: true
         }
     },
+    emergencyIssueCategory: {
+        type: String,
+        enum: [
+            "battery",
+            "flat_tyre",
+            "engine",
+            "brake",
+            "electrical",
+            "fuel",
+            "accident",
+            "overheating",
+            "noise",
+            "other",
+        ],
+        required: true
+
+    },
+    issueTitle: {
+        type: String,
+        required: true,
+        trim: true,
+        minLength: 3,
+        maxlength: 150
+    },
+
     issueDescription: {
         type: String,
         required: true,
         trim: true,
         minLength: 3,
         maxLength: 1000
+    },
+    issueImages: {
+        type: [String],
+        default: [],
+        validate: {
+            validator: (images: string[]) => images.length <= 5,
+            message: "A maximum of 5 images is allowed"
+        },
     },
     status: {
         type: String,

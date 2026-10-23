@@ -13,7 +13,10 @@ export class EmergencyRequestMapper {
                     address: document.location.address,
                 })
             },
+            document.emergencyIssueCategory,
+            document.issueTitle,
             document.issueDescription,
+            document.issueImages ?? [],
             document.status,
             document.assignedMechanicId?.toString() ?? null,
 

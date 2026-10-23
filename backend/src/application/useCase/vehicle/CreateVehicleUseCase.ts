@@ -23,19 +23,20 @@ export class CreateVehicleUseCase implements ICreateVehicleUseCase {
           let vehicleImageUrl: string | undefined
 
           if (files.vehicleImage) {
-               vehicleImageUrl = await this.fileStorageService.upload(files.vehicleImage.buffer, "roadassist/vehicles")
+               vehicleImageUrl = await this.fileStorageService.upload(files.vehicleImage.buffer, "roadassist/vehicles",files.vehicleImage.mimetype)
           }
 
           let insuranceCertificateImageUrl: string | undefined
 
           if (files.insuranceCertificateImage) {
-               insuranceCertificateImageUrl = await this.fileStorageService.upload(files.insuranceCertificateImage.buffer, "roadassist/vehicles/insurance")
+               insuranceCertificateImageUrl = await this.fileStorageService.upload(files.insuranceCertificateImage.buffer, "roadassist/vehicles/insurance",files.insuranceCertificateImage.mimetype)
           }
           let pucCertificateImageUrl: string | undefined
           if (files.pucCertificateImage) {
                pucCertificateImageUrl = await this.fileStorageService.upload(
                     files.pucCertificateImage.buffer,
-                    "roadassist/vehicles/puc"
+                    "roadassist/vehicles/puc",
+                    files.pucCertificateImage.mimetype
                );
           }
           console.log("IMAGE URLS:", {

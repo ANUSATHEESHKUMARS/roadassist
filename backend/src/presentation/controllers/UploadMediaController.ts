@@ -1,5 +1,6 @@
 
 import type { Request, Response } from "express";
+
 import { IFileStorageService } from "../../application/contracts/IFileStorageService.js";
 import { IUploadMediaUseCase } from "../../application/interfaces/IUploadMediaUseCase.js";
 import { IGetMediaUseCase } from "../../application/interfaces/admin/IGetMediaUseCase.js";
@@ -14,8 +15,8 @@ export class UploadMediaController {
     private readonly uploadMediaUseCase: IUploadMediaUseCase,
     private readonly getMediaUseCase: IGetMediaUseCase,
     private readonly deleteMediaUseCase: IDeleteMediaUseCase,
-    private readonly filestorageService:IFileStorageService
-  ) {}
+    private readonly filestorageService: IFileStorageService
+  ) { }
 
   handle = async (
     req: Request,
@@ -80,7 +81,6 @@ export class UploadMediaController {
     }
   };
 
-  // Get media
   handleGet = async (
     req: Request,
     res: Response
@@ -107,7 +107,6 @@ export class UploadMediaController {
     }
   };
 
-  // Delete media
   handleDelete = async (
     req: Request,
     res: Response
