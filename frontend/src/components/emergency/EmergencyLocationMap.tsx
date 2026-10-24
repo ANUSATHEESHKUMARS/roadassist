@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
     MapContainer,
     TileLayer,
@@ -8,32 +8,18 @@ import {
     useMap,
     useMapEvents,
 } from "react-leaflet";
-import { useMap as useLeafletMap } from "react-leaflet";
 
 import type { EmergencyLocation } from "../../types/emergencyRequest";
 
 interface EmergencyLocationMapProps {
     location: EmergencyLocation | null;
-    onLocationChange: (location: EmergencyLocation | null) => void;
+    onLocationChange: (location: EmergencyLocation) => void;
 }
 
-interface GPSInfo {
-    accuracy: number;
-    heading: number | null;
-}
+const DEFAULT_POSITION: [number, number] = [8.5241, 76.9366];
 
-const DEFAULT_POSITION: [number, number] = [
-    8.5241,
-    76.9366,
-];
-
-function MapUpdater({
-    location,
-}: {
-    location: EmergencyLocation | null;
-}) {
+function MapUpdater({ location }: { location: EmergencyLocation | null }) {
     const map = useMap();
-
     useEffect(() => {
         if (location) {
             map.setView(
@@ -42,7 +28,6 @@ function MapUpdater({
             );
         }
     }, [location?.latitude, location?.longitude, map]);
-
     return null;
 }
 
@@ -59,36 +44,20 @@ function MapClickHandler({
             });
         },
     });
-
     return null;
 }
 
-function RecenterButton({
-    location,
-}: {
-    location: EmergencyLocation | null;
-}) {
+function RecenterButton({ location }: { location: EmergencyLocation | null }) {
     const map = useMap();
-
-    const recenter = () => {
-        if (!location) return;
-
-        map.setView(
-            [location.latitude, location.longitude],
-            17,
-            { animate: true }
-        );
-    };
-
     return (
         <button
             type="button"
-            onClick={recenter}
+            onClick={() => {
+                if (!location) return;
+                map.setView([location.latitude, location.longitude], 17, { animate: true });
+            }}
             disabled={!location}
-            className="absolute right-3 top-3 z-[1000] rounded-lg
-                border bg-white px-3 py-2 text-sm font-medium
-                text-gray-800 shadow hover:bg-gray-100
-                disabled:cursor-not-allowed disabled:opacity-50"
+            className="absolute right-3 top-3 z-[1000] rounded-lg border bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
             Recenter
         </button>
@@ -99,42 +68,15 @@ export default function EmergencyLocationMap({
     location,
     onLocationChange,
 }: EmergencyLocationMapProps) {
-    const [gpsInfo, setGpsInfo] = useState<GPSInfo | null>(null);
-
-    useEffect(() => {
-        if (!navigator.geolocation) return;
-
-        const watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                setGpsInfo({
-                    accuracy: position.coords.accuracy,
-                    heading: position.coords.heading,
-                });
-            },
-            (error) => {
-                console.error("Location error:", error.message);
-            },
-            {
-                enableHighAccuracy: true,
-                maximumAge: 0,
-                timeout: 20000,
-            }
-        );
-
-        return () => {
-            navigator.geolocation.clearWatch(watchId);
-        };
-    }, []);
-
-    const position: [number, number] = location
+    const center: [number, number] = location
         ? [location.latitude, location.longitude]
         : DEFAULT_POSITION;
 
     return (
         <div className="space-y-2">
-            <div className="relative h-[350px] w-full overflow-hidden rounded-xl">
+            <div className="relative h-[350px] w-full overflow-hidden rounded-xl border border-border">
                 <MapContainer
-                    center={position}
+                    center={center}
                     zoom={location ? 17 : 12}
                     minZoom={3}
                     maxZoom={19}
@@ -151,43 +93,22 @@ export default function EmergencyLocationMap({
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         maxZoom={19}
                     />
-
-                    <MapClickHandler
-                        onLocationChange={onLocationChange}
-                    />
-
+                    <MapClickHandler onLocationChange={onLocationChange} />
                     <MapUpdater location={location} />
-
                     <RecenterButton location={location} />
-
                     {location && (
-                        <Marker position={position}>
+                        <Marker position={center}>
                             <Popup>
-                                Selected emergency location
+                                {location.address
+                                    ? <span style={{ fontSize: "0.8rem" }}>{location.address}</span>
+                                    : "Selected emergency location"}
                             </Popup>
                         </Marker>
                     )}
                 </MapContainer>
             </div>
-
-            {gpsInfo && (
-                <div className="text-sm text-muted-foreground">
-                    <p>
-                        GPS accuracy: approximately ±
-                        {Math.round(gpsInfo.accuracy)} metres
-                    </p>
-                    <p>
-                        Direction of travel:{" "}
-                        {gpsInfo.heading === null
-                            ? "Unavailable"
-                            : `${Math.round(gpsInfo.heading)}°`}
-                    </p>
-                </div>
-            )}
-
-            <p className="text-sm text-muted-foreground">
-                Zoom in to select a precise location, or click
-                anywhere on the map to move the marker.
+            <p className="text-xs text-muted-foreground">
+                Click anywhere on the map to move the pin. The address above will update automatically.
             </p>
         </div>
     );
