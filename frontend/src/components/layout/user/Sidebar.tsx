@@ -24,21 +24,21 @@ const mainNavItems = [
     icon: AlertTriangle,
     path: "/user/emergency",
   },
-  {
-    label: "Service History",
-    icon: History,
-    path: "/user/history",
-  },
-  {
-    label: "Notifications",
-    icon: Bell,
-    path: "/user/notifications",
-  },
-  {
-    label: "Payments",
-    icon: CreditCard,
-    path: "/user/payments",
-  },
+  // {
+  //   label: "Service History",
+  //   icon: History,
+  //   path: "/user/history",
+  // },
+  // {
+  //   label: "Notifications",
+  //   icon: Bell,
+  //   path: "/user/notifications",
+  // },
+  // {
+  //   label: "Payments",
+  //   icon: CreditCard,
+  //   path: "/user/payments",
+  // },
   {
     label: "Become a Mechanic",
     icon: Wrench,

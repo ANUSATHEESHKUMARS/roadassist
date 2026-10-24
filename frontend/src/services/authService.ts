@@ -5,6 +5,8 @@ export const register = async (data: RegisterRequest) => {
   const response = await apiClient.post('/auth/register', data)
   return response.data
 }
+
+
 export const verifyOtp = async (data: {
   email: string;
   otp: string;
@@ -41,13 +43,7 @@ export const resendOtp = async (data: { email: string, purpose: "EMAIL_VERIFICAT
   return response.data
 }
 
-export const getVehicles = async () => {
-  const response = await apiClient.get(
-    "/vehicle/getvehicles"
-  );
 
-  return response.data;
-};
 
 export const getCurrentUser = async () => {
   const response = await apiClient.get('/auth/me')
@@ -58,3 +54,5 @@ export const logout = async () => {
   const response = await apiClient.post('/auth/logout')
   return response.data
 }
+
+

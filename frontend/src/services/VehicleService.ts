@@ -38,7 +38,13 @@ export const createVehicle = async (data: VehicleFormData) => {
 
   return response.data;
 };
+export const getVehicles = async () => {
+  const response = await apiClient.get(
+    "/vehicle/getvehicles"
+  );
 
+  return response.data;
+};
 export const getVehicleById = async (
   vehicleId: string
 ): Promise<Vehicle> => {

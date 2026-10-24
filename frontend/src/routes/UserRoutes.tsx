@@ -10,6 +10,7 @@ import EditVehiclePage from "@/components/layout/user/EditVehiclePage";
 import VehicleDetailsPage from "@/pages/user/VehicleDetail";
 import { UserLayout } from "@/components/layout/user/UserLayout";
 import MechanicOnboardingPage from "@/pages/mechanic/mechanicOnboardingPage";
+import EmergencyRequestPage from "@/pages/user/EmergencyRequestPage";
 
 export const userRoutes: RouteObject[] = [
   {
@@ -50,7 +51,10 @@ export const userRoutes: RouteObject[] = [
            {
             path: "/mechanic/onboarding",
             element: <MechanicOnboardingPage />,
-          },
+          },{
+            path :"/user/emergency",
+            element:<EmergencyRequestPage/>
+          }
 
         ],
       },

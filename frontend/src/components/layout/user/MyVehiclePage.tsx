@@ -4,7 +4,7 @@ import { Breadcrumb } from "@/components/layout/user/Breadcrumb";
 import { VehicleCard } from "@/components/vehicle/VehicleCard";
 import { AddVehicleCard } from "@/components/vehicle/AddVehicleCard";
 
-import { getVehicles } from "@/services/authService";
+import { getVehicles } from "@/services/VehicleService";
 import type { Vehicle } from "@/types/user/vehicle";
 
 export default function MyVehiclesPage() {
