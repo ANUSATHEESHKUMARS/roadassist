@@ -82,6 +82,20 @@ export class MongoUserRepository implements IUserRepository {
       }
       return UserMapper.toDomain(updatedDocument)
    }
+   async updatePassword(userId: string, passwordHash: string): Promise<User | null> {
+      const updatedDocument = await UserModel.findByIdAndUpdate(userId,{
+         $set:{
+            password:passwordHash
+         }
+      },{
+         new : true,
+         runValidators:true
+      }).exec();
+      if(!updatedDocument){
+         return null
+      }
+      return UserMapper.toDomain(updatedDocument)
+   }
 }
 
 

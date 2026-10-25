@@ -2,7 +2,7 @@ import { Router } from "express";
 import { IAuthController } from "../interfaces/IAuthController.js";
 import { asyncHandler } from "../../shared/helper/asyncHandler.js";
 import { IVerifyOtpController } from "../interfaces/IVerifyOtpController.js";
-import { auth } from '../../di/container.js'
+import { auth, requestPasswordResetController, resetPasswordController, verifyPasswordResetOtpController } from '../../di/container.js'
 
 export default function createAuthRoutes(
     authcontroller: IAuthController,
@@ -26,6 +26,12 @@ export default function createAuthRoutes(
     authRouter.post('/logout', asyncHandler(authcontroller.logout))
 
     authRouter.post('/refresh', asyncHandler(authcontroller.refreshToken))
+
+    authRouter.post('/forget-password', asyncHandler(requestPasswordResetController.execute))
+
+    authRouter.post('/verify-reset-otp', asyncHandler(verifyPasswordResetOtpController.execute))
+
+    authRouter.post('/reset-password' , asyncHandler(resetPasswordController.execute))
     
     return authRouter
 

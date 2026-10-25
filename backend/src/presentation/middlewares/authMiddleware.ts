@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ITokenService } from "../../application/contracts/ITokenService.js";
 import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
+import { ForbiddenError } from "../../shared/errors/ForbiddenError.js";
 import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 
 export const authMiddleware = (tokenService: ITokenService, userRepository: IUserRepository) => {
@@ -25,7 +26,6 @@ export const authMiddleware = (tokenService: ITokenService, userRepository: IUse
             return next(new UnauthorizedError("Invalid access token",
                 "INVALID_ACCESS_TOKEN"
             ))
-
         }
         try {
 
@@ -36,7 +36,7 @@ export const authMiddleware = (tokenService: ITokenService, userRepository: IUse
             }
 
             if (user.status === "blocked") {
-                return next(new UnauthorizedError("Your accound has been blocked", "ACCOUNT_BLOCKED"))
+                return next(new ForbiddenError("Your account has been blocked. Please contact support.", "ACCOUNT_BLOCKED"))
 
             }
             req.user = payload
@@ -47,3 +47,5 @@ export const authMiddleware = (tokenService: ITokenService, userRepository: IUse
         }
     }
 } 
+
+

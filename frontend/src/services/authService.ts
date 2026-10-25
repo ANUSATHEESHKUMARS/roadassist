@@ -56,3 +56,20 @@ export const logout = async () => {
 }
 
 
+
+
+export const requestPasswordReset = async (data : {email : string}) => {
+  const response = await apiClient.post('/auth/forget-password', data)
+
+  return response.data
+}
+
+export const verifyPasswordResetOtp = async (data : {email : string , otp : string}) => {
+  const response = await apiClient.post('/auth/verify-reset-otp',data)
+  return response.data
+}
+
+export const resetPassword = async (data : {resetToken:string; newPassword:string})=>{
+  const response = await apiClient.post('/auth/reset-password',data)
+  return response.data
+}

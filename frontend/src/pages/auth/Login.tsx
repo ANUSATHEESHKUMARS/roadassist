@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
+import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 import {
   Mail,
@@ -17,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { login, getCurrentUser } from "@/services/authService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
 import apiClient from "@/services/apiClient";
@@ -44,6 +45,17 @@ export default function Login() {
   const [loginMedia, setLoginMedia] = useState<MediaResponseData | undefined>();
   const setUser = useAuthStore((state) => state.setUser);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Show a message when redirected here because the account was blocked
+  useEffect(() => {
+    if (searchParams.get("reason") === "blocked") {
+      showToast(
+        "Your account has been blocked. Please contact support.",
+        "error"
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const loadLoginMedia = async () => {
@@ -104,10 +116,19 @@ export default function Login() {
       console.log(error.response?.status);
       console.log("error", error.response?.data);
 
-      showToast(
-        "Login failed. Please check your credentials.",
-        "error"
-      );
+      const errorCode = error.response?.data?.code;
+
+      if (errorCode === "ACCOUNT_BLOCKED") {
+        showToast(
+          "Your account has been blocked. Please contact support.",
+          "error"
+        );
+      } else {
+        showToast(
+          "Login failed. Please check your credentials.",
+          "error"
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -320,12 +341,15 @@ export default function Login() {
                       Remember Me
                     </Label>
                   </div>
-                  <button
-                    type="button"
+
+                  <Link
+                    to="/forget-password"
+                    state={{ email }}
                     className="text-xs font-medium text-[#a1a1aa] hover:text-[#ff3b30] transition-colors"
                   >
                     Forgot Password?
-                  </button>
+                  </Link>
+
                 </div>
 
                 {/* Primary Submit Button */}

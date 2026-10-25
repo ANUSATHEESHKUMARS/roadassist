@@ -7,6 +7,9 @@ import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import VerifyOtp from "@/pages/auth/VerifyOtp";
 import LandingPage from "@/pages/user/LandingPage";
+import ForgotPassword from "@/pages/auth/ForgetPassword";
+import VerifyResetOtp from "@/pages/auth/VerifyResetOtp";
+import ResetPassword from "@/pages/auth/ResetPassword";
 
 
 const PublicRoute = () => {
@@ -45,6 +48,18 @@ export const publicRoutes: RouteObject[] = [
             {
                 path: "/verify-otp",
                 element: <VerifyOtp />,
+            },
+            { 
+                path : "/forget-password",
+                element:<ForgotPassword/>
+            },
+            {
+                path: "/verify-reset-otp",
+                element: <VerifyResetOtp />,
+            },
+            {
+                path: "/reset-password",
+                element: <ResetPassword />,
             },
             {
                 path: "/",

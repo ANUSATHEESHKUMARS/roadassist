@@ -21,10 +21,21 @@ apiClient.interceptors.response.use(
             return Promise.reject(error);
         }
 
+        const responseData = error.response?.data as { code?: string } | undefined;
+
+        // If the account is blocked (403 ACCOUNT_BLOCKED), log out immediately
+        if (
+            error.response?.status === 403 &&
+            responseData?.code === "ACCOUNT_BLOCKED"
+        ) {
+            useAuthStore.getState().logout();
+            window.location.href = "/login?reason=blocked";
+            return Promise.reject(error);
+        }
+
         const isLoginRequest = originalRequest.url?.includes("/auth/login");
         const isRefreshRequest = originalRequest.url?.includes("/auth/refresh");
 
-        
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&

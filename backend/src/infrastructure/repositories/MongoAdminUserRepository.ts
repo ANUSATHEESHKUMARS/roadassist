@@ -1,5 +1,6 @@
 import { AdminUser } from "../../application/types/admin/AdminUser.js";
 import { IAdminUserRepository } from "../../domain/repositories/admin/IAdminUserRepository.js";
+import { AccountStatus } from "../../domain/User/entities/User.js";
 import { UserModel } from "../databases/models/UserModel.js";
 
 export class MongoAdminUserRepository implements IAdminUserRepository {
@@ -49,6 +50,30 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
         users:mappedUser,
         totalRecords
       }
+    }
+    async updateUserStatus(userId: string, status: AccountStatus): Promise<AdminUser | null> {
+        const updatedUser = await UserModel.findByIdAndUpdate(userId,
+            {$set : {status}},
+            {new : true,
+                runValidators:true
+            }
+
+        ).select('-password')
+        .lean()
+        .exec()
+
+        if(!updatedUser){
+            return null
+        }
+        return {
+            userId:updatedUser._id.toString(),
+            fullName:updatedUser.fullName,
+            email:updatedUser.email,
+            phoneNumber:updatedUser.phoneNumber,
+            role:updatedUser.role,
+            authProvider:updatedUser.authProvider,
+            status:updatedUser.status
+        }
     }
 }
 

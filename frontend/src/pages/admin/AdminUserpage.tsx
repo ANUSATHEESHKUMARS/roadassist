@@ -6,6 +6,8 @@ import { UserSearchAndFilters } from "@/components/admin/user/UserSearchAndFilte
 import { UserTable } from "@/components/admin/user/UserTable";
 import { UserPagination } from "@/components/admin/user/UserPagination";
 import { getAdminUser } from "@/services/admin/adminUserService";
+import { blockAdminUser, unblockAdminuser } from "@/services/admin/adminUserService";
+import { useToast } from "@/components/ui/toast/ToastProvider";
 
 
 export default function AdminUserPage() {
@@ -17,7 +19,7 @@ export default function AdminUserPage() {
   const [totalpage, setTotalPage] = useState(1)
   const [totalRecords, setTotalRecords] = useState(0)
   const [pageSize, setPageSize] = useState(10)
-
+  const {showToast} = useToast()
 
   const fetchUsers = async (
     searchValue: string = search,
@@ -48,6 +50,41 @@ export default function AdminUserPage() {
       setIsLoading(false);
     }
   };
+const handleBlock = async (userId: string) => {
+  try {
+    const response = await blockAdminUser(userId);
+
+    showToast(
+      response.message || "User blocked successfully",
+      "success"
+    );
+
+    await fetchUsers(search, currentPage, pageSize);
+  } catch (error) {
+    console.error("Failed to block user:", error);
+
+    showToast("Failed to block user", "error");
+  }
+};
+
+
+const handleUnblock = async (userId: string) => {
+  try {
+    const response = await unblockAdminuser(userId);
+
+    showToast(
+      response.message || "User unblocked successfully",
+      "success"
+    );
+
+    await fetchUsers(search, currentPage, pageSize);
+  } catch (error) {
+    console.error("Failed to unblock user:", error);
+
+    showToast("Failed to unblock user", "error");
+  }
+};
+
   const handlePageChange = (page: number) => {
   fetchUsers(search, page, pageSize);
 };
@@ -109,6 +146,8 @@ const handlePageSizeChange = (size: number) => {
 <UserTable
   users={users}
   isLoading={isloading}
+  onBlock={handleBlock}
+  onUnblock={handleUnblock}
 />
 
 <UserPagination

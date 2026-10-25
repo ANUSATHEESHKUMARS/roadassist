@@ -2,7 +2,17 @@ import React, { useState, useRef, useEffect } from "react";
 import { MoreHorizontal, Eye, Edit3, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
 import type { AdminUser } from "@/types/admin/user";
 
-export const UserActionsMenu: React.FC<{ user: AdminUser }> = ({ user }) => {
+
+interface UserActionMenuProps {
+  user: AdminUser;
+  onBlock: (userId: string) => Promise<void>
+  onUnblock: (userId: string) => Promise<void>
+}
+
+export const UserActionsMenu: React.FC<UserActionMenuProps> = ({ user, onBlock,
+  onUnblock
+}) => {
+  
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +62,7 @@ export const UserActionsMenu: React.FC<{ user: AdminUser }> = ({ user }) => {
           {user.status === "active" ? (
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={async () => { setOpen(false); await onBlock(user.userId); }}
               className="w-full px-3 py-1.5 text-xs text-left text-primary hover:bg-destructive/10 flex items-center gap-2 transition-colors cursor-pointer"
             >
               <ShieldAlert className="h-3.5 w-3.5" />
@@ -61,7 +71,7 @@ export const UserActionsMenu: React.FC<{ user: AdminUser }> = ({ user }) => {
           ) : (
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={async () => { setOpen(false); await onUnblock(user.userId); }}
               className="w-full px-3 py-1.5 text-xs text-left text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-2 transition-colors cursor-pointer"
             >
               <ShieldCheck className="h-3.5 w-3.5" />

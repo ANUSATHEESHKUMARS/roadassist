@@ -54,6 +54,14 @@ import { CreateEmerencyRequestValidator } from "../application/validators/Create
 import { CreateEmergencyRequestController } from "../presentation/controllers/EmergencyRequestController.js";
 import { UploadEmergencyImagesUseCase } from "../application/useCase/emergency/UploadEmergencyImagesUseCase.js";
 import { UploadEmergencyImagesController } from "../presentation/controllers/UploademergencyImagesController.js";
+import { RedisPasswordResetTokenRepository } from "../infrastructure/repositories/RedisPasswordResetTokenRepository.js";
+import { PasswordResetTokenService } from "../infrastructure/services/PasswordResetTokenService.js";
+import { ResetPasswordUseCase } from "../application/useCase/auth/ResetPasswordUseCase.js";
+import { VerifyPasswordResetOtpUseCase } from "../application/useCase/auth/VerifyPasswordResetOtpUseCase.js";
+import { RequestPasswordResetUseCase } from "../application/useCase/auth/RequestPasswordResetUseCaset.js";
+import { RequestPasswordResetController } from "../presentation/controllers/RequestPasswordResetController.js";
+import { VerifyPasswordResetOtpController } from "../presentation/controllers/VerifyPasswordResetController.js";
+import { ResetPasswordController } from "../presentation/controllers/ResetPasswordController.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -62,7 +70,7 @@ const passwordHasher = new BcryptPasswordHasher();
 
 const tokenService = new JwtTokenService()
 
-export const auth = authMiddleware(tokenService,userRepository)
+export const auth = authMiddleware(tokenService, userRepository)
 
 const registerUserValidator = new RegisterUserValidator()
 
@@ -183,9 +191,9 @@ const getMechanicApplicatinUseCase = new GetMechanicApplicationUseCase(mechanicA
 
 
 export const adminController = new AdminController(getUserUseCase,
-     getMechanicApplicatinUseCase,
+    getMechanicApplicatinUseCase,
     blockUserUseCase,
-unblockUserCase)
+    unblockUserCase)
 
 const mechanicApplicationValidator = new MechanicApplicationValidator()
 
@@ -215,11 +223,11 @@ export const createEmergencyRequestController = new CreateEmergencyRequestContro
 
 const submitMechanicApplicationUseCase = new SubmitMechanicApplicationUseCase(mechanicApplicationRepository, mechanicApplicationValidator)
 
-export const mechanicApplicationController = new MechanicApplicationController(saveMechanicDraftUseCase,submitMechanicApplicationUseCase)
+export const mechanicApplicationController = new MechanicApplicationController(saveMechanicDraftUseCase, submitMechanicApplicationUseCase)
 
 
 
-export const uploadMediaController = new UploadMediaController(uploadMediaUseCase, getMediaUseCase, deleteMediaUseCase,s3StorageService)
+export const uploadMediaController = new UploadMediaController(uploadMediaUseCase, getMediaUseCase, deleteMediaUseCase, s3StorageService)
 
 
 
@@ -237,7 +245,39 @@ export const authcontroller = new AuthController(registerUserUseCase,
 )
 
 
+const passwordResetTokenRepository =
+    new RedisPasswordResetTokenRepository();
+
+const passwordResetTokenService =
+    new PasswordResetTokenService();
+
+const requestPasswordResetUseCase =
+    new RequestPasswordResetUseCase(
+        userRepository,
+        otpRepository,
+        otpService,
+        emailService
+    );
+
+const verifyPasswordResetOtpUseCase =
+    new VerifyPasswordResetOtpUseCase(
+        otpRepository,
+        otpService,
+        passwordResetTokenService,
+        passwordResetTokenRepository
+    );
+
+const resetPasswordUseCase =
+    new ResetPasswordUseCase(
+        userRepository,
+        passwordResetTokenRepository,
+        passwordResetTokenService,
+        passwordHasher
+    );
 
 
+    export const requestPasswordResetController = new RequestPasswordResetController(requestPasswordResetUseCase)
 
+    export const verifyPasswordResetOtpController = new VerifyPasswordResetOtpController(verifyPasswordResetOtpUseCase)
 
+    export const resetPasswordController = new ResetPasswordController(resetPasswordUseCase)
