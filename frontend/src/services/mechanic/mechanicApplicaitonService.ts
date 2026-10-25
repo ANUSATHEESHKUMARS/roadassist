@@ -110,3 +110,41 @@ export const uploadMechanicProfilePhoto = async (
     "mechanic_profile"
   );
 };
+
+
+export interface MyMechanicApplicationResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: string;
+    userId: string;
+    status: string;
+    experienceYears?: number;
+    specializations?: string[];
+    supportedVehicleTypes?: string[];
+    serviceOffered?: string[];
+    serviceModel?: string;
+    serviceAddress?: string;
+    workshopName?: string;
+    workshopAddress?: string;
+    pincode?: string;
+    professionalDescription?: string;
+    documents?: {
+      documentType: string;
+      originalName: string;
+      verificationStatus: string;
+      rejectionReason?: string;
+    }[];
+    submittedAt?: string;
+    reviewedAt?: string;
+    reviewReason?: string;
+  } | null;
+}
+
+export const getMyMechanicApplication = async (): Promise<MyMechanicApplicationResponse> => {
+  const response = await apiClient.get<MyMechanicApplicationResponse>(
+    "/mechanic/my-application"
+  );
+
+  return response.data;
+};

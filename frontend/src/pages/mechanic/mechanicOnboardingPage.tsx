@@ -406,6 +406,8 @@ const handleSubmit = async () => {
             "Your mechanic application was submitted successfully.",
             "success"
         );
+
+        navigate("/user/mechanic-application");
     } catch (error: unknown) {
         console.error("Submit mechanic application error:", error);
 
@@ -449,13 +451,24 @@ const handleSubmit = async () => {
                         You will be notified when its status changes.
                     </p>
 
-                    <Button
-                        type="button"
-                        onClick={() => navigate("/user/dashboard")}
-                        className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
-                    >
-                        Return to Dashboard
-                    </Button>
+                    <div className="space-y-2">
+                        <Button
+                            type="button"
+                            onClick={() => navigate("/user/mechanic-application")}
+                            className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                        >
+                            View Application Status
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => navigate("/user/dashboard")}
+                            className="w-full h-10 font-semibold"
+                        >
+                            Return to Dashboard
+                        </Button>
+                    </div>
                 </div>
             </div>
         );

@@ -21,6 +21,12 @@ mechanicRouter.post(
   asyncHandler(mechanicApplicationController.submitApplication)
 );
 
+mechanicRouter.get(
+  "/my-application",
+  auth,
+  asyncHandler(mechanicApplicationController.getMyApplication)
+);
+
 mechanicRouter.post(
   "/media/upload",
   auth,

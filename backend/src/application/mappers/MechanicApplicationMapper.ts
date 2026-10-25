@@ -157,4 +157,44 @@ export class MechanicApplicationMapper {
 
     return new MechanicApplication(props);
   }
+
+
+  static toResponse(application: MechanicApplication) {
+  return {
+    id: application.id,
+    userId: application.userId,
+
+    profilePhotoKey: application.profilePhotoKey,
+    experienceYears: application.experienceYears,
+
+    specializations: application.specializations,
+    supportedVehicleTypes: application.supportedVehicleType,
+    serviceOffered: application.serviceOffered,
+
+    serviceModel: application.serviceModel,
+    serviceAddress: application.serviceAddress,
+    pincode: application.pincode,
+
+    documents: application.documents,
+    status: application.status,
+
+    professionalDescription:
+      application.professionalDescription,
+
+    latitude: application.latitude,
+    longitude: application.longitude,
+    serviceRadiusKm: application.serviceRadiusKm,
+
+    workshopName: application.workshopName,
+    workshopAddress: application.workshopAddress,
+
+    submittedAt: application.submittedAt,
+    reviewedBy: application.reviewedBy,
+    reviewedAt: application.reviewedAt,
+    reviewReason: application.reviewReason,
+
+    createdAt: application.createdAt,
+    updatedAt: application.updatedAt,
+  };
+}
 }

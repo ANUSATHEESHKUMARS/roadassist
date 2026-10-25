@@ -2,7 +2,10 @@ import { HttpStatusCode } from "../../../application/enum/httpCodes.js";
 import { IBlockUserUseCase } from "../../../application/interfaces/admin/IBlockUserUseCase.js";
 import { IGetUserUseCase } from "../../../application/interfaces/admin/IGetUserUseCase.js";
 import { IUnblockUserUseCase } from "../../../application/interfaces/admin/IUnblockuserUseCase.js";
+import { IApproveMechanicApplicationUseCase } from "../../../application/interfaces/IApproveMechanicApplicationUseCase.js";
+import { IRejectMechanicApplictionUseCase } from "../../../application/interfaces/IRejectMechanicApplicaitonUseCase.js";
 import { IGetMechanicApplicationUseCase } from "../../../application/interfaces/mechanic/IGetMechanicApplicationUseCase.js";
+import { MechanicApplicationMapper } from "../../../application/mappers/MechanicApplicationMapper.js";
 import { MechanicApplicationStatus } from "../../../domain/User/entities/MechanicApplication.js";
 import { CommonResponse } from "../../../shared/types/CommonResponse.js";
 import { IAdminUserController } from "../../interfaces/admin/IAdminController.js";
@@ -21,7 +24,9 @@ export class AdminController implements IAdminUserController {
    constructor(private getUserUseCase: IGetUserUseCase,
       private getMechanicApplicationUseCase: IGetMechanicApplicationUseCase,
       private blockUserUseCase: IBlockUserUseCase,
-      private unblockUserUseCase: IUnblockUserUseCase
+      private unblockUserUseCase: IUnblockUserUseCase,
+      private approveMechanicApplicationUseCase: IApproveMechanicApplicationUseCase,
+      private rejectMechanicApplicationUseCases: IRejectMechanicApplictionUseCase
    ) { }
 
    getUsers = async (req: Request, res: Response): Promise<void> => {
@@ -53,10 +58,12 @@ export class AdminController implements IAdminUserController {
       const status = requestedStatus as MechanicApplicationStatus;
       const application = await this.getMechanicApplicationUseCase.execute(status)
 
-      const response: CommonResponse<typeof application> = {
+      const response: CommonResponse<ReturnType<typeof MechanicApplicationMapper.toResponse>[] >= {
          success: true,
          message: "Mechanic application retrieved succesfully",
-         data: application
+           data: application.map(
+    (item) => MechanicApplicationMapper.toResponse(item)
+  ),
       }
       res.status(HttpStatusCode.OK).json(response)
    }
@@ -100,6 +107,96 @@ export class AdminController implements IAdminUserController {
       }
       res.status(HttpStatusCode.OK).json(response)
    }
+
+   approveMechanicApplication = async (
+      req: Request,
+      res: Response
+   ): Promise<void> => {
+      const applicationId = req.params.applicationId;
+      if (typeof applicationId !== "string" || !applicationId.trim()) {
+         const response: CommonResponse = {
+            success: false,
+            message: "Valid application Id is required"
+         }
+         res.status(HttpStatusCode.BAD_REQUEST).json(response)
+         return
+      }
+      const adminId = req.user?.userId;
+
+      if (!adminId) {
+
+         const response: CommonResponse = {
+            success: false,
+            message: "Authentication required"
+         }
+         res.status(HttpStatusCode.UNAUTHORIZED).json(response)
+         return;
+      }
+
+
+      const application =
+         await this.approveMechanicApplicationUseCase.execute(
+            applicationId,
+            adminId
+         );
+
+      const response: CommonResponse<ReturnType<typeof MechanicApplicationMapper.toResponse>> = {
+         success: true,
+         message: "Mechanic application approved successfully",
+         data: MechanicApplicationMapper.toResponse(application)
+      }
+      res.status(HttpStatusCode.OK).json(response)
+   };
+
+   rejectMechanicApplication = async (
+      req: Request,
+      res: Response
+   ): Promise<void> => {
+      const applicationId = req.params.applicationId;
+      if (typeof applicationId !== "string" || !applicationId.trim()) {
+
+         const response: CommonResponse = {
+            success: false,
+            message: "Application ID is required"
+         }
+         res.status(HttpStatusCode.BAD_REQUEST).json(response)
+         return;
+      }
+      const adminId = req.user?.userId;
+
+      const { reason } = req.body as { reason?: string };
+
+      if (!adminId) {
+         res.status(HttpStatusCode.UNAUTHORIZED).json({
+            success: false,
+            message: "Authentication required"
+         });
+         return;
+      }
+
+      if (typeof reason !== "string" || !reason.trim()) {
+         res.status(HttpStatusCode.BAD_REQUEST).json({
+            success: false,
+            message: "Rejection reason is required"
+         });
+         return;
+      }
+
+      const application =
+         await this.rejectMechanicApplicationUseCases.execute(
+            applicationId,
+            adminId,
+            reason
+         );
+
+
+      const response: CommonResponse<ReturnType<typeof MechanicApplicationMapper.toResponse>> = {
+         success: true,
+         message: "Mechanic application rejected successfully",
+         data: MechanicApplicationMapper.toResponse(application)
+      }
+      res.status(HttpStatusCode.OK).json(response)
+   };
 }
 
 

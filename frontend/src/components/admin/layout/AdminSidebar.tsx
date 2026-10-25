@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
   {
     label : "Mechanic Mangement",
     path : "/admin/mechanics",
-    icon : Images
+    icon : Wrench
   }
   
 ];

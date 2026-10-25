@@ -22,15 +22,15 @@ interface AdminHeaderProps {
 export const AdminHeader: React.FC<AdminHeaderProps> = ({
   onMenuClick,
 }) => {
-  const {showToast} = useToast()
+  const { showToast } = useToast()
   const navigate = useNavigate();
 
   const onLogout = async () => {
     await handleLogout();
-   showToast(
-    "Logged out successfully",
-    "success"
-  );
+    showToast(
+      "Logged out successfully",
+      "success"
+    );
     navigate("/login", {
       replace: true,
     });
@@ -100,20 +100,12 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
 
         {/* Logout Confirmation */}
         <AlertDialog>
-
-          <AlertDialogTrigger >
-            <button
-              type="button"
-              className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Logout
-            </button>
+          <AlertDialogTrigger className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+            Logout
           </AlertDialogTrigger>
 
           <AlertDialogContent>
-
             <AlertDialogHeader>
-
               <AlertDialogTitle>
                 Are you sure you want to logout?
               </AlertDialogTitle>
@@ -122,11 +114,9 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
                 You will be signed out of your RoadAssist admin account and
                 redirected to the login page.
               </AlertDialogDescription>
-
             </AlertDialogHeader>
 
             <AlertDialogFooter>
-
               <AlertDialogCancel>
                 Cancel
               </AlertDialogCancel>
@@ -134,12 +124,10 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
               <AlertDialogAction onClick={onLogout}>
                 Logout
               </AlertDialogAction>
-
             </AlertDialogFooter>
-
           </AlertDialogContent>
-
         </AlertDialog>
+
 
       </div>
 

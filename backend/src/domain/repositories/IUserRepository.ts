@@ -1,4 +1,4 @@
-import { AccountStatus, User } from "../User/entities/User.js"
+import { AccountStatus, User, UserRole } from "../User/entities/User.js"
 export interface IUserRepository {
     save(user: User): Promise<User>
     findbyemail(email: string): Promise<User | null>
@@ -12,6 +12,10 @@ export interface IUserRepository {
     updateStatus(userId: string,
         status: AccountStatus
     ): Promise<User | null>
-    updatePassword(userId:string, passwordHash:string):Promise<User | null>
+    updatePassword(userId: string, passwordHash: string): Promise<User | null>;
+
+    updateRole(userId: string,
+        role: UserRole
+    ): Promise<User | null>
 }
 

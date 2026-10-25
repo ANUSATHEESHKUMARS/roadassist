@@ -16,14 +16,12 @@ apiClient.interceptors.response.use(
             | (InternalAxiosRequestConfig & { _retry?: boolean })
             | undefined;
 
-        // If there is no request config, just reject
         if (!originalRequest) {
             return Promise.reject(error);
         }
 
         const responseData = error.response?.data as { code?: string } | undefined;
 
-        // If the account is blocked (403 ACCOUNT_BLOCKED), log out immediately
         if (
             error.response?.status === 403 &&
             responseData?.code === "ACCOUNT_BLOCKED"

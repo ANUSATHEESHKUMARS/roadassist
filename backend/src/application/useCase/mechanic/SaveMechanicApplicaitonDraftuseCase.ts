@@ -25,6 +25,10 @@ export class SaveMechanicDraftUseCase
         const existingApplication =
             await this.mechanicApplicationRepository.findByUserId(userId);
 
+console.log("USER ID:", userId);
+console.log("APPLICATION FOUND:", !!existingApplication);
+console.log("APPLICATION STATUS:", existingApplication?.status);
+
         if (!existingApplication) {
             const application = new MechanicApplication({
                 userId,
@@ -38,6 +42,7 @@ export class SaveMechanicDraftUseCase
         if (
             existingApplication.status !== "incomplete" &&
             existingApplication.status !== "changes_requested"
+            
         ) {
             throw new ConflictError(
                 "This application cannot be edited in its current status",

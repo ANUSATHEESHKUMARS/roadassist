@@ -4,13 +4,16 @@ import { CommonResponse } from "../../../shared/types/CommonResponse.js";
 import { SaveMechanicApplicationDraftDto } from "../../../application/dtos/mechanic/SavemechanicApplicationDraftDto.js";
 import { ISubmitMechanicApplicationUseCase } from "../../../application/interfaces/mechanic/ISubmitMechanicApplicationUseCase.js";
 import { ISaveMechanicApplicationDraftUseCase } from "../../../application/interfaces/mechanic/ISaveMechanicApplicationDraftUseCase.js";
+import { IGetMyMechanicApplicationUseCase } from "../../../application/interfaces/mechanic/IGetMyMechanicApplicationUseCase.js";
+import { MechanicApplicationMapper } from "../../../application/mappers/MechanicApplicationMapper.js";
 import { HttpStatusCode } from "../../../application/enum/httpCodes.js";
 
 
 export class MechanicApplicationController {
     constructor(
         private readonly saveMechanicDraftUseCase: ISaveMechanicApplicationDraftUseCase,
-        private readonly submitMechanicApplicationUseCase: ISubmitMechanicApplicationUseCase
+        private readonly submitMechanicApplicationUseCase: ISubmitMechanicApplicationUseCase,
+        private readonly getMyMechanicApplicationUseCase: IGetMyMechanicApplicationUseCase
     ) { }
 
     saveDraft = async (req: Request, res: Response): Promise<void> => {
@@ -58,4 +61,35 @@ export class MechanicApplicationController {
         res.status(HttpStatusCode.OK).json(response)
     }
 
+    getMyApplication = async (req: Request, res: Response): Promise<void> => {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Authentication required"
+            };
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+            return;
+        }
+
+        const application = await this.getMyMechanicApplicationUseCase.execute(userId);
+
+        if (!application) {
+            const response: CommonResponse = {
+                success: true,
+                message: "No mechanic application found",
+                data: null
+            };
+            res.status(HttpStatusCode.OK).json(response);
+            return;
+        }
+
+        const response: CommonResponse<ReturnType<typeof MechanicApplicationMapper.toResponse>> = {
+            success: true,
+            message: "Mechanic application retrieved successfully",
+            data: MechanicApplicationMapper.toResponse(application)
+        };
+        res.status(HttpStatusCode.OK).json(response);
+    }
 }

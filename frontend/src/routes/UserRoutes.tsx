@@ -10,6 +10,7 @@ import EditVehiclePage from "@/components/layout/user/EditVehiclePage";
 import VehicleDetailsPage from "@/pages/user/VehicleDetail";
 import { UserLayout } from "@/components/layout/user/UserLayout";
 import MechanicOnboardingPage from "@/pages/mechanic/mechanicOnboardingPage";
+import MechanicApplicationStatusPage from "@/pages/mechanic/MechanicApplicationStatusPage";
 import EmergencyRequestPage from "@/pages/user/EmergencyRequestPage";
 
 export const userRoutes: RouteObject[] = [
@@ -44,6 +45,10 @@ export const userRoutes: RouteObject[] = [
               {
                 path: "vehicles/:vehicleId/edit",
                 element: <EditVehiclePage />,
+              },
+              {
+                path: "mechanic-application",
+                element: <MechanicApplicationStatusPage />,
               },
               
             ],

@@ -46,6 +46,7 @@ import { SaveMechanicDraftUseCase } from "../application/useCase/mechanic/SaveMe
 import { MechanicApplicationController } from "../presentation/controllers/mechanic/SaveMechanicDraftController.js";
 import { SubmitMechanicApplicationUseCase } from "../application/useCase/mechanic/SubmitMechanicApplicationUseCase.js";
 import { GetMechanicApplicationUseCase } from "../application/useCase/mechanic/GetMechanicApplicationUseCase.js";
+import { GetMyMechanicApplicationUseCase } from "../application/useCase/mechanic/GetMyMechanicApplicationUseCase.js";
 import { BlockUserUseCase } from "../application/useCase/admin/BlockUserUseCase.js";
 import { UnblockUserUseCase } from "../application/useCase/admin/UnblockUserUseCase.js";
 import { EmergencyRequestRepository } from "../infrastructure/repositories/EmergencyRequestRepository.js";
@@ -62,6 +63,8 @@ import { RequestPasswordResetUseCase } from "../application/useCase/auth/Request
 import { RequestPasswordResetController } from "../presentation/controllers/RequestPasswordResetController.js";
 import { VerifyPasswordResetOtpController } from "../presentation/controllers/VerifyPasswordResetController.js";
 import { ResetPasswordController } from "../presentation/controllers/ResetPasswordController.js";
+import { ApproveMechanicApplicationUseCase } from "../application/useCase/admin/ApproveMechanicApplicationUseCase.js";
+import { RejectMechanicApplicationUseCase } from "../application/useCase/admin/RejectMechanicApplicationUseCase.js";
 
 
 const userRepository = new MongoUserRepository();
@@ -190,10 +193,20 @@ const mechanicApplicationRepository = new MongoMechanicApplicaitonRepository()
 const getMechanicApplicatinUseCase = new GetMechanicApplicationUseCase(mechanicApplicationRepository)
 
 
-export const adminController = new AdminController(getUserUseCase,
+const approveMechanicApplicationUseCase = new ApproveMechanicApplicationUseCase(
+    mechanicApplicationRepository,
+    userRepository
+)
+
+const rejectdMechanicAppliationUseCase = new RejectMechanicApplicationUseCase(mechanicApplicationRepository)
+
+export const adminController = new AdminController(
+    getUserUseCase,
     getMechanicApplicatinUseCase,
     blockUserUseCase,
-    unblockUserCase)
+    unblockUserCase,
+approveMechanicApplicationUseCase,
+rejectdMechanicAppliationUseCase)
 
 const mechanicApplicationValidator = new MechanicApplicationValidator()
 
@@ -223,7 +236,9 @@ export const createEmergencyRequestController = new CreateEmergencyRequestContro
 
 const submitMechanicApplicationUseCase = new SubmitMechanicApplicationUseCase(mechanicApplicationRepository, mechanicApplicationValidator)
 
-export const mechanicApplicationController = new MechanicApplicationController(saveMechanicDraftUseCase, submitMechanicApplicationUseCase)
+const getMyMechanicApplicationUseCase = new GetMyMechanicApplicationUseCase(mechanicApplicationRepository)
+
+export const mechanicApplicationController = new MechanicApplicationController(saveMechanicDraftUseCase, submitMechanicApplicationUseCase, getMyMechanicApplicationUseCase)
 
 
 
@@ -281,3 +296,6 @@ const resetPasswordUseCase =
     export const verifyPasswordResetOtpController = new VerifyPasswordResetOtpController(verifyPasswordResetOtpUseCase)
 
     export const resetPasswordController = new ResetPasswordController(resetPasswordUseCase)
+
+
+    

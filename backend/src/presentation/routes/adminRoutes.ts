@@ -20,5 +20,19 @@ adminRouter.delete('/media/:id', auth, authorizeRoles("admin"), asyncHandler(upl
 
 adminRouter.get('/mechanic-applications', auth, authorizeRoles("admin"), asyncHandler(adminController.getMechanicApplication))
 
+
+adminRouter.patch(
+    "/mechanic-applications/:applicationId/approve",
+    auth,
+    authorizeRoles("admin"),
+    asyncHandler(adminController.approveMechanicApplication)
+);
+
+adminRouter.patch(
+    "/mechanic-applications/:applicationId/reject",
+    auth,
+    authorizeRoles("admin"),
+    asyncHandler(adminController.rejectMechanicApplication)
+);
 export default adminRouter
 
