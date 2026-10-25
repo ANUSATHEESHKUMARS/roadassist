@@ -1,8 +1,9 @@
 import apiClient from "./apiClient";
 import type { RegisterRequest } from "@/types/auth";
+import API_ROUTES from "./apiRoutes";
 
 export const register = async (data: RegisterRequest) => {
-  const response = await apiClient.post('/auth/register', data)
+  const response = await apiClient.post(API_ROUTES.AUTH.REGISTER, data)
   return response.data
 }
 
@@ -13,7 +14,7 @@ export const verifyOtp = async (data: {
   purpose: "EMAIL_VERIFICATION";
 }) => {
   const response = await apiClient.post(
-    "/auth/verifyotp",
+    API_ROUTES.AUTH.VERIFY_OTP,
     data
   );
 
@@ -22,7 +23,7 @@ export const verifyOtp = async (data: {
 
 export const login = async (data: { email: string, password: string }) => {
   try{
-    const response = await apiClient.post('/auth/login', data)
+    const response = await apiClient.post(API_ROUTES.AUTH.LOGIN, data)
   return response.data
   }catch(error){
     console.log("login api error", error)
@@ -31,7 +32,7 @@ export const login = async (data: { email: string, password: string }) => {
 }
 
 export const googleLogin = async (idToken: string) => {
-  const response = await apiClient.post("/auth/google", {
+  const response = await apiClient.post(API_ROUTES.AUTH.GOOGLE_LOGIN, {
     idToken
   });
 
@@ -39,19 +40,19 @@ export const googleLogin = async (idToken: string) => {
 };
 
 export const resendOtp = async (data: { email: string, purpose: "EMAIL_VERIFICATION" }) => {
-  const response = await apiClient.post('/auth/resend', data)
+  const response = await apiClient.post(API_ROUTES.AUTH.RESEND_OTP, data)
   return response.data
 }
 
 
 
 export const getCurrentUser = async () => {
-  const response = await apiClient.get('/auth/me')
+  const response = await apiClient.get(API_ROUTES.AUTH.CURRENT_USER)
   return response.data
 }
 
 export const logout = async () => {
-  const response = await apiClient.post('/auth/logout')
+  const response = await apiClient.post(API_ROUTES.AUTH.LOGOUT)
   return response.data
 }
 
@@ -59,17 +60,17 @@ export const logout = async () => {
 
 
 export const requestPasswordReset = async (data : {email : string}) => {
-  const response = await apiClient.post('/auth/forget-password', data)
+  const response = await apiClient.post(API_ROUTES.AUTH.FORGOT_PASSWORD, data)
 
   return response.data
 }
 
 export const verifyPasswordResetOtp = async (data : {email : string , otp : string}) => {
-  const response = await apiClient.post('/auth/verify-reset-otp',data)
+  const response = await apiClient.post(API_ROUTES.AUTH.VERIFY_RESET_OTP,data)
   return response.data
 }
 
 export const resetPassword = async (data : {resetToken:string; newPassword:string})=>{
-  const response = await apiClient.post('/auth/reset-password',data)
+  const response = await apiClient.post(API_ROUTES.AUTH.RESET_PASSWORD,data)
   return response.data
 }

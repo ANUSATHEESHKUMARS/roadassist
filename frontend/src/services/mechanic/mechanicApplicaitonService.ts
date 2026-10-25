@@ -1,6 +1,6 @@
 
 import apiClient from "../apiClient";
-
+import API_ROUTES from "../apiRoutes";
 import type {
   MechanicOnboardingRequest,
   SaveMechanicDraftRequest,
@@ -13,7 +13,7 @@ export const saveMechanicDraft = async (
   payload: SaveMechanicDraftRequest
 ): Promise<OnboardingApiResponse> => {
   const response = await apiClient.patch<OnboardingApiResponse>(
-    "/mechanic/draft",
+   API_ROUTES.MECHANIC.DRAFT,
     payload
   );
 
@@ -27,7 +27,7 @@ export const submitMechanicApplication = async (
   payload: MechanicOnboardingRequest
 ): Promise<OnboardingApiResponse> => {
   const response = await apiClient.post<OnboardingApiResponse>(
-    "/mechanic/submit",
+   API_ROUTES.MECHANIC.SUBMIT,
     payload
   );
 
@@ -68,7 +68,7 @@ const uploadMechanicMedia = async (
   }
 
   const response = await apiClient.post<MediaUploadResponse>(
-    "/mechanic/media/upload",
+   API_ROUTES.MECHANIC.UPLOAD_MEDIA,
     formData
   );
 
@@ -143,7 +143,7 @@ export interface MyMechanicApplicationResponse {
 
 export const getMyMechanicApplication = async (): Promise<MyMechanicApplicationResponse> => {
   const response = await apiClient.get<MyMechanicApplicationResponse>(
-    "/mechanic/my-application"
+   API_ROUTES.MECHANIC.MY_APPLICATION
   );
 
   return response.data;

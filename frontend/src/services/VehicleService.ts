@@ -1,6 +1,7 @@
 import apiClient from "./apiClient";
 
 import type { Vehicle, VehicleApiResponse, VehicleFormData } from "@/types/user/vehicle";
+import API_ROUTES from "./apiRoutes";
 
 export const createVehicle = async (data: VehicleFormData) => {
   const formData = new FormData();
@@ -32,7 +33,7 @@ export const createVehicle = async (data: VehicleFormData) => {
   }
 
   const response = await apiClient.post(
-    "/vehicle/create",
+   API_ROUTES.VEHICLE.CREATE,
     formData
   );
 
@@ -40,7 +41,7 @@ export const createVehicle = async (data: VehicleFormData) => {
 };
 export const getVehicles = async () => {
   const response = await apiClient.get(
-    "/vehicle/getvehicles"
+    API_ROUTES.VEHICLE.LIST
   );
 
   return response.data;
@@ -50,7 +51,7 @@ export const getVehicleById = async (
 ): Promise<Vehicle> => {
 
   const response = await apiClient.get<VehicleApiResponse>(
-    `/vehicle/${vehicleId}`
+   API_ROUTES.VEHICLE.BY_ID(vehicleId)
   );
 
   console.log("DETAIL API RESPONSE:", response.data);
@@ -68,7 +69,7 @@ export const updateVehicle = async (
   formData: FormData
 ): Promise<Vehicle> => {
   const response = await apiClient.patch<VehicleApiResponse>(
-    `/vehicle/${vehicleId}`,
+   API_ROUTES.VEHICLE.BY_ID(vehicleId),
     formData
   );
 
@@ -79,7 +80,7 @@ export const updateVehicle = async (
 export const deleteVehicle = async (
   VehicleId : string
 ):Promise<void> =>{
-    await apiClient.delete(`/vehicle/${VehicleId}`)
+    await apiClient.delete(API_ROUTES.VEHICLE.BY_ID(VehicleId))
 }
 
 

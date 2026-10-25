@@ -1,5 +1,6 @@
 
 import apiClient from "../apiClient";
+import API_ROUTES from "../apiRoutes";
 
 export type MechanicApplicationStatus =
   | "incomplete"
@@ -53,7 +54,8 @@ export const getMechanicApplications = async (
   status: MechanicApplicationStatus = "pending"
 ): Promise<MechanicApplicationsResponse> => {
   const response = await apiClient.get<MechanicApplicationsResponse>(
-    "/admin/mechanic-applications",
+    
+    API_ROUTES.ADMIN.MECHANIC_APPLICATIONS,
     {
       params: { status },
     }
@@ -66,7 +68,7 @@ export const approveMechanicApplication = async (
   applicationId: string
 ): Promise<MechanicApplicationActionResponse> => {
   const response = await apiClient.patch<MechanicApplicationActionResponse>(
-    `/admin/mechanic-applications/${applicationId}/approve`
+    API_ROUTES.ADMIN.APPROVE_MECHANIC_APPLICATION(applicationId)
   );
 
   return response.data;
@@ -77,7 +79,7 @@ export const rejectMechanicApplication = async (
   reason: string
 ): Promise<MechanicApplicationActionResponse> => {
   const response = await apiClient.patch<MechanicApplicationActionResponse>(
-    `/admin/mechanic-applications/${applicationId}/reject`,
+   API_ROUTES.ADMIN.REJECT_MECHANIC_APPLICATION(applicationId),
     { reason }
   );
 

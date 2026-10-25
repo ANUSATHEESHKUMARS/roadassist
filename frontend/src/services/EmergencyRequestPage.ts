@@ -3,6 +3,7 @@ import type {
 } from "@/types/emergencyRequest";
 
 import apiClient from "./apiClient";
+import API_ROUTES from "./apiRoutes";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -31,7 +32,7 @@ export const emergencyRequestService = {
     });
 
     const response = await apiClient.post<ApiResponse<UploadedImages>>(
-      "/emergency-requests/images",
+      API_ROUTES.EMERGENCY_REQUEST.UPLOAD_IMAGES,
       formData
     );
 
@@ -43,7 +44,7 @@ export const emergencyRequestService = {
   ): Promise<CreatedEmergencyRequest> {
     const response = await apiClient.post<
       ApiResponse<CreatedEmergencyRequest>
-    >("/emergency-requests", payload);
+    >(API_ROUTES.EMERGENCY_REQUEST.BASE, payload);
 
     return response.data.data;
   },

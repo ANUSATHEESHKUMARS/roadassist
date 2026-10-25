@@ -1,5 +1,6 @@
 import type { AdminUser } from "@/types/admin/user";
 import apiClient from "../apiClient";
+import API_ROUTES from "../apiRoutes";
 
 
 
@@ -39,7 +40,7 @@ export const getAdminUser = async (search: string = "",
     page = 1,
     limit = 10
 ): Promise<GetAdminUserResponse> => {
-    const response = await apiClient.get<GetAdminUserResponse>('/admin/users', {
+    const response = await apiClient.get<GetAdminUserResponse>(API_ROUTES.ADMIN.USERS, {
         params: {
             search,
             page,
@@ -52,13 +53,13 @@ export const getAdminUser = async (search: string = "",
 export const blockAdminUser = async (
     userId: string,
 ): Promise<UpdateUserStatusResponse> => {
-    const response = await apiClient.patch<UpdateUserStatusResponse>(`/admin/user/${userId}/block`)
+    const response = await apiClient.patch<UpdateUserStatusResponse>(API_ROUTES.ADMIN.BLOCK_USER(userId))
     return response.data
 }
 
 export const unblockAdminuser = async (
     userId: string
 ): Promise<UpdateUserStatusResponse> => {
-    const resposne = await apiClient.patch<UpdateUserStatusResponse>(`/admin/user/${userId}/unblock`)
+    const resposne = await apiClient.patch<UpdateUserStatusResponse>(API_ROUTES.ADMIN.UNBLOCK_USER(userId))
     return resposne.data
 }
