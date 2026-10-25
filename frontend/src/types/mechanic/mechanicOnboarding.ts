@@ -47,7 +47,7 @@ export interface DocumentEntry {
 
 
 export interface MechanicOnboardingRequest {
-    profilePhotoKey?:string;
+  profilePhotoKey?: string;
   experienceYears: number;
   specialization: string[];
   supportedVehicleTypes: string[];

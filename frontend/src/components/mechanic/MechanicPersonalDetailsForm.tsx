@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   MapPin,
   Hash,
@@ -13,10 +13,13 @@ import {
   X,
   Wrench,
   Trash2,
+  Navigation,
+  AlertCircle,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 import type {
   MechanicOnboardingRequest,
@@ -42,6 +45,69 @@ export const MechanicPersonalDetailsForm: React.FC<PersonalProps> = ({
   onRemoveProfilePhoto,
 }) => {
 
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const [locationError, setLocationError] = useState("");
+
+  const handleFetchLocation = () => {
+    if (isFetchingLocation) return;
+
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsFetchingLocation(true);
+    setLocationError("");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        onChange({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setIsFetchingLocation(false);
+        setLocationError("");
+      },
+      (error) => {
+        setIsFetchingLocation(false);
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError(
+              "Location access was denied. Please allow location access in your browser settings and try again."
+            );
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError(
+              "Location information is unavailable. Please try again."
+            );
+            break;
+          case error.TIMEOUT:
+            setLocationError(
+              "The location request timed out. Please try again."
+            );
+            break;
+          default:
+            setLocationError(
+              "An unknown error occurred while fetching your location."
+            );
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
+  };
+
+  const handleRemoveLocation = () => {
+    onChange({
+      latitude: undefined,
+      longitude: undefined,
+    });
+    setLocationError("");
+  };
 
 const handleRemovePhoto = () => {
     onChange({
@@ -348,6 +414,138 @@ const handleRemovePhoto = () => {
             {errors.serviceRadiusKm && (
               <p role="alert" className="text-[11px] text-destructive">
                 {errors.serviceRadiusKm}
+              </p>
+            )}
+          </div>
+
+          {/* GPS Location */}
+          <div className="space-y-3 sm:col-span-2">
+            <div className="border-t border-border/40 pt-4">
+              <Label className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                <Navigation className="h-3.5 w-3.5 text-muted-foreground" />
+                GPS Coordinates
+              </Label>
+
+              <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
+                Fetch your current GPS location to help customers find you accurately.
+                This allows RoadAssist to show your exact position on the map.
+              </p>
+            </div>
+
+            {/* Location Status */}
+            {data.latitude !== undefined && data.longitude !== undefined ? (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                  <span className="text-xs font-semibold text-emerald-500">
+                    Location captured successfully
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Latitude
+                    </span>
+                    <p className="font-mono text-xs text-foreground bg-input/50 border border-border rounded-lg px-3 py-2">
+                      {data.latitude.toFixed(6)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Longitude
+                    </span>
+                    <p className="font-mono text-xs text-foreground bg-input/50 border border-border rounded-lg px-3 py-2">
+                      {data.longitude.toFixed(6)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleFetchLocation}
+                    disabled={isFetchingLocation}
+                    className="h-8 gap-2 text-[11px]"
+                  >
+                    {isFetchingLocation ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Navigation className="h-3.5 w-3.5" />
+                    )}
+                    {isFetchingLocation ? "Updating..." : "Update Location"}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRemoveLocation}
+                    className="h-8 gap-2 text-[11px] text-muted-foreground hover:text-destructive hover:border-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Remove
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-border bg-card p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+                    <Navigation className="h-5 w-5 text-primary" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-foreground">
+                      No location set
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      Click the button below to detect your GPS coordinates automatically.
+                    </p>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleFetchLocation}
+                  disabled={isFetchingLocation}
+                  className="w-full sm:w-auto h-10 gap-2 text-xs font-semibold"
+                >
+                  {isFetchingLocation ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Fetching location...
+                    </>
+                  ) : (
+                    <>
+                      <Navigation className="h-4 w-4" />
+                      Fetch My Location
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* Location Error */}
+            {locationError && (
+              <div
+                role="alert"
+                className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5"
+              >
+                <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                <p className="text-[11px] leading-relaxed text-destructive">
+                  {locationError}
+                </p>
+              </div>
+            )}
+
+            {errors.location && (
+              <p role="alert" className="text-[11px] text-destructive">
+                {errors.location}
               </p>
             )}
           </div>
