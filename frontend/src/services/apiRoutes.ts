@@ -55,7 +55,7 @@ const API_ROUTES = {
     MEDIA_BY_ID: (mediaId: string) =>
       `/admin/media/${mediaId}`,
   },
-    SUPERADMIN: {
+  SUPERADMIN: {
     ADMINS: "/superadmin/admins",
   },
 

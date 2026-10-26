@@ -18,7 +18,7 @@ import {
 
 
 export const Header: React.FC = () => {
-const {showToast} = useToast()
+  const { showToast } = useToast()
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
@@ -33,10 +33,10 @@ const {showToast} = useToast()
 
   const onLogout = async () => {
     await handleLogout();
-  showToast(
-    "Logged out successfully",
-    "success"
-  );
+    showToast(
+      "Logged out successfully",
+      "success"
+    );
     navigate("/login", {
       replace: true,
     });
@@ -99,39 +99,39 @@ const {showToast} = useToast()
           </div>
 
           {/* Logout */}
-        <AlertDialog>
-  <AlertDialogTrigger >
-    <button
-      type="button"
-      className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-    >
-      Logout
-    </button>
-  </AlertDialogTrigger>
+          <AlertDialog>
+            <AlertDialogTrigger >
+              <button
+                type="button"
+                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Logout
+              </button>
+            </AlertDialogTrigger>
 
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>
-        Are you sure you want to logout?
-      </AlertDialogTitle>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Are you sure you want to logout?
+                </AlertDialogTitle>
 
-      <AlertDialogDescription>
-        You will be signed out of your RoadAssist account and redirected to the
-        login page.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
+                <AlertDialogDescription>
+                  You will be signed out of your RoadAssist account and redirected to the
+                  login page.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
 
-    <AlertDialogFooter>
-      <AlertDialogCancel>
-        Cancel
-      </AlertDialogCancel>
+              <AlertDialogFooter>
+                <AlertDialogCancel>
+                  Cancel
+                </AlertDialogCancel>
 
-      <AlertDialogAction onClick={onLogout}>
-        Logout
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
+                <AlertDialogAction onClick={onLogout}>
+                  Logout
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
         </div>
 

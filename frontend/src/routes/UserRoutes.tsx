@@ -50,15 +50,15 @@ export const userRoutes: RouteObject[] = [
                 path: "mechanic-application",
                 element: <MechanicApplicationStatusPage />,
               },
-              
+
             ],
           },
-           {
+          {
             path: "/mechanic/onboarding",
             element: <MechanicOnboardingPage />,
-          },{
-            path :"/user/emergency",
-            element:<EmergencyRequestPage/>
+          }, {
+            path: "/user/emergency",
+            element: <EmergencyRequestPage />
           }
 
         ],
