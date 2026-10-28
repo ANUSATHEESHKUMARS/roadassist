@@ -65,17 +65,9 @@ import { VerifyPasswordResetOtpController } from "../presentation/controllers/Ve
 import { ResetPasswordController } from "../presentation/controllers/ResetPasswordController.js";
 import { ApproveMechanicApplicationUseCase } from "../application/useCase/admin/ApproveMechanicApplicationUseCase.js";
 import { RejectMechanicApplicationUseCase } from "../application/useCase/admin/RejectMechanicApplicationUseCase.js";
-import { RedisMechanicLocationRepository } from "../infrastructure/repositories/RedisMechanicLocationRepository.js";
-import { MongoMechanicRequestRepository } from "../infrastructure/repositories/MongoMechanicRequestRepository.js";
-import { UpdateMechanicLocationUseCase } from "../application/useCase/mechanic/UpdateMechanicLocationUseCase.js";
-import { GetMechanicLocationStatusUseCase } from "../application/useCase/mechanic/GetMechanicLocationStatusUseCase.js";
-import { GetIncomingRequestsUseCase } from "../application/useCase/mechanic/GetIncomingRequestsUseCase.js";
-import { RespondToEmergencyRequestUseCase } from "../application/useCase/mechanic/RespondToEmergencyRequestUseCase.js";
-import { MechanicLocationController } from "../presentation/controllers/mechanic/MechanicLocationController.js";
-import { MechanicRequestController } from "../presentation/controllers/mechanic/MechanicRequestController.js";
-import { GetEmergencyRequestUseCase } from "../application/useCase/emergency/GetEmergencyRequestUseCase.js";
-import { GetEmergencyRequestController } from "../presentation/controllers/GetEmergencyRequestController.js";
 
+
+// ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
 
 const userRepository = new MongoUserRepository();
 
@@ -190,12 +182,7 @@ const getMediaUseCase = new GetMediaUseCase(mediaRepository, s3StorageService)
 const deleteMediaUseCase = new DeleteMediaUseCase(mediaRepository, s3StorageService)
 
 
-
-
-//mechanic 
-
-
-
+// ─── Mechanic Application ───────────────────────────────────────────────────
 
 
 const mechanicApplicationRepository = new MongoMechanicApplicaitonRepository()
@@ -225,76 +212,32 @@ const saveMechanicDraftUseCase = new SaveMechanicDraftUseCase(
     mechanicApplicationValidator
 )
 
-// ============================================================================
-// CLEAN ARCHITECTURE: EMERGENCY & MECHANIC LOCATION MATCHING
-// ============================================================================
 
-// 1. Infrastructure Layer (Repositories implementing domain repository interfaces)
 const emergencyRequestRepository = new EmergencyRequestRepository();
-const mechanicLocationRepository = new RedisMechanicLocationRepository();
-const mechanicRequestRepository = new MongoMechanicRequestRepository();
 
-// 2. Application Layer (Validators)
+// Application Layer (Validators)
 const createEmergencyRequestValidator = new CreateEmerencyRequestValidator();
 
-// 3. Application Layer (Use Cases)
-const updateMechanicLocationUseCase = new UpdateMechanicLocationUseCase(
-    mechanicLocationRepository,
-    userRepository
-);
-
-const getMechanicLocationStatusUseCase = new GetMechanicLocationStatusUseCase(
-    mechanicLocationRepository
-);
-
-const getIncomingRequestsUseCase = new GetIncomingRequestsUseCase(
-    mechanicRequestRepository,
-    emergencyRequestRepository
-);
-
-const respondToEmergencyRequestUseCase = new RespondToEmergencyRequestUseCase(
-    mechanicRequestRepository,
-    emergencyRequestRepository
-);
-
+// Application Layer (Use Cases)
 const createEmergencyRequestUseCase = new CreateEmergencyRequestUseCase(
     emergencyRequestRepository,
     vehiceRepository,
-    createEmergencyRequestValidator,
-    mechanicLocationRepository,
-    mechanicRequestRepository
-);
-
-const getEmergencyRequestUseCase = new GetEmergencyRequestUseCase(
-    emergencyRequestRepository
+    createEmergencyRequestValidator
 );
 
 const emergencyImageUploadUseCase = new UploadEmergencyImagesUseCase(
     s3StorageService
 );
 
-// 4. Presentation Layer (Controllers)
-export const mechanicLocationController = new MechanicLocationController(
-    updateMechanicLocationUseCase,
-    getMechanicLocationStatusUseCase
-);
-
-export const mechanicRequestController = new MechanicRequestController(
-    getIncomingRequestsUseCase,
-    respondToEmergencyRequestUseCase
-);
-
+// Presentation Layer (Controllers)
 export const createEmergencyRequestController = new CreateEmergencyRequestController(
     createEmergencyRequestUseCase
-);
-
-export const getEmergencyRequestController = new GetEmergencyRequestController(
-    getEmergencyRequestUseCase
 );
 
 export const emergencyImageUploadController = new UploadEmergencyImagesController(
     emergencyImageUploadUseCase
 );
+
 
 const submitMechanicApplicationUseCase = new SubmitMechanicApplicationUseCase(mechanicApplicationRepository, mechanicApplicationValidator)
 
