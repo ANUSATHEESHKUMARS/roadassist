@@ -17,11 +17,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { login, getCurrentUser } from "@/services/authService";
+import { login, getCurrentUser, googleLogin } from "@/services/authService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
-import apiClient from "@/services/apiClient";
 import type { MediaResponseData } from "@/types/media";
 
 
@@ -86,29 +85,32 @@ export default function Login() {
     setIsSubmitting(true);
 
     try {
+
+      console.log("Button clicked-----------------------------------------------------------")
       const response = await login({
         email,
         password,
       });
       console.log("login succes ayyii", response);
+    
       const userResponse = await getCurrentUser();
       const user = userResponse.data;
 
       console.log("LOGIN USER:", user);
       console.log("LOGIN ROLE:", user.role);
 
+
       setUser(user);
 
       showToast("Login successful", "success");
 
       if (user.role === "superadmin") {
-        console.log("GOING TO SUPER ADMIN");
         navigate("/superadmin/admins", { replace: true });
       } else if (user.role === "admin") {
-        console.log("GOING TO ADMIN");
         navigate("/admin/users", { replace: true });
+      } else if (user.role === "mechanic") {
+        navigate("/mechanic/dashboard", { replace: true });
       } else {
-        console.log("GOING TO USER");
         navigate("/user", { replace: true });
       }
     } catch (error: any) {
@@ -138,36 +140,43 @@ export default function Login() {
       const idToken = response.credential;
 
       if (!idToken) {
-        console.log("Google ID token not received");
+        showToast("Google sign-in failed. Please try again.", "error");
         return;
       }
 
-      const result = await apiClient.post("/auth/google", {
-        idToken,
-      });
-
-      console.log("Google login successful:", result.data);
+      await googleLogin(idToken);
 
       const userResponse = await getCurrentUser();
       const user = userResponse.data;
 
-      console.log("GOOGLE USER:", user);
-      console.log("GOOGLE ROLE:", user.role);
-
       setUser(user);
+
+      showToast("Login successful", "success");
 
       if (user.role === "superadmin") {
         navigate("/superadmin/admins", { replace: true });
       } else if (user.role === "admin") {
         navigate("/admin/users", { replace: true });
+      } else if (user.role === "mechanic") {
+        navigate("/mechanic/dashboard", { replace: true });
       } else {
         navigate("/user", { replace: true });
       }
 
     } catch (error: any) {
-      console.log("Google login failed");
-      console.log(error.response?.status);
-      console.log(error.response?.data);
+      const errorCode = error.response?.data?.code;
+
+      if (errorCode === "ACCOUNT_BLOCKED") {
+        showToast(
+          "Your account has been blocked. Please contact support.",
+          "error"
+        );
+      } else {
+        showToast(
+          "Google login failed. Please try again.",
+          "error"
+        );
+      }
     }
   };
 

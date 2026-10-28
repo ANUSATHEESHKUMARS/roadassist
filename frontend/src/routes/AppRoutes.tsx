@@ -4,6 +4,7 @@ import { publicRoutes } from "./PublicRoutes";
 import { userRoutes } from "./UserRoutes";
 import { adminRoutes } from "./AdminRoutes";
 import { superAdminRoutes } from "./SuperAdminRoutes";
+import { mechanicRoutes } from "./MechanicRoutes";
 
 export const AppRoutes = () => {
 
@@ -12,6 +13,7 @@ export const AppRoutes = () => {
         ...userRoutes,
         ...adminRoutes,
         ...superAdminRoutes,
+        ...mechanicRoutes,
 
         {
             path: "/user/dashboard",

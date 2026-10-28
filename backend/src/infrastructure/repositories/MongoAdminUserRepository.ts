@@ -22,7 +22,7 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
             }
         }
         const skip = (page - 1) * limit
-
+        
         const [users , totalRecords ] = await Promise.all([
             UserModel
             .find(filter)

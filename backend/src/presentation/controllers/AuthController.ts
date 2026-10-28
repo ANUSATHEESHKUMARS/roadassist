@@ -70,8 +70,11 @@ export class AuthController implements IAuthController {
 
 
     const loginUserDto: LoginUserDTO = req.body
+    console.log(req.body , "asdjfasdkjfklsdajfdklsjkfasjdkfj ----------------------------------------")
 
     const result = await this.loginUserUseCase.execute(loginUserDto)
+
+
 
     this.logger.info(
       `User login successful for email: ${loginUserDto.email}`
@@ -113,17 +116,29 @@ export class AuthController implements IAuthController {
 
     const result = await this.googleLoginUseCase.execute(idToken);
 
-    res.cookie("accessToken", result.accessToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax"
-    });
+    this.cookieService.setCookie(
+      res,
+      "accessToken",
+      result.accessToken,
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: ACCESS_TOKEN_MAX_AGE
+      }
+    );
 
-    res.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax"
-    });
+    this.cookieService.setCookie(
+      res,
+      "refreshToken",
+      result.refreshToken,
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: REFRESH_TOKEN_MAX_AGE
+      }
+    );
 
     const response: CommonResponse = {
       success: true,

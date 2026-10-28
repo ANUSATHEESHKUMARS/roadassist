@@ -28,14 +28,12 @@ export default function VerifyResetOtp() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [apiError, setApiError] = useState("");
 
-  // Redirect if no email was provided
   useEffect(() => {
     if (!email) {
       navigate("/forget-password", { replace: true });
     }
   }, [email, navigate]);
 
-  // Countdown timer
   useEffect(() => {
     if (timeLeft <= 0) return;
 

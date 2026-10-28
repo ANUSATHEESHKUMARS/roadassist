@@ -26,6 +26,10 @@ const PublicRoute = () => {
             return <Navigate to="/admin/users" replace />;
         }
 
+        if (user.role === "mechanic") {
+            return <Navigate to="/mechanic/dashboard" replace />;
+        }
+
         return <Navigate to="/user" replace />;
     }
 

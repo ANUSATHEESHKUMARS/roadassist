@@ -4,19 +4,19 @@ import { GetCurrentUserResponseDto } from "../../dtos/auth.js";
 import { IGetCurrentUserUseCase } from "../../interfaces/IGetCurrentUserUseCase.js";
 
 export class GetCurrentUserUseCase implements IGetCurrentUserUseCase {
-constructor(private userRepository : IUserRepository){}
-  async execute(userId: string) {
-    const user = await this.userRepository.findById(userId);
+    constructor(private userRepository: IUserRepository) { }
+    async execute(userId: string) {
+        const user = await this.userRepository.findById(userId);
 
-    if (!user) {
-        throw new NotfoundError("User not found");
+        if (!user) {
+            throw new NotfoundError("User not found");
+        }
+
+        return {
+            userId: user.userId!,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role
+        };
     }
-
-    return {
-        userId: user.userId!,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role
-    };
-}
 }

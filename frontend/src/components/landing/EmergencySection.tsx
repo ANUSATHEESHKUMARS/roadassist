@@ -10,7 +10,7 @@ interface EmergencySectionProps {
   media?: MediaResponseData
 }
 
-export const EmergencySection: React.FC<EmergencySectionProps> = ({ data , media}) => {
+export const EmergencySection: React.FC<EmergencySectionProps> = ({ data , media: _media}) => {
   return (
     <section id="emergency" className="relative py-24 overflow-hidden border-y border-border">
       {/* Background Dynamic Media */}

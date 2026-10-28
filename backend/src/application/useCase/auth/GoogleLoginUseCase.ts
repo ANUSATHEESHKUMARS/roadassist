@@ -2,6 +2,7 @@ import { IGoogleAuthService } from "../../contracts/IGoogleAuthService.js";
 import { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
 import { ITokenService } from "../../contracts/ITokenService.js";
 import { UnauthorizedError } from "../../../shared/errors/UnauthorizedError.js";
+import { ForbiddenError } from "../../../shared/errors/ForbiddenError.js";
 import { IGoogleLoginUseCase } from "../../interfaces/IGoogleLoginUseCase.js";
 
 
@@ -40,6 +41,13 @@ export class GoogleLoginUseCase implements IGoogleLoginUseCase {
                     email: googleUser.email,
                     googleId: googleUser.googleId
                 });
+        }
+
+        if (user.status === "blocked") {
+            throw new ForbiddenError(
+                "Your account has been blocked. Please contact support.",
+                "ACCOUNT_BLOCKED"
+            );
         }
 
         const accessToken =

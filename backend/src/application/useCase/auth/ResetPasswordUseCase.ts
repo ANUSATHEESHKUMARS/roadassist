@@ -46,7 +46,6 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
             );
         }
 
-        // 5. Check token expiration
         if (authorization.expiresAt.getTime() <= Date.now()) {
             await this.resetTokenRepository.consume(tokenHash);
 
@@ -56,7 +55,6 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
             );
         }
 
-        // 6. Find the user associated with the reset token
         const user = await this.userRepository.findbyemail(
             authorization.email
         );
@@ -70,7 +68,6 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
             );
         }
 
-        // 7. Hash the new password before updating the database
         const hashedPassword =
             await this.passwordHasher.hash(newPassword);
 
@@ -90,7 +87,6 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
                 "USER_ID_MISSING"
             );
         }
-        // 9. Update the user's password in MongoDB
         const updatedUser = await this.userRepository.updatePassword(
             user.userId,
             hashedPassword
@@ -103,7 +99,6 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
             );
         }
 
-        // 10. Invalidate any other reset authorizations for this email
         await this.resetTokenRepository.delete(authorization.email);
 
         return {

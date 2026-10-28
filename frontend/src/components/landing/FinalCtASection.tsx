@@ -10,7 +10,7 @@ interface FinalCTAProps {
   media?:MediaResponseData
 }
 
-export const FinalCTASection: React.FC<FinalCTAProps> = ({ data, media }) => {
+export const FinalCTASection: React.FC<FinalCTAProps> = ({ data, media: _media }) => {
   return (
     <section className="relative py-28 overflow-hidden border-t border-border">
       {/* Background Media */}

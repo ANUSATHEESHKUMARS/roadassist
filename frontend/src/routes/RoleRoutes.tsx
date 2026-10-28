@@ -7,6 +7,25 @@ interface RoleRouteProps {
     allowedRoles: UserRole[];
 }
 
+/**
+ * Returns the default redirect path for a given role.
+ * This prevents infinite redirect loops when a role does not match
+ * the allowedRoles of the current route.
+ */
+const getDefaultPathForRole = (role: UserRole): string => {
+    switch (role) {
+        case "superadmin":
+            return "/superadmin/admins";
+        case "admin":
+            return "/admin/users";
+        case "mechanic":
+            return "/mechanic/dashboard";
+        case "user":
+        default:
+            return "/user";
+    }
+};
+
 const RoleRoute = ({ allowedRoles }: RoleRouteProps) => {
 
     const user = useAuthStore((state) => state.user);
@@ -15,12 +34,8 @@ const RoleRoute = ({ allowedRoles }: RoleRouteProps) => {
         return <Navigate to="/login" replace />;
     }
 
-    console.log("AUTH USER:", user);
-    console.log("USER ROLE:", user.role);
-    console.log("ALLOWED ROLES:", allowedRoles);
-
     if (!allowedRoles.includes(user.role)) {
-        return <Navigate to="/user" replace />;
+        return <Navigate to={getDefaultPathForRole(user.role)} replace />;
     }
 
     return <Outlet />;

@@ -22,14 +22,12 @@ export class RedisPasswordResetTokenRepository
             throw new Error("Password reset token has expired");
         }
 
-        // Store by email (for email-based lookups and cleanup)
         await redisClient.set(
             emailKey,
             JSON.stringify({ tokenHash, expiresAt }),
             { EX: ttl }
         );
 
-        // Store by tokenHash (for token-based lookups during password reset)
         await redisClient.set(
             tokenKey,
             JSON.stringify({ email, expiresAt }),

@@ -119,7 +119,6 @@ const approveApplication = async (applicationId: string) => {
         showToast("Mechanic application approved.", "success");
         setExpandedId(null);
 
-        // Close the confirmation modal after success
         setPendingAction(null);
 
         // Refresh the application list

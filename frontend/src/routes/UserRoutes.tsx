@@ -9,9 +9,9 @@ import AddVehiclePage from "@/components/layout/user/AddVehiclePage";
 import EditVehiclePage from "@/components/layout/user/EditVehiclePage";
 import VehicleDetailsPage from "@/pages/user/VehicleDetail";
 import { UserLayout } from "@/components/layout/user/UserLayout";
-import MechanicOnboardingPage from "@/pages/mechanic/mechanicOnboardingPage";
 import MechanicApplicationStatusPage from "@/pages/mechanic/MechanicApplicationStatusPage";
 import EmergencyRequestPage from "@/pages/user/EmergencyRequestPage";
+import MechanicOnboardingPage from "@/pages/mechanic/mechanicOnboardingPage";
 
 export const userRoutes: RouteObject[] = [
   {
@@ -20,12 +20,13 @@ export const userRoutes: RouteObject[] = [
       {
         element: <RoleRoute allowedRoles={["user"]} />,
         children: [
-
+          // Standalone landing/home page at /user (no sidebar layout)
           {
             path: "/user",
             element: <UserLandingPage />,
           },
 
+          // Sub-pages wrapped in the sidebar/header UserLayout
           {
             path: "/user",
             element: <UserLayout />,
@@ -50,15 +51,15 @@ export const userRoutes: RouteObject[] = [
                 path: "mechanic-application",
                 element: <MechanicApplicationStatusPage />,
               },
-
+              
             ],
           },
-          {
+           {
             path: "/mechanic/onboarding",
             element: <MechanicOnboardingPage />,
-          }, {
-            path: "/user/emergency",
-            element: <EmergencyRequestPage />
+          },{
+            path :"/user/emergency",
+            element:<EmergencyRequestPage/>
           }
 
         ],
@@ -66,5 +67,3 @@ export const userRoutes: RouteObject[] = [
     ],
   },
 ];
-
-
