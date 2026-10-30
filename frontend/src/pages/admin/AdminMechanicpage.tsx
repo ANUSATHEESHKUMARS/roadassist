@@ -110,26 +110,26 @@ export default function MechanicApplicationsPage() {
     }, [fetchApplications]);
 
 
-const approveApplication = async (applicationId: string) => {
-    setActionId(applicationId);
+    const approveApplication = async (applicationId: string) => {
+        setActionId(applicationId);
 
-    try {
-        await approveMechanicApplication(applicationId);
+        try {
+            await approveMechanicApplication(applicationId);
 
-        showToast("Mechanic application approved.", "success");
-        setExpandedId(null);
+            showToast("Mechanic application approved.", "success");
+            setExpandedId(null);
 
-        setPendingAction(null);
+            setPendingAction(null);
 
-        // Refresh the application list
-        await fetchApplications();
-    } catch (error) {
-        console.error("Failed to approve application:", error);
-        showToast("Unable to approve this application.", "error");
-    } finally {
-        setActionId(null);
-    }
-};
+            // Refresh the application list
+            await fetchApplications();
+        } catch (error) {
+            console.error("Failed to approve application:", error);
+            showToast("Unable to approve this application.", "error");
+        } finally {
+            setActionId(null);
+        }
+    };
 
 
     const rejectApplication = async () => {
@@ -242,8 +242,8 @@ const approveApplication = async (applicationId: string) => {
                                         setExpandedId(null);
                                     }}
                                     className={`rounded-lg px-3 py-2 text-xs font-medium transition-colors ${status === item
-                                            ? "bg-primary text-primary-foreground"
-                                            : "bg-muted text-muted-foreground hover:text-foreground"
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-muted text-muted-foreground hover:text-foreground"
                                         }`}
                                 >
                                     {formatStatus(item)}
@@ -493,18 +493,18 @@ const approveApplication = async (applicationId: string) => {
                 )}
             </div>
 
-{pendingAction?.action === "approve" && (
-  <ConfirmActionModal
-    title="Approve mechanic application?"
-    message="Are you sure you want to approve this mechanic? The decision will be saved and reflected on the mechanic's side."
-    confirmLabel="Approve application"
-    loading={actionId === pendingAction.applicationId}
-    onCancel={() => setPendingAction(null)}
-    onConfirm={() => {
-      void approveApplication(pendingAction.applicationId);
-    }}
-  />
-)}
+            {pendingAction?.action === "approve" && (
+                <ConfirmActionModal
+                    title="Approve mechanic application?"
+                    message="Are you sure you want to approve this mechanic? The decision will be saved and reflected on the mechanic's side."
+                    confirmLabel="Approve application"
+                    loading={actionId === pendingAction.applicationId}
+                    onCancel={() => setPendingAction(null)}
+                    onConfirm={() => {
+                        void approveApplication(pendingAction.applicationId);
+                    }}
+                />
+            )}
 
             {rejectingId && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">

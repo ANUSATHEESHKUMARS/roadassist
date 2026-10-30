@@ -118,13 +118,14 @@ export default function VerifyOtp({
       const userResponse = await getCurrentUser();
 
       const user = userResponse.data;
+      const role = user.activeRole ?? user.role;
 
       console.log("verified user:", user);
       showToast("verification success", "success")
       setUser(user)
-      if (user.role === "superadmin") {
+      if (role === "superadmin") {
         navigate("/superadmin/admins", { replace: true });
-      } else if (user.role === "admin") {
+      } else if (role === "admin") {
         navigate("/admin/users", { replace: true });
       } else {
         navigate("/user", { replace: true });

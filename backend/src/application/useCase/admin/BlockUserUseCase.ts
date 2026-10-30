@@ -21,9 +21,7 @@ export class BlockUserUseCase implements IBlockUserUseCase{
         if(user.status === "blocked" ){
             throw new ConflictError('User is alredy blocked',"USER_ALREDY_BLOCKED")
         }
-        if(user.role === "superadmin"){
-            throw new ConflictError("SuperAdmin cannot be blocked through this operation","SUPERADMIN_BLOCK_NOT_ALLOWED")
-        }
+       
         const updatedUser = await this.userRepository.updateStatus(userId, "blocked")
 
         if(!updatedUser){

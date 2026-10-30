@@ -6,11 +6,12 @@ export class User {
         public email: string,
         public phoneNumber: string,
         private password: string | undefined,
-        public role: UserRole,
+        public roles: UserRole[],
         public userId?: string,
         public googleId?:string,
         public authProvider:AuthProvider = "LOCAL",
-        public status : AccountStatus ="active"
+        public status : AccountStatus ="active",
+        public activeRole:UserRole = "user"
     
     ) {}
 

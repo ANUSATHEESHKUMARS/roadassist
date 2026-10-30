@@ -12,7 +12,7 @@ interface UserActionMenuProps {
 export const UserActionsMenu: React.FC<UserActionMenuProps> = ({ user, onBlock,
   onUnblock
 }) => {
-  
+
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 

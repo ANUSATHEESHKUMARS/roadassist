@@ -92,23 +92,24 @@ export default function Login() {
         password,
       });
       console.log("login succes ayyii", response);
-    
+
       const userResponse = await getCurrentUser();
       const user = userResponse.data;
+      const role = user.activeRole ?? user.role;
 
       console.log("LOGIN USER:", user);
-      console.log("LOGIN ROLE:", user.role);
+      console.log("LOGIN ROLE:", role);
 
 
       setUser(user);
 
       showToast("Login successful", "success");
 
-      if (user.role === "superadmin") {
+      if (role === "superadmin") {
         navigate("/superadmin/admins", { replace: true });
-      } else if (user.role === "admin") {
+      } else if (role === "admin") {
         navigate("/admin/users", { replace: true });
-      } else if (user.role === "mechanic") {
+      } else if (role === "mechanic") {
         navigate("/mechanic/dashboard", { replace: true });
       } else {
         navigate("/user", { replace: true });
@@ -148,16 +149,17 @@ export default function Login() {
 
       const userResponse = await getCurrentUser();
       const user = userResponse.data;
+      const role = user.activeRole ?? user.role;
 
       setUser(user);
 
       showToast("Login successful", "success");
 
-      if (user.role === "superadmin") {
+      if (role === "superadmin") {
         navigate("/superadmin/admins", { replace: true });
-      } else if (user.role === "admin") {
+      } else if (role === "admin") {
         navigate("/admin/users", { replace: true });
-      } else if (user.role === "mechanic") {
+      } else if (role === "mechanic") {
         navigate("/mechanic/dashboard", { replace: true });
       } else {
         navigate("/user", { replace: true });

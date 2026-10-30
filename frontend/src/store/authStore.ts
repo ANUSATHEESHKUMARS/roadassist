@@ -17,7 +17,11 @@ export const useAuthStore = create<AuthState>()(
 
             setUser: (user) =>
                 set({
-                    user,
+                    // Normalize: backend sends `activeRole`, frontend uses `role`
+                    user: {
+                        ...user,
+                        role: user.activeRole ?? user.role,
+                    },
                     isAuthenticated: true
                 }),
 
@@ -28,7 +32,13 @@ export const useAuthStore = create<AuthState>()(
                 })
         }),
         {
-            name: "roadassist-auth"
+            name: "roadassist-auth",
+            onRehydrateStorage: () => (state) => {
+                // Normalize stale persisted data where `role` may be missing
+                if (state?.user && !state.user.role && state.user.activeRole) {
+                    state.user.role = state.user.activeRole;
+                }
+            }
         }
     )
 );

@@ -30,11 +30,17 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
                 "USER_NOT_FOUND"
             );
         }
+        if (user.status !== "active") {
+            throw new UnauthorizedError('Account is blocked',
+                "ACCOUNT_BLOCKED"
+            )
+        }
 
         const accessToken = this.tokenService.generateAccessToken({
             userId: user.userId!,
             email: user.email,
-            role: user.role
+            roles: user.roles,
+            activeRole: user.activeRole
         });
 
         return accessToken;

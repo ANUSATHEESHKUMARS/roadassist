@@ -14,8 +14,12 @@ export interface IUserRepository {
     ): Promise<User | null>
     updatePassword(userId: string, passwordHash: string): Promise<User | null>;
 
-    updateRole(userId: string,
-        role: UserRole
-    ): Promise<User | null>
+    addRole(userId: string,
+        roles: UserRole
+    ): Promise<User | null>;
+
+    updateActiveRole(userId:string,
+        roles:UserRole
+    ):Promise<User|null>
 }
 

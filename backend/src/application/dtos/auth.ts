@@ -1,7 +1,10 @@
+import { UserRole } from "../../domain/User/entities/User.js";
+
 export interface GetCurrentUserResponseDto {
     userId : string,
     fullName:string,
     email : string,
-    role : "user"|"mechanic"|"admin"|"superadmin"
+    roles : UserRole[];
+    activeRole:UserRole
 }
 

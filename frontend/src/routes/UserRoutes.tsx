@@ -18,7 +18,7 @@ export const userRoutes: RouteObject[] = [
     element: <ProtectedRoute />,
     children: [
       {
-        element: <RoleRoute allowedRoles={["user"]} />,
+        element: <RoleRoute allowedRoles={["user","mechanic"]} />,
         children: [
           // Standalone landing/home page at /user (no sidebar layout)
           {

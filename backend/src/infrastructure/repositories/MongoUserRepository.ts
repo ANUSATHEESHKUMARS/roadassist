@@ -12,7 +12,7 @@ export class MongoUserRepository implements IUserRepository {
          fullName: string;
          email: string;
          phoneNumber: string;
-         role: UserRole;
+         roles: UserRole[];
          authProvider: AuthProvider;
          password?: string;
          googleId?: string;
@@ -20,7 +20,7 @@ export class MongoUserRepository implements IUserRepository {
          fullName: user.fullName,
          email: user.email,
          phoneNumber: user.phoneNumber,
-         role: user.role,
+         roles: user.roles,
          authProvider: user.authProvider
       };
 
@@ -58,7 +58,7 @@ export class MongoUserRepository implements IUserRepository {
       const userDocument = await UserModel.create({
          fullName: data.fullName,
          email: data.email,
-         role: "user",
+         roles: ["user"],
          googleId: data.googleId,
          authProvider: "GOOGLE"
       })
@@ -96,13 +96,25 @@ export class MongoUserRepository implements IUserRepository {
       }
       return UserMapper.toDomain(updatedDocument)
    }
-   async updateRole(userId: string, role: UserRole): Promise<User | null> {
+   async addRole(userId: string, role: UserRole): Promise<User | null> {
       const updatedDocument = await UserModel.findByIdAndUpdate(userId, {
-         $set : {role}
+         $addToSet:{roles:role}
       },{
          new : true,
          runValidators:true
       }).exec()
+
+      if(!updatedDocument){
+         return null
+      }
+      return UserMapper.toDomain(updatedDocument)
+   }
+   async updateActiveRole(userId: string, role: UserRole): Promise<User | null> {
+      const updatedDocument = await UserModel.findOneAndUpdate({_id: userId,
+         roles:role
+      },{
+         $set:{activeRole:role}
+      },{new: true, runValidators:true}).exec()
 
       if(!updatedDocument){
          return null

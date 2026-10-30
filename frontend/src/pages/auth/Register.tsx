@@ -5,12 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
 import type { RegisterFormType } from "@/types/formType";
-import { register } from "@/services/authService";
+import { register, googleLogin, getCurrentUser } from "@/services/authService";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
-import apiClient from "@/services/apiClient";
 import { getApiErrorMessage } from "@/api/apiError";
+import { useAuthStore } from "@/store/authStore";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 import { getPublicMedia } from "@/services/mediaService";
 import type { MediaResponseData } from "@/types/media";
@@ -18,7 +18,8 @@ import type { MediaResponseData } from "@/types/media";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { showToast } = useToast()
+  const { showToast } = useToast();
+  const setUser = useAuthStore((state) => state.setUser);
   const [showPassword, setShowpasword] = useState(false);
   const [apiError, setApiError] = useState("");
 
@@ -36,7 +37,7 @@ export default function Register() {
       }
     }
     loadRegisterMedia()
-  })
+  }, [])
 
   const [role, setRole] = useState<"user" | "admin">("user");
 
@@ -128,20 +129,42 @@ export default function Register() {
       const idToken = response.credential;
 
       if (!idToken) {
-        console.log("Google ID token not received");
+        showToast("Google sign-in failed. Please try again.", "error");
         return;
       }
 
-      const result = await apiClient.post("/auth/google", {
-        idToken,
-      });
+      await googleLogin(idToken);
 
-      navigate("/user");
-      console.log("Google registration successful:", result.data);
+      const userResponse = await getCurrentUser();
+      const user = userResponse.data;
+
+      setUser(user);
+
+      showToast("Registration successful", "success");
+
+      if (user.role === "superadmin") {
+        navigate("/superadmin/admins", { replace: true });
+      } else if (user.role === "admin") {
+        navigate("/admin/users", { replace: true });
+      } else if (user.role === "mechanic") {
+        navigate("/mechanic/dashboard", { replace: true });
+      } else {
+        navigate("/user", { replace: true });
+      }
     } catch (error: any) {
-      console.log("Google registration failed");
-      console.log(error.response?.status);
-      console.log(error.response?.data);
+      const errorCode = error.response?.data?.code;
+
+      if (errorCode === "ACCOUNT_BLOCKED") {
+        showToast(
+          "Your account has been blocked. Please contact support.",
+          "error"
+        );
+      } else {
+        showToast(
+          "Google registration failed. Please try again.",
+          "error"
+        );
+      }
     }
   };
 

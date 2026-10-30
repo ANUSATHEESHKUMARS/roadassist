@@ -18,9 +18,7 @@ export class UnblockUserUseCase implements IUnblockUserUseCase{
         if(user.status === 'active'){
             throw new ConflictError("User is alredy active","CANT_BLOCK_USER")
         }
-        if(user.role === "superadmin"){
-            throw new ConflictError("Superadmin cannot be unblocked through this operation","CANT_BLOCK_SUPERADMIN")
-        }
+        
         const updatedUser = await this.userRepository.updateStatus(userId , "active")
 
        if(!updatedUser){

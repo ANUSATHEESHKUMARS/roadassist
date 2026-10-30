@@ -50,7 +50,8 @@ export class LoginUserUseCase implements ILoginUserUserCase {
         const accessToken = this.tokenService.generateAccessToken({
             userId: user.userId!,
             email: user.email,
-            role: user.role
+            roles: user.roles,
+            activeRole:user.activeRole
 
         })
 

@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link , useNavigate} from "react-router-dom";
 
 import {
     CheckCircle2,
@@ -14,6 +14,7 @@ import {
     ArrowRight,
     MapPin,
     ShieldCheck,
+    ArrowLeft,
 } from "lucide-react";
 
 import { useToast } from "@/components/ui/toast/ToastProvider";
@@ -90,6 +91,7 @@ const formatDate = (value?: string) => {
 };
 
 export default function MechanicApplicationStatusPage() {
+    const navigate = useNavigate()
     const { showToast } = useToast();
 
     const [loading, setLoading] = useState(true);
@@ -158,31 +160,46 @@ export default function MechanicApplicationStatusPage() {
     const config = statusConfig[application.status] ?? statusConfig.incomplete;
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Wrench className="h-4 w-4" />
-                        Mechanic Application
-                    </div>
-
-                    <h1 className="mt-2 text-2xl font-bold tracking-tight">
-                        Application Status
-                    </h1>
-                </div>
-
-                <button
-                    type="button"
-                    onClick={() => void fetchApplication()}
-                    disabled={loading}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 transition-colors"
-                >
-                    <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-                    Refresh
-                </button>
+       <div className="space-y-6 max-w-4xl mx-auto">
+    {/* Header */}
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Wrench className="h-4 w-4" />
+                Mechanic Application
             </div>
 
+            <h1 className="mt-2 text-2xl font-bold tracking-tight">
+                Application Status
+            </h1>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+            <button
+                type="button"
+                onClick={() => navigate("/user",{ replace: true })}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
+            >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+            </button>
+
+            <button
+                type="button"
+                onClick={() => void fetchApplication()}
+                disabled={loading}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 transition-colors"
+            >
+                <RefreshCw
+                    className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                />
+                Refresh
+            </button>
+        </div>
+    </div>
+
+ 
             {/* Status Card */}
             <div className={`rounded-xl border ${config.borderColor} ${config.bgColor} p-6`}>
                 <div className="flex items-start gap-4">

@@ -6,7 +6,7 @@ export class PendingRegistration {
         public email : string,
         public phoneNumber : string,
         private password : string,
-        public role :RegisterationRole,
+        public roles :RegisterationRole,
         public expiresAt : Date
 
     ){}

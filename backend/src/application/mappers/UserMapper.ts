@@ -8,11 +8,12 @@ export class UserMapper {
             document.email,
             document.phoneNumber,
             document.password,
-            document.role,
+            document.roles,
             document._id.toString(),
             document.googleId,
             document.authProvider,
-            document.status ?? "active"
+            document.status ?? "active",
+            document.activeRole
         )
     }
 }

@@ -24,9 +24,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ data , media}) => {
         />
 
         {/* Ambient Darkened Gradient Masks */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background/60" />
-
+       <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-background/10 to-transparent" />
+<div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-background/20" />
         {/* Subtle Tech Grid Pattern */}
         <div className="absolute inset-0 opacity-15 bg-[radial-gradient(var(--border)_1px,transparent_1px)] [background-size:24px_24px]" />
       </div>

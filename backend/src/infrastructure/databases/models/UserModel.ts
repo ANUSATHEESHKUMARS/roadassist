@@ -6,10 +6,11 @@ export interface IUserDocuments extends Document {
     email: string,
     phoneNumber: string,
     password: string,
-    role: UserRole,
+    roles: UserRole[],
     googleId?: string,
     authProvider: AuthProvider,
     status: UserStatus,
+    activeRole: UserRole
 
 }
 
@@ -31,26 +32,35 @@ const userSchema = new Schema<IUserDocuments>({
         type: String,
         required: false
     },
-    role: {
+    roles: {
+        type: [{
+            type: String,
+            enum: ["user", "mechanic", "admin", "superadmin"]
+        }],
+        required: true,
+        default: ["user"]
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    authProvider: {
+        type: String,
+        enum: ["LOCAL", "GOOGLE"],
+        default: "LOCAL"
+    },
+    status: {
         type: String,
         required: true,
-        enum: ["user", "mechanic", "admin", "superadmin"]
+        enum: ["active", "blocked"],
+        default: "active"
     },
-    googleId:{
-        type:String,
-        unique : true,
-        sparse:true
-    },
-    authProvider:{
-        type:String,
-        enum:["LOCAL","GOOGLE"],
-        default:"LOCAL"
-    },
-    status:{
+    activeRole: {
         type: String,
-        required:true,
-        enum:["active" , "blocked"],
-        default :"active"
+        required: true,
+        enum: ["user", "mechanic", "admin", "superadmin"],
+        default: "user"
     }
 
 
@@ -60,15 +70,15 @@ export type UserRole =
     | "user"
     | "mechanic"
     | "admin"
-    |"superadmin"
+    | "superadmin"
 
 export type AuthProvider =
     | "LOCAL"
     | "GOOGLE"
 
 
-export type UserStatus = 
-    |"active"
-    |"blocked"
+export type UserStatus =
+    | "active"
+    | "blocked"
 
 export const UserModel = model<IUserDocuments>("User", userSchema)

@@ -54,7 +54,8 @@ export class GoogleLoginUseCase implements IGoogleLoginUseCase {
             this.tokenService.generateAccessToken({
                 userId: user.userId!,
                 email: user.email,
-                role: user.role
+                roles: user.roles,
+                activeRole:user.activeRole
             });
 
         const refreshToken =

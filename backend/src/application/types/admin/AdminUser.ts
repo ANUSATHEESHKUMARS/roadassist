@@ -1,3 +1,5 @@
+import { UserRole } from "../../../domain/User/entities/User.js"
+
 export type AdminUserStatus = "active" | "blocked"
 
 export interface AdminUser {
@@ -5,7 +7,7 @@ export interface AdminUser {
     fullName:string,
     email:string,
     phoneNumber:string,
-    role:"user"|"mechanic"|"admin" | 'superadmin'
+    roles:UserRole[]
     authProvider:"LOCAL"|"GOOGLE",
     status:AdminUserStatus
 }

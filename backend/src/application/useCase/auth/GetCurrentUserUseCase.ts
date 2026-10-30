@@ -1,6 +1,5 @@
 import { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
 import { NotfoundError } from "../../../shared/errors/NotFoundError.js";
-import { GetCurrentUserResponseDto } from "../../dtos/auth.js";
 import { IGetCurrentUserUseCase } from "../../interfaces/IGetCurrentUserUseCase.js";
 
 export class GetCurrentUserUseCase implements IGetCurrentUserUseCase {
@@ -16,7 +15,8 @@ export class GetCurrentUserUseCase implements IGetCurrentUserUseCase {
             userId: user.userId!,
             fullName: user.fullName,
             email: user.email,
-            role: user.role
+            roles: user.roles,
+            activeRole:user.activeRole
         };
     }
 }
