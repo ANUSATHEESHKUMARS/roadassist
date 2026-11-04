@@ -13,6 +13,7 @@ export class MongoUserRepository implements IUserRepository {
          email: string;
          phoneNumber: string;
          roles: UserRole[];
+         activeRole:UserRole;
          authProvider: AuthProvider;
          password?: string;
          googleId?: string;
@@ -21,6 +22,7 @@ export class MongoUserRepository implements IUserRepository {
          email: user.email,
          phoneNumber: user.phoneNumber,
          roles: user.roles,
+         activeRole:user.activeRole,
          authProvider: user.authProvider
       };
 
@@ -59,6 +61,7 @@ export class MongoUserRepository implements IUserRepository {
          fullName: data.fullName,
          email: data.email,
          roles: ["user"],
+         activeRole:"user",
          googleId: data.googleId,
          authProvider: "GOOGLE"
       })
@@ -98,25 +101,26 @@ export class MongoUserRepository implements IUserRepository {
    }
    async addRole(userId: string, role: UserRole): Promise<User | null> {
       const updatedDocument = await UserModel.findByIdAndUpdate(userId, {
-         $addToSet:{roles:role}
-      },{
-         new : true,
-         runValidators:true
+         $addToSet: { roles: role }
+      }, {
+         new: true,
+         runValidators: true
       }).exec()
 
-      if(!updatedDocument){
+      if (!updatedDocument) {
          return null
       }
       return UserMapper.toDomain(updatedDocument)
    }
    async updateActiveRole(userId: string, role: UserRole): Promise<User | null> {
-      const updatedDocument = await UserModel.findOneAndUpdate({_id: userId,
-         roles:role
-      },{
-         $set:{activeRole:role}
-      },{new: true, runValidators:true}).exec()
+      const updatedDocument = await UserModel.findOneAndUpdate({
+         _id: userId,
+         roles: role
+      }, {
+         $set: { activeRole: role }
+      }, { new: true, runValidators: true }).exec()
 
-      if(!updatedDocument){
+      if (!updatedDocument) {
          return null
       }
       return UserMapper.toDomain(updatedDocument)

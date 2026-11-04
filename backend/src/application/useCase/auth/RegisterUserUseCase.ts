@@ -49,7 +49,6 @@ export class RegisterUserUseCase implements IRegisterUserUseCase {
             registerUserDto.email,
             registerUserDto.phoneNumber,
             hashedPassword,
-            registerUserDto.role,
             expiresAt
         )
 

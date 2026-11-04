@@ -6,10 +6,7 @@ export const superAdminOnly = (
     res : Response,
     next : NextFunction
 ): void => {
-    console.log(req.user , 'this is for checking everything')
-    if(req.user?.role !== "superadmin"){
-          console.log("SUPER ADMIN MIDDLEWARE ENTERED");
-
+    if(req.user?.activeRole !== "superadmin"){
         res.status(HttpStatusCode.CONFILCT).json({
             succes:false,
             message:"Super Admin acess required"

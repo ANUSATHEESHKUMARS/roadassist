@@ -390,7 +390,7 @@ const handleSubmit = async () => {
 
         console.log("Step 2: Submitting mechanic application...");
 
-        const submitResponse = await submitMechanicApplication(formData);
+        const submitResponse = await submitMechanicApplication();
 
         console.log("Submit response:", submitResponse);
 

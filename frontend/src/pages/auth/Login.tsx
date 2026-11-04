@@ -27,7 +27,26 @@ import type { MediaResponseData } from "@/types/media";
 import { getPublicMedia } from "@/services/mediaService";
 
 
+import type { UserRole } from "@/types/admin/auth";
 
+const getDashboardPath = (role: UserRole): string => {
+  switch (role) {
+    case "superadmin":
+      return "/superadmin/admins";
+
+    case "admin":
+      return "/admin/users";
+
+    case "mechanic":
+      return "/mechanic/dashboard";
+
+    case "user":
+      return "/user";
+
+    default:
+      throw new Error(`Unsupported role: ${role}`);
+  }
+};
 
 export default function Login() {
 
@@ -74,103 +93,136 @@ export default function Login() {
     loadLoginMedia();
   }, []);
 
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  e.preventDefault();
 
+  if (isSubmitting) return;
 
-    if (isSubmitting) {
-      return;
+  setIsSubmitting(true);
+
+  try {
+    // 1. Authenticate user
+    await login({
+      email,
+      password,
+    });
+
+    // 2. Fetch authenticated user's information
+    const userResponse = await getCurrentUser();
+    const user = userResponse.data;
+
+    // 3. Validate user information
+    if (
+      !user ||
+      !Array.isArray(user.roles) ||
+      user.roles.length === 0 ||
+      !user.roles.includes(user.activeRole)
+    ) {
+      throw new Error("Invalid user role information");
     }
-    setIsSubmitting(true);
 
-    try {
+    console.log("AUTHENTICATED USER:", user);
+    console.log("USER ROLES:", user.roles);
+    console.log("ACTIVE ROLE:", user.activeRole);
 
-      console.log("Button clicked-----------------------------------------------------------")
-      const response = await login({
-        email,
-        password,
-      });
-      console.log("login succes ayyii", response);
+    // 4. Get dashboard path
+    const dashboardPath = getDashboardPath(user.activeRole);
 
-      const userResponse = await getCurrentUser();
-      const user = userResponse.data;
-      const role = user.activeRole ?? user.role;
+    console.log("DASHBOARD PATH:", dashboardPath);
 
-      console.log("LOGIN USER:", user);
-      console.log("LOGIN ROLE:", role);
-
-
-      setUser(user);
-
-      showToast("Login successful", "success");
-
-      if (role === "superadmin") {
-        navigate("/superadmin/admins", { replace: true });
-      } else if (role === "admin") {
-        navigate("/admin/users", { replace: true });
-      } else if (role === "mechanic") {
-        navigate("/mechanic/dashboard", { replace: true });
-      } else {
-        navigate("/user", { replace: true });
-      }
-    } catch (error: any) {
-      console.log("login failed");
-      console.log(error.response?.status);
-      console.log("error", error.response?.data);
-
-      const errorCode = error.response?.data?.code;
-
-      if (errorCode === "ACCOUNT_BLOCKED") {
-        showToast(
-          "Your account has been blocked. Please contact support.",
-          "error"
-        );
-      } else {
-        showToast(
-          "Login failed. Please check your credentials.",
-          "error"
-        );
-      }
-    } finally {
-      setIsSubmitting(false);
+    if (!dashboardPath) {
+      throw new Error("Dashboard path not found");
     }
-  };
+
+    // 5. Store user in Zustand
+    setUser(user);
+
+    // 6. Show success message
+    showToast("Login successful", "success");
+
+    // 7. Navigate to dashboard
+    navigate(dashboardPath, {
+      replace: true,
+    });
+
+  } catch (error: any) {
+    console.error("Login failed:", error);
+
+    const errorCode = error.response?.data?.code;
+
+    if (errorCode === "ACCOUNT_BLOCKED") {
+      showToast(
+        "Your account has been blocked. Please contact support.",
+        "error"
+      );
+    } else if (error.message === "Invalid user role information") {
+      showToast(
+        "Unable to load your account permissions. Please contact support.",
+        "error"
+      );
+    } else {
+      showToast(
+        "Login failed. Please check your credentials.",
+        "error"
+      );
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   const handleGoogleLogin = async (response: CredentialResponse) => {
     try {
+      // 1. Get Google ID token
       const idToken = response.credential;
 
       if (!idToken) {
-        showToast("Google sign-in failed. Please try again.", "error");
+        showToast(
+          "Google sign-in failed. Please try again.",
+          "error"
+        );
         return;
       }
 
+      // 2. Authenticate using Google
       await googleLogin(idToken);
 
+      // 3. Fetch authenticated user's latest information
       const userResponse = await getCurrentUser();
       const user = userResponse.data;
-      const role = user.activeRole ?? user.role;
 
-      setUser(user);
-
-      showToast("Login successful", "success");
-
-      if (role === "superadmin") {
-        navigate("/superadmin/admins", { replace: true });
-      } else if (role === "admin") {
-        navigate("/admin/users", { replace: true });
-      } else if (role === "mechanic") {
-        navigate("/mechanic/dashboard", { replace: true });
-      } else {
-        navigate("/user", { replace: true });
+      if (
+        !user ||
+        !Array.isArray(user.roles) ||
+        user.roles.length === 0 ||
+        !user.roles.includes(user.activeRole)
+      ) {
+        throw new Error("Invalid user role information");
       }
 
+      // 5. Store user in Zustand
+      setUser(user);
+
+      // 6. Show success message
+      showToast("Login successful", "success");
+
+      // 7. Redirect according to active role
+      navigate(getDashboardPath(user.activeRole), {
+        replace: true,
+      });
+
     } catch (error: any) {
+      console.error("Google login failed:", error);
+
       const errorCode = error.response?.data?.code;
 
       if (errorCode === "ACCOUNT_BLOCKED") {
         showToast(
           "Your account has been blocked. Please contact support.",
+          "error"
+        );
+      } else if (error.message === "Invalid user role information") {
+        showToast(
+          "Unable to load your account permissions. Please contact support.",
           "error"
         );
       } else {
@@ -181,7 +233,6 @@ export default function Login() {
       }
     }
   };
-
   return (
     <div className="relative min-h-screen flex flex-col justify-between bg-[#060709] text-white selection:bg-[#ff3b30] selection:text-white font-sans overflow-x-hidden">
       {/* ================= FULL-PAGE AUTOMOTIVE BACKGROUND & OVERLAYS ================= */}

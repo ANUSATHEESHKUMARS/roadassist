@@ -38,7 +38,8 @@ export class MechanicApplicationController {
 
       const response : CommonResponse <typeof application>= {
         success:true,
-        message:"Mechanic applicatin draft saved succesfullyy"
+        message:"Mechanic applicatin draft saved succesfullyy",
+        data:application
       }
       res.status(HttpStatusCode.OK).json(response)
     }

@@ -55,7 +55,7 @@ const mechanicApplicationSchema =
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true,
-        index: true,
+        unique: true,
       },
 
       profilePhotoKey: String,
@@ -94,7 +94,8 @@ const mechanicApplicationSchema =
 
       serviceRadiusKm: {
         type: Number,
-        min: 0,
+        min: 0.1,
+        max:100
       },
 
       workshopName: String,

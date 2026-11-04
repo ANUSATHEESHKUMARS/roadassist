@@ -105,9 +105,8 @@ export default function Register() {
       email: formData.email,
       phoneNumber: formData.phoneNumber,
       password: formData.password,
-      role: role,
+      role,
     };
-    console.log("REQUEST DATA:", requestData);
 
     try {
       await register(requestData);
@@ -138,18 +137,41 @@ export default function Register() {
       const userResponse = await getCurrentUser();
       const user = userResponse.data;
 
+      // Validate the user's role information
+      if (
+        !user ||
+        !Array.isArray(user.roles) ||
+        user.roles.length === 0 ||
+        !user.roles.includes(user.activeRole)
+      ) {
+        throw new Error("Invalid user role information");
+      }
+
+      // Store authenticated user
       setUser(user);
 
       showToast("Registration successful", "success");
 
-      if (user.role === "superadmin") {
-        navigate("/superadmin/admins", { replace: true });
-      } else if (user.role === "admin") {
-        navigate("/admin/users", { replace: true });
-      } else if (user.role === "mechanic") {
-        navigate("/mechanic/dashboard", { replace: true });
-      } else {
-        navigate("/user", { replace: true });
+      // Navigate based on the active role
+      switch (user.activeRole) {
+        case "superadmin":
+          navigate("/superadmin/admins", { replace: true });
+          break;
+
+        case "admin":
+          navigate("/admin/users", { replace: true });
+          break;
+
+        case "mechanic":
+          navigate("/mechanic/dashboard", { replace: true });
+          break;
+
+        case "user":
+          navigate("/user", { replace: true });
+          break;
+
+        default:
+          throw new Error("Unsupported user role");
       }
     } catch (error: any) {
       const errorCode = error.response?.data?.code;
@@ -197,7 +219,7 @@ export default function Register() {
           />
         )}
       </div>
-      
+
       {/* High-Contrast Dual Darkness Overlay */}
       <div className="fixed inset-0 bg-[#060709]/85 backdrop-blur-[2px] z-0" />
       <div className="fixed inset-0 bg-gradient-to-t from-[#060709] via-[#060709]/60 to-transparent z-0" />

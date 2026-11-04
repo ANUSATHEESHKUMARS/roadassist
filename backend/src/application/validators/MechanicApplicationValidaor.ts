@@ -79,14 +79,6 @@ export class MechanicApplicationValidator {
       this.validateServiceRadius(data.serviceRadiusKm);
     }
 
-    if (data.serviceModel === "workshop" ||
-      data.serviceModel === "both"
-    ) {
-
-      if(data.workshopName !== undefined){
-        this.validateNonEmptyString(data.workshopName,'Workshop name',"INVALID_WORKSHOP_NAME")
-      }
-    }
 
  if (
   data.serviceModel === "workshop" ||
@@ -141,15 +133,20 @@ export class MechanicApplicationValidator {
 
     this.validateServiceModel(data.serviceModel);
 
-    this.validateNonEmptyString(
-      data.serviceAddress,
-      "Service address is required",
-      "SERVICE_ADDRESS_REQUIRED",
-    );
+   if (
+  data.serviceModel === "mobile" ||
+  data.serviceModel === "both"
+) {
+  this.validateNonEmptyString(
+    data.serviceAddress ?? "",
+    "Service address is required",
+    "SERVICE_ADDRESS_REQUIRED",
+  );
 
-    this.validatePincode(data.pincode ?? "");
+  this.validatePincode(data.pincode ?? "");
 
-    this.validateServiceRadius(data.serviceRadiusKm ?? NaN);
+  this.validateServiceRadius(data.serviceRadiusKm ?? NaN);
+}
 
     this.validateCoordinates(data.latitude, data.longitude);
 
@@ -326,11 +323,7 @@ export class MechanicApplicationValidator {
     }
 
  for (const [index, document] of documents.entries()) {
-    console.log(
-        `Document ${index + 1} received by validator:`,
-        JSON.stringify(document, null, 2)
-    );
-
+   
     if (!document || typeof document !== "object") {
         throw new BadRequest(
             `Document ${index + 1} is invalid`,

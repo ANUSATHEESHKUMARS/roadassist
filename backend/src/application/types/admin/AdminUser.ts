@@ -7,7 +7,8 @@ export interface AdminUser {
     fullName:string,
     email:string,
     phoneNumber:string,
-    roles:UserRole[]
+    roles:UserRole[];
+    activeRole:UserRole,
     authProvider:"LOCAL"|"GOOGLE",
     status:AdminUserStatus
 }

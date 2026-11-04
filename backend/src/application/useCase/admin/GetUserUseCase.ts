@@ -7,7 +7,8 @@ export class GetUserUseCase implements IGetUserUseCase {
     private adminUserRepository: IAdminUserRepository
   ) { }
   async execute(search: string | undefined, page: number, limit: number): Promise<{ users: GetUsersResponseDto[]; pagination: {currentPage: number, totalPage: number, totalRecords: number, pageSize: number}; }> {
-    const result = await this.adminUserRepository.findAllUser(search,
+    const result = await this.adminUserRepository.findAllUser(
+      search,
       page,
       limit
     )
@@ -20,7 +21,8 @@ export class GetUserUseCase implements IGetUserUseCase {
       fullName: user.fullName,
       email: user.email,
       phoneNumber: user.phoneNumber,
-      role: user.role,
+      roles: user.roles,
+      activeRole:user.activeRole,
       authProvider: user.authProvider,
       status: user.status
     }))

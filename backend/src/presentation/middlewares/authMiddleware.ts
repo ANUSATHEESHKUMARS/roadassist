@@ -1,51 +1,86 @@
+
 import { Request, Response, NextFunction } from "express";
+
 import { ITokenService } from "../../application/contracts/ITokenService.js";
 import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
 import { ForbiddenError } from "../../shared/errors/ForbiddenError.js";
 import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 
-export const authMiddleware = (tokenService: ITokenService, userRepository: IUserRepository) => {
+export const authMiddleware = (
+    tokenService: ITokenService,
+    userRepository: IUserRepository
+) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        const token = req.cookies?.accessToken
 
-        if (!token) {
-            return next(new UnauthorizedError("Authentication required", "AUTHENTICATION_REQUIRED")
-            );
-        }
-
-        let payload;
         try {
-            payload = tokenService.verifyAccessToken(token)
+            // 1. Get access token
+            const token = req.cookies?.accessToken;
 
-        } catch {
-            return next(new UnauthorizedError("Invalid or expired access token", "INVALID_ACCESS_TOKEN"))
-        }
-        const userId = payload.userId
+            if (!token) {
+                throw new UnauthorizedError(
+                    "Authentication required",
+                    "AUTHENTICATION_REQUIRED"
+                );
+            }
 
-        if (!userId) {
-            return next(new UnauthorizedError("Invalid access token",
-                "INVALID_ACCESS_TOKEN"
-            ))
-        }
-        try {
+            // 2. Verify access token
+            let payload;
 
-            const user = await userRepository.findById(userId)
+            try {
+                payload = tokenService.verifyAccessToken(token);
+            } catch {
+                throw new UnauthorizedError(
+                    "Invalid or expired access token",
+                    "INVALID_ACCESS_TOKEN"
+                );
+            }
+
+            // 3. Validate user ID
+            if (!payload.userId) {
+                throw new UnauthorizedError(
+                    "Invalid access token",
+                    "INVALID_ACCESS_TOKEN"
+                );
+            }
+
+            // 4. Fetch latest user from database
+            const user = await userRepository.findById(payload.userId);
+
             if (!user) {
-                return next(new UnauthorizedError("User accound not found", "USER_NOT_FOUND"))
-
+                throw new UnauthorizedError(
+                    "User account not found",
+                    "USER_NOT_FOUND"
+                );
             }
 
-            if (user.status === "blocked") {
-                return next(new ForbiddenError("Your account has been blocked. Please contact support.", "ACCOUNT_BLOCKED"))
-
+            // 5. Check account status
+            if (user.status !== "active") {
+                throw new ForbiddenError(
+                    "Your account has been blocked. Please contact support.",
+                    "ACCOUNT_BLOCKED"
+                );
             }
-            req.user = payload
-            return next()
+
+            // 6. Validate active role
+            if (!user.roles.includes(user.activeRole)) {
+                throw new ForbiddenError(
+                    "Invalid active role",
+                    "INVALID_ACTIVE_ROLE"
+                );
+            }
+
+            // 7. Attach latest user information
+            req.user = {
+                userId: user.userId!,
+                email: user.email,
+                roles: user.roles,
+                activeRole: user.activeRole
+            };
+
+            return next();
 
         } catch (error) {
-            return next(error)
+            return next(error);
         }
-    }
-} 
-
-
+    };
+};

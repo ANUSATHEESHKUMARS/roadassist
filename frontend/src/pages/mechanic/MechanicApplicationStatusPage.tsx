@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useCallback } from "react";
-import { Link , useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
     CheckCircle2,
@@ -160,46 +160,46 @@ export default function MechanicApplicationStatusPage() {
     const config = statusConfig[application.status] ?? statusConfig.incomplete;
 
     return (
-       <div className="space-y-6 max-w-4xl mx-auto">
-    {/* Header */}
-    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Wrench className="h-4 w-4" />
-                Mechanic Application
+        <div className="space-y-6 max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Wrench className="h-4 w-4" />
+                        Mechanic Application
+                    </div>
+
+                    <h1 className="mt-2 text-2xl font-bold tracking-tight">
+                        Application Status
+                    </h1>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/user", { replace: true })}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => void fetchApplication()}
+                        disabled={loading}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 transition-colors"
+                    >
+                        <RefreshCw
+                            className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                        />
+                        Refresh
+                    </button>
+                </div>
             </div>
 
-            <h1 className="mt-2 text-2xl font-bold tracking-tight">
-                Application Status
-            </h1>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
-            <button
-                type="button"
-                onClick={() => navigate("/user",{ replace: true })}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
-            >
-                <ArrowLeft className="h-4 w-4" />
-                Back
-            </button>
-
-            <button
-                type="button"
-                onClick={() => void fetchApplication()}
-                disabled={loading}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 transition-colors"
-            >
-                <RefreshCw
-                    className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
-                />
-                Refresh
-            </button>
-        </div>
-    </div>
-
- 
             {/* Status Card */}
             <div className={`rounded-xl border ${config.borderColor} ${config.bgColor} p-6`}>
                 <div className="flex items-start gap-4">
@@ -320,13 +320,12 @@ export default function MechanicApplicationStatusPage() {
                                     </div>
                                 </div>
 
-                                <span className={`text-xs font-medium ${
-                                    doc.verificationStatus === "verified"
+                                <span className={`text-xs font-medium ${doc.verificationStatus === "verified"
                                         ? "text-emerald-500"
                                         : doc.verificationStatus === "rejected"
                                             ? "text-red-500"
                                             : "text-amber-500"
-                                }`}>
+                                    }`}>
                                     {doc.verificationStatus.charAt(0).toUpperCase() + doc.verificationStatus.slice(1)}
                                 </span>
 
@@ -338,6 +337,17 @@ export default function MechanicApplicationStatusPage() {
                             </div>
                         ))}
                     </div>
+                </div>
+            )}
+            {application.status === "approved" && (
+                <div className="flex justify-end">
+                    <Link
+                        to="/mechanic/dashboard"
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                    >
+                        Go to Mechanic Dashboard
+                        <ArrowRight className="h-4 w-4" />
+                    </Link>
                 </div>
             )}
 

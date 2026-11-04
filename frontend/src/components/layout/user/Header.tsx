@@ -88,7 +88,7 @@ export const Header: React.FC = () => {
             </p>
 
             <p className="text-[11px] text-muted-foreground capitalize">
-              {user?.role ?? "user"}
+              {user?.roles ?? "user"}
             </p>
 
           </div>

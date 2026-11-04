@@ -1,3 +1,4 @@
+
 import type { RouteObject } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoutes";
@@ -11,59 +12,50 @@ import VehicleDetailsPage from "@/pages/user/VehicleDetail";
 import { UserLayout } from "@/components/layout/user/UserLayout";
 import MechanicApplicationStatusPage from "@/pages/mechanic/MechanicApplicationStatusPage";
 import EmergencyRequestPage from "@/pages/user/EmergencyRequestPage";
-import MechanicOnboardingPage from "@/pages/mechanic/mechanicOnboardingPage";
 
 export const userRoutes: RouteObject[] = [
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: <RoleRoute allowedRoles={["user","mechanic"]} />,
+    {
+        element: <ProtectedRoute />,
         children: [
-          // Standalone landing/home page at /user (no sidebar layout)
-          {
-            path: "/user",
-            element: <UserLandingPage />,
-          },
-
-          // Sub-pages wrapped in the sidebar/header UserLayout
-          {
-            path: "/user",
-            element: <UserLayout />,
-            children: [
-              {
-                path: "vehicles",
-                element: <MyVehiclesPage />,
-              },
-              {
-                path: "vehicles/add",
-                element: <AddVehiclePage />,
-              },
-              {
-                path: "vehicles/:vehicleId",
-                element: <VehicleDetailsPage />,
-              },
-              {
-                path: "vehicles/:vehicleId/edit",
-                element: <EditVehiclePage />,
-              },
-              {
-                path: "mechanic-application",
-                element: <MechanicApplicationStatusPage />,
-              },
-              
-            ],
-          },
-           {
-            path: "/mechanic/onboarding",
-            element: <MechanicOnboardingPage />,
-          },{
-            path :"/user/emergency",
-            element:<EmergencyRequestPage/>
-          }
-
+            {
+                element: <RoleRoute allowedRoles={["user"]} />,
+                children: [
+                    {
+                        path: "/user",
+                        element: <UserLandingPage />,
+                    },
+                    {
+                        path: "/user",
+                        element: <UserLayout />,
+                        children: [
+                            {
+                                path: "vehicles",
+                                element: <MyVehiclesPage />,
+                            },
+                            {
+                                path: "vehicles/add",
+                                element: <AddVehiclePage />,
+                            },
+                            {
+                                path: "vehicles/:vehicleId",
+                                element: <VehicleDetailsPage />,
+                            },
+                            {
+                                path: "vehicles/:vehicleId/edit",
+                                element: <EditVehiclePage />,
+                            },
+                            {
+                                path: "mechanic-application",
+                                element: <MechanicApplicationStatusPage />,
+                            },
+                        ],
+                    },
+                    {
+                        path: "/user/emergency",
+                        element: <EmergencyRequestPage />,
+                    },
+                ],
+            },
         ],
-      },
-    ],
-  },
+    },
 ];

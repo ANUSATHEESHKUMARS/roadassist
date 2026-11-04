@@ -30,10 +30,7 @@ export class SubmitMechanicApplicationUseCase
             );
         }
 
-        console.log(
-            "Saved application documents:",
-            JSON.stringify(application.documents, null, 2)
-        );
+        
 
         if (!application.id) {
             throw new BadRequest(

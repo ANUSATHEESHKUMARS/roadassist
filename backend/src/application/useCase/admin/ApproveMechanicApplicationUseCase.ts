@@ -87,18 +87,18 @@ export class ApproveMechanicApplicationUseCase implements IApproveMechanicApplic
             reviewedApplication
         );
 
+
         if (!updatedApplicaiton) {
             throw new BadRequest('Failed to approve mechanic application', "FAILED_TO_APPROVE_APPLICAITON")
         }
         const updatedUser = await this.userRepository.addRole(application.userId, "mechanic")
-        if (!updatedUser) {
 
+        if (!updatedUser) {
             throw new BadRequest(
-                "Application approved, but mechanic role update failed. Administrator intervention is required.",
+                "Application approved, but mechanic role update failed.",
                 "MECHANIC_ROLE_UPDATE_FAILED"
             );
         }
-
         return updatedApplicaiton;
     }
 }

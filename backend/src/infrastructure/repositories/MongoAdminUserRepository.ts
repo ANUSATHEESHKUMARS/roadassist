@@ -40,6 +40,7 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
             email : user.email,
             phoneNumber: user.phoneNumber,
             roles:user.roles,
+            activeRole:user.activeRole,
             authProvider:user.authProvider,
             status:user.status
 
@@ -71,6 +72,7 @@ export class MongoAdminUserRepository implements IAdminUserRepository {
             email:updatedUser.email,
             phoneNumber:updatedUser.phoneNumber,
             roles:updatedUser.roles,
+            activeRole:updatedUser.activeRole,
             authProvider:updatedUser.authProvider,
             status:updatedUser.status
         }

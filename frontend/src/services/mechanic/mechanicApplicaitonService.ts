@@ -7,30 +7,26 @@ import type {
   OnboardingApiResponse,
 } from "@/types/mechanic/mechanicOnboarding";
 
-import type{  MechanicDocumentType } from '../../types/mechanic/common'
+import type { MechanicDocumentType } from '../../types/mechanic/common'
 
 export const saveMechanicDraft = async (
   payload: SaveMechanicDraftRequest
 ): Promise<OnboardingApiResponse> => {
   const response = await apiClient.patch<OnboardingApiResponse>(
-   API_ROUTES.MECHANIC.DRAFT,
+    API_ROUTES.MECHANIC.DRAFT,
     payload
   );
 
-  
+
   return response.data;
 };
 
 
 
-export const submitMechanicApplication = async (
-  payload: MechanicOnboardingRequest
-): Promise<OnboardingApiResponse> => {
+export const submitMechanicApplication = async (): Promise<OnboardingApiResponse> => {
   const response = await apiClient.post<OnboardingApiResponse>(
-   API_ROUTES.MECHANIC.SUBMIT,
-    payload
+    API_ROUTES.MECHANIC.SUBMIT,
   );
-
   return response.data;
 };
 
@@ -68,7 +64,7 @@ const uploadMechanicMedia = async (
   }
 
   const response = await apiClient.post<MediaUploadResponse>(
-   API_ROUTES.MECHANIC.UPLOAD_MEDIA,
+    API_ROUTES.MECHANIC.UPLOAD_MEDIA,
     formData
   );
 
@@ -143,7 +139,7 @@ export interface MyMechanicApplicationResponse {
 
 export const getMyMechanicApplication = async (): Promise<MyMechanicApplicationResponse> => {
   const response = await apiClient.get<MyMechanicApplicationResponse>(
-   API_ROUTES.MECHANIC.MY_APPLICATION
+    API_ROUTES.MECHANIC.MY_APPLICATION
   );
 
   return response.data;

@@ -40,7 +40,8 @@ export class MongoSuperAdminRepository implements ISuperAdminRepository {
             fullName: admin.fullName,
             email: admin.email,
             phoneNumber: admin.phoneNumber,
-            role: admin.role,
+            roles: admin.roles,
+            activeRole:admin.activeRole,
             authProvider: admin.authProvider,
             status: admin.status
         }))

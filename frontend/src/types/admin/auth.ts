@@ -1,4 +1,9 @@
-export type UserRole = "user" | "admin" | "mechanic" | "superadmin";
+
+export type UserRole =
+    | "user"
+    | "admin"
+    | "mechanic"
+    | "superadmin";
 
 export interface AuthUser {
     userId: string;
@@ -6,7 +11,4 @@ export interface AuthUser {
     email: string;
     roles: UserRole[];
     activeRole: UserRole;
-    /** Convenience alias used throughout the frontend for role-based checks */
-    role: UserRole;
 }
-

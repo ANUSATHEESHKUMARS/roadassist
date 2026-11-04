@@ -1,17 +1,17 @@
-export type RegisterationRole = "user"|"admin";
+export type RegisterationRole = "user" | "admin";
 
 export class PendingRegistration {
     constructor(
-        public fullName : string,
-        public email : string,
-        public phoneNumber : string,
-        private password : string,
-        public roles :RegisterationRole,
-        public expiresAt : Date
+        public fullName: string,
+        public email: string,
+        public phoneNumber: string,
+        private password: string,
+        public expiresAt: Date,
+        public role: RegisterationRole = "user"
 
-    ){}
+    ) { }
 
-    getPassword (){
+    getPassword() {
         return this.password
     }
 }
