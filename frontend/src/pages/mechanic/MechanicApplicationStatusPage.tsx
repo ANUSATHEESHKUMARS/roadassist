@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 
 import { useToast } from "@/components/ui/toast/ToastProvider";
+import { useAuthStore } from "@/store/authStore";
+import { switchActiveRole } from "@/services/authService";
 
 import {
     getMyMechanicApplication,
@@ -93,9 +95,11 @@ const formatDate = (value?: string) => {
 export default function MechanicApplicationStatusPage() {
     const navigate = useNavigate()
     const { showToast } = useToast();
+    const updateActiveRole = useAuthStore((state) => state.updateActiveRole);
 
     const [loading, setLoading] = useState(true);
     const [application, setApplication] = useState<ApplicationData | null>(null);
+    const [isSwitchingRole, setIsSwitchingRole] = useState(false);
 
     const fetchApplication = useCallback(async () => {
         setLoading(true);
@@ -341,13 +345,38 @@ export default function MechanicApplicationStatusPage() {
             )}
             {application.status === "approved" && (
                 <div className="flex justify-end">
-                    <Link
-                        to="/mechanic/dashboard"
-                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                    <button
+                        type="button"
+                        disabled={isSwitchingRole}
+                        onClick={async () => {
+                            setIsSwitchingRole(true);
+                            try {
+                                const response = await switchActiveRole("mechanic");
+                                if (response.success && response.data) {
+                                    updateActiveRole(response.data.activeRole, response.data.roles);
+                                    showToast("Switched to mechanic mode", "success");
+                                    navigate("/mechanic/dashboard", { replace: true });
+                                }
+                            } catch {
+                                showToast("Failed to switch to mechanic role", "error");
+                            } finally {
+                                setIsSwitchingRole(false);
+                            }
+                        }}
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                     >
-                        Go to Mechanic Dashboard
-                        <ArrowRight className="h-4 w-4" />
-                    </Link>
+                        {isSwitchingRole ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Switching...
+                            </>
+                        ) : (
+                            <>
+                                Go to Mechanic Dashboard
+                                <ArrowRight className="h-4 w-4" />
+                            </>
+                        )}
+                    </button>
                 </div>
             )}
 

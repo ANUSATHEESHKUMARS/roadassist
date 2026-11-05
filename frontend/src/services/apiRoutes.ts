@@ -11,6 +11,7 @@ const API_ROUTES = {
     FORGOT_PASSWORD: "/auth/forget-password",
     VERIFY_RESET_OTP: "/auth/verify-reset-otp",
     RESET_PASSWORD: "/auth/reset-password",
+    SWITCH_ROLE: "/auth/switch-role",
   },
 
   USER: {

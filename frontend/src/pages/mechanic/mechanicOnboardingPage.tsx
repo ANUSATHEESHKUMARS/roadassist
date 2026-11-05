@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -30,6 +30,7 @@ import {
     saveMechanicDraft,
     submitMechanicApplication,
     uploadMechanicProfilePhoto,
+    getMyMechanicApplication,
 } from "@/services/mechanic/mechanicApplicaitonService";
 
 
@@ -72,6 +73,7 @@ export default function MechanicOnboardingPage() {
     const { showToast } = useToast();
 
     const [currentStep, setCurrentStep] = useState(1);
+    const [isCheckingExisting, setIsCheckingExisting] = useState(true);
 
 
     const [formData, setFormData] =
@@ -86,6 +88,43 @@ export default function MechanicOnboardingPage() {
     const [isUploadingProfilePhoto, setIsUploadingProfilePhoto] =
         useState(false);
     const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
+
+    // Guard: redirect if application already submitted/approved/rejected
+    useEffect(() => {
+        let cancelled = false;
+
+        const checkExistingApplication = async () => {
+            try {
+                const response = await getMyMechanicApplication();
+                const status = response.data?.status;
+
+                if (cancelled) return;
+
+                // If application is in a non-editable state, redirect to status page
+                if (
+                    status === "pending" ||
+                    status === "under_review" ||
+                    status === "approved" ||
+                    status === "rejected"
+                ) {
+                    navigate("/user/mechanic-application", { replace: true });
+                    return;
+                }
+            } catch {
+                // No application exists — allow onboarding to proceed
+            } finally {
+                if (!cancelled) {
+                    setIsCheckingExisting(false);
+                }
+            }
+        };
+
+        void checkExistingApplication();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [navigate]);
 
     const handleUpdate = (
         fields: Partial<MechanicOnboardingRequest>
@@ -433,6 +472,17 @@ const handleSubmit = async () => {
     }
 };
 
+
+    if (isCheckingExisting) {
+        return (
+            <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+                <div className="flex items-center gap-3 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm">Checking application status...</span>
+                </div>
+            </div>
+        );
+    }
 
     if (isSubmittedSuccess) {
         return (

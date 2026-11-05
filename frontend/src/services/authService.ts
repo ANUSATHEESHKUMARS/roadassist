@@ -74,3 +74,8 @@ export const resetPassword = async (data : {resetToken:string; newPassword:strin
   const response = await apiClient.post(API_ROUTES.AUTH.RESET_PASSWORD,data)
   return response.data
 }
+
+export const switchActiveRole = async (role: string) => {
+  const response = await apiClient.patch(API_ROUTES.AUTH.SWITCH_ROLE, { role });
+  return response.data;
+}

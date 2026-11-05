@@ -65,6 +65,8 @@ import { VerifyPasswordResetOtpController } from "../presentation/controllers/Ve
 import { ResetPasswordController } from "../presentation/controllers/ResetPasswordController.js";
 import { ApproveMechanicApplicationUseCase } from "../application/useCase/admin/ApproveMechanicApplicationUseCase.js";
 import { RejectMechanicApplicationUseCase } from "../application/useCase/admin/RejectMechanicApplicationUseCase.js";
+import { SwitchActiveRoleUseCase } from "../application/useCase/auth/SwitchActiveRoleUseCase.js";
+import { SwitchActiveRoleController } from "../presentation/controllers/auth/SwitchActiveRoleController.js";
 
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
@@ -302,5 +304,5 @@ const resetPasswordUseCase =
 
     export const resetPasswordController = new ResetPasswordController(resetPasswordUseCase)
 
-
-    
+const switchActiveRoleUseCase = new SwitchActiveRoleUseCase(userRepository);
+export const switchActiveRoleController = new SwitchActiveRoleController(switchActiveRoleUseCase);
