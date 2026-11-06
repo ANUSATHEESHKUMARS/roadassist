@@ -1,21 +1,12 @@
-
-export type BookingSlot =
-  | "morning"
-  | "afternoon"
-  | "full_day";
-
-export type BookingStatus =
-  | "pending"
-  | "confirmed"
-  | "assigned"
-  | "in_progress"
-  | "completed"
-  | "cancelled";
-
+import {
+  BookingSlot,
+  BookingStatus,
+} from "../Types/BookingTypes.js"
 export interface BookingProps {
   id?: string;
   userId: string;
   vehicleId: string;
+  mechanicId: string;
   serviceType: string;
   serviceAddress: string;
   scheduledDate: Date;
@@ -29,47 +20,10 @@ export interface BookingProps {
 export class Booking {
   private constructor(
     private readonly props: BookingProps
-  ) {}
+  ) { }
 
   static create(props: BookingProps): Booking {
-    if (!props.userId.trim()) {
-      throw new Error("User ID is required");
-    }
-
-    if (!props.vehicleId.trim()) {
-      throw new Error("Vehicle ID is required");
-    }
-
-    if (!props.serviceType.trim()) {
-      throw new Error("Service type is required");
-    }
-
-    if (!props.serviceAddress.trim()) {
-      throw new Error("Service address is required");
-    }
-
-    if (
-      !(props.scheduledDate instanceof Date) ||
-      Number.isNaN(props.scheduledDate.getTime())
-    ) {
-      throw new Error("A valid scheduled date is required");
-    }
-
-    if (props.scheduledDate.getTime() <= Date.now()) {
-      throw new Error("Scheduled date must be in the future");
-    }
-
-    const expectedAmount =
-      props.slot === "full_day" ? 1300 : 700;
-
-    if (props.estimatedAmount !== expectedAmount) {
-      throw new Error("Invalid booking amount");
-    }
-
-    return new Booking({
-      ...props,
-      status: props.status,
-    });
+    return new Booking(props);
   }
 
   get id(): string | undefined {
@@ -82,6 +36,10 @@ export class Booking {
 
   get vehicleId(): string {
     return this.props.vehicleId;
+  }
+
+  get mechanicId(): string {
+    return this.props.mechanicId;
   }
 
   get serviceType(): string {
@@ -120,3 +78,4 @@ export class Booking {
     return { ...this.props };
   }
 }
+
