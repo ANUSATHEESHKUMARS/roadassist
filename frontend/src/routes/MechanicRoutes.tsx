@@ -1,4 +1,3 @@
-
 import type { RouteObject } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoutes";
@@ -6,6 +5,9 @@ import RoleRoute from "./RoleRoutes";
 
 import MechanicOnboardingPage from "@/pages/mechanic/mechanicOnboardingPage";
 import MechanicDashboardPage from "@/pages/mechanic/MechanicDashboardPage";
+import MechanicServiceRequestsPage from "@/pages/mechanic/MechanicServiceRequestsPage";
+import { MechanicLayout } from "@/components/mechanic/MechanicLayout";
+
 
 export const mechanicRoutes: RouteObject[] = [
     {
@@ -22,13 +24,22 @@ export const mechanicRoutes: RouteObject[] = [
                 ],
             },
 
-            // Only approved mechanics can access their dashboard
+            // Only approved mechanics can access mechanic pages
             {
                 element: <RoleRoute allowedRoles={["mechanic"]} />,
                 children: [
                     {
-                        path: "/mechanic/dashboard",
-                        element: <MechanicDashboardPage />,
+                        element: <MechanicLayout />,
+                        children: [
+                            {
+                                path: "/mechanic/dashboard",
+                                element: <MechanicDashboardPage />,
+                            },
+                            {
+                                path: "/mechanic/service-requests",
+                                element: <MechanicServiceRequestsPage />,
+                            },
+                        ],
                     },
                 ],
             },
