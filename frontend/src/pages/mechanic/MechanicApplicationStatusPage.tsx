@@ -178,7 +178,7 @@ export default function MechanicApplicationStatusPage() {
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
-                        onClick={() => navigate("/user", { replace: true })}
+                        onClick={() => navigate("/mechanic/onboarding")}
                         className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4" />
@@ -321,10 +321,10 @@ export default function MechanicApplicationStatusPage() {
                                 </div>
 
                                 <span className={`text-xs font-medium ${doc.verificationStatus === "verified"
-                                        ? "text-emerald-500"
-                                        : doc.verificationStatus === "rejected"
-                                            ? "text-red-500"
-                                            : "text-amber-500"
+                                    ? "text-emerald-500"
+                                    : doc.verificationStatus === "rejected"
+                                        ? "text-red-500"
+                                        : "text-amber-500"
                                     }`}>
                                     {doc.verificationStatus.charAt(0).toUpperCase() + doc.verificationStatus.slice(1)}
                                 </span>

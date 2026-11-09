@@ -1,9 +1,10 @@
 import React from "react";
-import { Bell, Menu } from "lucide-react";
+import { Bell, Menu, ArrowLeftRight } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
 import { handleLogout } from "@/utils/logoutHandler";
 import { useToast } from "@/components/ui/toast/ToastProvider";
+import type { UserRole } from "@/types/admin/auth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,11 +19,35 @@ import {
 
 
 export const Header: React.FC = () => {
+  console.log("HEADER COMPONENT IS RENDERING");
+
   const { showToast } = useToast()
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
-  console.log("header user:", user);
+
+  const switchRole = useAuthStore((state) => state.switchRole);
+
+  const targetRole: UserRole | null =
+    user?.activeRole === "user" && user.roles.includes("mechanic")
+      ? "mechanic"
+      : user?.activeRole === "mechanic" && user.roles.includes("user")
+        ? "user"
+        : null;
+
+
+  const handleRoleSwitch = () => {
+    if (!targetRole) return;
+
+    switchRole(targetRole);
+
+    navigate(
+      targetRole === "mechanic"
+        ? "/mechanic/dashboard"
+        : "/user",
+      { replace: true }
+    );
+  };
 
   const initials = user?.fullName
     ?.split(" ")
@@ -63,7 +88,10 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Right Section */}
+
+
       <div className="flex items-center gap-4">
+
 
         {/* Notifications */}
         <button
@@ -88,7 +116,7 @@ export const Header: React.FC = () => {
             </p>
 
             <p className="text-[11px] text-muted-foreground capitalize">
-              {user?.roles ?? "user"}
+              {user?.activeRole ?? "user"}
             </p>
 
           </div>
@@ -97,9 +125,22 @@ export const Header: React.FC = () => {
           <div className="h-9 w-9 rounded-full bg-muted text-foreground border border-border flex items-center justify-center text-xs font-bold">
             {initials || "U"}
           </div>
+          {targetRole && (
+            <button
+              type="button"
+              onClick={handleRoleSwitch}
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+            >
+              <ArrowLeftRight className="size-4" />
 
+              <span className="hidden sm:inline">
+                Switch to {targetRole === "mechanic" ? "Mechanic" : "User"}
+              </span>
+            </button>
+          )}
           {/* Logout */}
           <AlertDialog>
+
             <AlertDialogTrigger >
               <button
                 type="button"

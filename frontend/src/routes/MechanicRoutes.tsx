@@ -4,8 +4,8 @@ import type { RouteObject } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import RoleRoute from "./RoleRoutes";
 
-import MechanicApplicationStatusPage from "@/pages/mechanic/MechanicApplicationStatusPage";
 import MechanicOnboardingPage from "@/pages/mechanic/mechanicOnboardingPage";
+import MechanicDashboardPage from "@/pages/mechanic/MechanicDashboardPage";
 
 export const mechanicRoutes: RouteObject[] = [
     {
@@ -28,7 +28,7 @@ export const mechanicRoutes: RouteObject[] = [
                 children: [
                     {
                         path: "/mechanic/dashboard",
-                        element: <MechanicApplicationStatusPage />,
+                        element: <MechanicDashboardPage />,
                     },
                 ],
             },
