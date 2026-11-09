@@ -8,6 +8,7 @@ export interface IAuthController {
     getCurrentUser(req: Request, res: Response): Promise<void>;
     logout(req:Request, res : Response):Promise<void>
     refreshToken(req : Request, res : Response):Promise<void>
+    switchActiveRole(req:Request, res : Response):Promise<void>
 }
 
 

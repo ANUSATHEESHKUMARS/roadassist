@@ -32,6 +32,8 @@ export default function createAuthRoutes(
     authRouter.post('/verify-reset-otp', asyncHandler(verifyPasswordResetOtpController.execute))
 
     authRouter.post('/reset-password' , asyncHandler(resetPasswordController.execute))
+
+    authRouter.patch('/active-role', auth, asyncHandler(authcontroller.switchActiveRole))
     
     return authRouter
 

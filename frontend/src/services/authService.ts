@@ -1,6 +1,20 @@
 import apiClient from "./apiClient";
 import type { RegisterRequest } from "@/types/auth";
 import API_ROUTES from "./apiRoutes";
+import type { UserRole } from "@/types/admin/auth";
+
+
+interface SwitchActiveRoleResponse {
+  success: boolean;
+  message: string;
+  data: {
+    userId: string;
+    fullName: string;
+    email: string;
+    roles: UserRole[];
+    activeRole: UserRole;
+  };
+}
 
 export const register = async (data: RegisterRequest) => {
   const response = await apiClient.post(API_ROUTES.AUTH.REGISTER, data)
@@ -22,10 +36,10 @@ export const verifyOtp = async (data: {
 };
 
 export const login = async (data: { email: string, password: string }) => {
-  try{
+  try {
     const response = await apiClient.post(API_ROUTES.AUTH.LOGIN, data)
-  return response.data
-  }catch(error){
+    return response.data
+  } catch (error) {
     console.log("login api error", error)
     throw error
   }
@@ -59,18 +73,25 @@ export const logout = async () => {
 
 
 
-export const requestPasswordReset = async (data : {email : string}) => {
+export const requestPasswordReset = async (data: { email: string }) => {
   const response = await apiClient.post(API_ROUTES.AUTH.FORGOT_PASSWORD, data)
 
   return response.data
 }
 
-export const verifyPasswordResetOtp = async (data : {email : string , otp : string}) => {
-  const response = await apiClient.post(API_ROUTES.AUTH.VERIFY_RESET_OTP,data)
+export const verifyPasswordResetOtp = async (data: { email: string, otp: string }) => {
+  const response = await apiClient.post(API_ROUTES.AUTH.VERIFY_RESET_OTP, data)
   return response.data
 }
 
-export const resetPassword = async (data : {resetToken:string; newPassword:string})=>{
-  const response = await apiClient.post(API_ROUTES.AUTH.RESET_PASSWORD,data)
+export const resetPassword = async (data: { resetToken: string; newPassword: string }) => {
+  const response = await apiClient.post(API_ROUTES.AUTH.RESET_PASSWORD, data)
+  return response.data
+}
+
+export const switchActiveRole = async (
+  activeRole: UserRole
+): Promise<SwitchActiveRoleResponse> => {
+  const response = await apiClient.patch<SwitchActiveRoleResponse>("/auth/active-role", { activeRole })
   return response.data
 }

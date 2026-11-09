@@ -65,6 +65,7 @@ import { VerifyPasswordResetOtpController } from "../presentation/controllers/Ve
 import { ResetPasswordController } from "../presentation/controllers/ResetPasswordController.js";
 import { ApproveMechanicApplicationUseCase } from "../application/useCase/admin/ApproveMechanicApplicationUseCase.js";
 import { RejectMechanicApplicationUseCase } from "../application/useCase/admin/RejectMechanicApplicationUseCase.js";
+import { SwitchActiveRoleUseCase } from "../application/useCase/auth/SwitchActiveRoleUseCase.js";
 
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
@@ -249,7 +250,7 @@ export const mechanicApplicationController = new MechanicApplicationController(s
 
 export const uploadMediaController = new UploadMediaController(uploadMediaUseCase, getMediaUseCase, deleteMediaUseCase, s3StorageService)
 
-
+const switchActiveRoleUseCase = new SwitchActiveRoleUseCase(userRepository)
 
 const refreshTokenUseCase = new RefreshTokenUseCase(userRepository, tokenService)
 
@@ -260,7 +261,9 @@ export const authcontroller = new AuthController(registerUserUseCase,
     cookieService,
     getCurrentUserUseCase,
     refreshTokenUseCase,
-    logger
+    logger,
+    switchActiveRoleUseCase
+
 
 )
 

@@ -13,30 +13,32 @@ import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
 import { GetCurrentUserUseCase } from "../../application/useCase/auth/GetCurrentUserUseCase.js";
 import { IRefreshTokenUseCase } from "../../application/interfaces/IRefreshTokenUseCase.js";
 import { ILogger } from "../../application/contracts/ILogger.js";
+import { ISwitchActiveRoleUseCase } from "../../application/interfaces/ISwitchActiveRoleUseCase.js";
+import { SwitchActiveRoleDto } from "../../application/dtos/SwitchActiveRoleDto.js";
 
 
 
 
 const ACCESS_TOKEN_MAX_AGE = Number(
-    process.env.ACCESS_TOKEN_MAX_AGE
+  process.env.ACCESS_TOKEN_MAX_AGE
 );
 
 const REFRESH_TOKEN_MAX_AGE = Number(
-    process.env.REFRESH_TOKEN_MAX_AGE
+  process.env.REFRESH_TOKEN_MAX_AGE
 );
 
 if (
-    !Number.isSafeInteger(ACCESS_TOKEN_MAX_AGE) ||
-    ACCESS_TOKEN_MAX_AGE <= 0
+  !Number.isSafeInteger(ACCESS_TOKEN_MAX_AGE) ||
+  ACCESS_TOKEN_MAX_AGE <= 0
 ) {
-    throw new Error("Invalid ACCESS_TOKEN_MAX_AGE configuration");
+  throw new Error("Invalid ACCESS_TOKEN_MAX_AGE configuration");
 }
 
 if (
-    !Number.isSafeInteger(REFRESH_TOKEN_MAX_AGE) ||
-    REFRESH_TOKEN_MAX_AGE <= 0
+  !Number.isSafeInteger(REFRESH_TOKEN_MAX_AGE) ||
+  REFRESH_TOKEN_MAX_AGE <= 0
 ) {
-    throw new Error("Invalid REFRESH_TOKEN_MAX_AGE configuration");
+  throw new Error("Invalid REFRESH_TOKEN_MAX_AGE configuration");
 }
 
 
@@ -48,7 +50,8 @@ export class AuthController implements IAuthController {
     private cookieService: ICookieService,
     private getCurrentUserUseCase: GetCurrentUserUseCase,
     private refreshTokenUseCase: IRefreshTokenUseCase,
-    private logger: ILogger
+    private logger: ILogger,
+    private switchActiveRoleUseCase: ISwitchActiveRoleUseCase
   ) { }
 
   register = async (req: Request, res: Response): Promise<void> => {
@@ -70,7 +73,7 @@ export class AuthController implements IAuthController {
 
 
     const loginUserDto: LoginUserDTO = req.body
-    console.log(req.body , "asdjfasdkjfklsdajfdklsjkfasjdkfj ----------------------------------------")
+    console.log(req.body, "asdjfasdkjfklsdajfdklsjkfasjdkfj ----------------------------------------")
 
     const result = await this.loginUserUseCase.execute(loginUserDto)
 
@@ -175,7 +178,7 @@ export class AuthController implements IAuthController {
     this.cookieService.clear(res, "accessToken");
     this.cookieService.clear(res, "refreshToken");
 
-    
+
     const response: CommonResponse = {
       success: true,
       message: "logout success"
@@ -212,6 +215,39 @@ export class AuthController implements IAuthController {
     };
 
     res.status(HttpStatusCode.OK).json(response);
+  };
+
+  switchActiveRole = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+
+    if (!req.user) {
+      throw new UnauthorizedError(
+        "Authentication required",
+        "AUTHENTICATION_REQUIRED"
+      );
+    }
+
+    const dto: SwitchActiveRoleDto = req.body;
+
+    const updatedUser =
+      await this.switchActiveRoleUseCase.execute(
+        req.user.userId,
+        dto
+      );
+
+    res.status(HttpStatusCode.OK).json({
+      success: true,
+      message: "Active role switched successfully",
+      data: {
+        userId: updatedUser.userId,
+        fullName: updatedUser.fullName,
+        email: updatedUser.email,
+        roles: updatedUser.roles,
+        activeRole: updatedUser.activeRole,
+      },
+    });
   };
 }
 
