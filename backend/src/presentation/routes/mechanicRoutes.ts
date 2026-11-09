@@ -49,6 +49,12 @@ mechanicRouter.get(
   asyncHandler(mechanicEmergencyController.getNearbyRequests)
 );
 
+mechanicRouter.get(
+  "/emergency-requests/:id",
+  auth,
+  asyncHandler(mechanicEmergencyController.getAssignedRequest)
+);
+
 mechanicRouter.post(
   "/emergency-requests/:id/accept",
   auth,

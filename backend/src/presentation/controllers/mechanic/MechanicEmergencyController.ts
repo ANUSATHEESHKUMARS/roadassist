@@ -5,13 +5,16 @@ import { IUpdateMechanicAvailabilityUseCase } from "../../../application/interfa
 import { IGetNearbyEmergencyRequestsUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
 import { IAcceptEmergencyRequestUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
 import { IRejectEmergencyRequestUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
+import { IGetMechanicAssignedRequestUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
+
 export class MechanicEmergencyController {
     constructor(
         private readonly updateMechanicAvailabilityUseCase: IUpdateMechanicAvailabilityUseCase,
         private readonly getNearbyEmergencyRequestsUseCase: IGetNearbyEmergencyRequestsUseCase,
         private readonly acceptEmergencyRequestUseCase: IAcceptEmergencyRequestUseCase,
-        private readonly rejectEmergencyRequestUseCase: IRejectEmergencyRequestUseCase
-    ) { }
+        private readonly rejectEmergencyRequestUseCase: IRejectEmergencyRequestUseCase,
+        private readonly getMechanicAssignedRequestUseCase: IGetMechanicAssignedRequestUseCase
+    ) {}
 
     updateAvailability = async (req: Request, res: Response): Promise<void> => {
         const userId = req.user?.userId;
@@ -79,7 +82,6 @@ export class MechanicEmergencyController {
 
         const { id } = req.params;
 
-
         if (!id || Array.isArray(id)) {
             const response: CommonResponse = {
                 success: false,
@@ -133,5 +135,37 @@ export class MechanicEmergencyController {
 
         res.status(HttpStatusCode.OK).json(response);
     };
-}
 
+    getAssignedRequest = async (req: Request, res: Response): Promise<void> => {
+        const userId = req.user?.userId;
+        if (!userId) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Unauthorized, please log in.",
+            };
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+            return;
+        }
+
+        const { id } = req.params;
+
+        if (!id || Array.isArray(id)) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Invalid emergency request ID",
+            };
+            res.status(HttpStatusCode.BAD_REQUEST).json(response);
+            return;
+        }
+
+        const result = await this.getMechanicAssignedRequestUseCase.execute(id, userId);
+
+        const response: CommonResponse<typeof result> = {
+            success: true,
+            message: "Assigned request details retrieved",
+            data: result,
+        };
+
+        res.status(HttpStatusCode.OK).json(response);
+    };
+}

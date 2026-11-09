@@ -19,7 +19,6 @@ export class AcceptEmergencyRequestUseCase implements IAcceptEmergencyRequestUse
             throw new BadRequest("Mechanic ID is required");
         }
 
-        // Verify the request exists
         const existing = await this.emergencyRequestRepository.findById(requestId);
 
         if (!existing) {
@@ -34,7 +33,6 @@ export class AcceptEmergencyRequestUseCase implements IAcceptEmergencyRequestUse
             throw new BadRequest("This request has been cancelled by the user");
         }
 
-        // Atomic accept — only succeeds if status is still pending/searching
         const accepted = await this.emergencyRequestRepository.atomicAccept(
             requestId,
             mechanicId

@@ -13,6 +13,8 @@ import VehicleDetailsPage from "@/pages/user/VehicleDetail";
 import { UserLayout } from "@/components/layout/user/UserLayout";
 import MechanicApplicationStatusPage from "@/pages/mechanic/MechanicApplicationStatusPage";
 import EmergencyRequestPage from "@/pages/user/EmergencyRequestPage";
+import EmergencyRequestStatusPage from "@/pages/user/EmergencyRequestStatusPage";
+import UserEmergencyRequestsListPage from "@/pages/user/UserEmergencyRequestsListPage";
 
 export const userRoutes: RouteObject[] = [
     {
@@ -52,6 +54,14 @@ export const userRoutes: RouteObject[] = [
                             {
                                 path: "emergency",
                                 element: <EmergencyRequestPage />,
+                            },
+                            {
+                                path: "emergency-requests",
+                                element: <UserEmergencyRequestsListPage />,
+                            },
+                            {
+                                path: "emergency-requests/:requestId",
+                                element: <EmergencyRequestStatusPage />,
                             },
                         ],
                     },

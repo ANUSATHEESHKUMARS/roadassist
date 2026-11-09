@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { EmergencyRequestDetail } from "@/types/emergencyRequest";
 import { mechanicEmergencyService } from "@/services/mechanic/mechanicEmergencyService";
 import { useToast } from "@/components/ui/toast/ToastProvider";
@@ -50,6 +51,7 @@ function timeAgo(dateStr?: string): string {
 
 export default function MechanicServiceRequestsPage() {
     const { showToast } = useToast();
+    const navigate = useNavigate();
 
     const [requests, setRequests] = useState<EmergencyRequestDetail[]>([]);
     const [loading, setLoading] = useState(true);
@@ -92,10 +94,8 @@ export default function MechanicServiceRequestsPage() {
             await mechanicEmergencyService.acceptRequest(requestId);
             showToast("Emergency request accepted successfully!", "success");
 
-            // Remove from list
-            setRequests((prev) =>
-                prev.filter((r) => (r.id ?? r._id) !== requestId)
-            );
+            // Navigate to the accepted request detail page
+            navigate(`/mechanic/emergency-requests/${requestId}`);
         } catch (err: unknown) {
             const message =
                 (err as { response?: { data?: { message?: string } } })

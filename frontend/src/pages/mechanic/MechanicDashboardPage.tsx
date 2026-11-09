@@ -208,113 +208,11 @@ export default function MechanicDashboardPage() {
     return (
         <div className="min-h-screen bg-background text-foreground">
             <div className="flex min-h-screen">
-                {/* Dashboard Sidebar */}
-                <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card md:flex">
-                    <div className="flex h-16 items-center gap-3 border-b border-border px-5">
-                        <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            <Wrench className="size-5" />
-                        </div>
-
-                        <div>
-                            <p className="text-sm font-bold">RoadAssist</p>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                Mechanic Portal
-                            </p>
-                        </div>
-                    </div>
-
-                    <nav className="flex-1 space-y-1 p-3">
-                        <SidebarItem
-                            icon={Activity}
-                            label="Dashboard"
-                            active={activePage === "dashboard"}
-                            onClick={() => handleSidebarClick("dashboard")}
-                        />
-                        <SidebarItem
-                            icon={BriefcaseBusiness}
-                            label="Service Requests"
-                            active={activePage === "service-requests"}
-                            onClick={() =>
-                                handleSidebarClick("service-requests")
-                            }
-                            badge={
-                                nearbyRequests.length > 0
-                                    ? nearbyRequests.length
-                                    : undefined
-                            }
-                        />
-                        <SidebarItem
-                            icon={CalendarDays}
-                            label="Bookings"
-                        />
-                        <SidebarItem
-                            icon={UserRound}
-                            label="My Profile"
-                        />
-                    </nav>
-
-                    <div className="border-t border-border p-3">
-                        <SidebarItem icon={Settings} label="Settings" />
-                    </div>
-                </aside>
-
+             
                 {/* Main Content */}
                 <div className="min-w-0 flex-1">
                     {/* Header */}
-                    <header className="flex min-h-16 items-center justify-between gap-3 border-b border-border px-3 py-2 sm:px-6">
-                        <div>
-                            <p className="text-sm font-semibold">
-                                Mechanic Dashboard
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                Manage your roadside assistance services
-                            </p>
-                        </div>
-
-                        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="relative"
-                                aria-label="Notifications"
-                            >
-                                <Bell className="size-4" />
-                                {nearbyRequests.length > 0 && (
-                                    <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-primary" />
-                                )}
-                            </Button>
-
-                            <div className="hidden min-w-0 items-center gap-2 sm:flex">
-                                <div className="flex size-9 items-center justify-center rounded-full border border-border bg-muted">
-                                    <UserRound className="size-4 text-muted-foreground" />
-                                </div>
-
-                                <div className="min-w-0">
-                                    <p className="max-w-32 truncate text-xs font-semibold">
-                                        {user?.fullName ?? "Mechanic"}
-                                    </p>
-                                    <p className="text-[10px] text-muted-foreground">
-                                        Verified Partner
-                                    </p>
-                                </div>
-                            </div>
-
-                            {canSwitchToUser && (
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleRoleSwitch}
-                                    className="gap-2 whitespace-nowrap"
-                                    aria-label="Switch to User portal"
-                                >
-                                    <ArrowLeftRight className="size-4" />
-                                    <span className="hidden sm:inline">
-                                        Switch to User
-                                    </span>
-                                </Button>
-                            )}
-                        </div>
-                    </header>
+                  
 
                     {/* Dashboard Content */}
                     <main className="space-y-6 p-4 sm:p-6 lg:p-8">

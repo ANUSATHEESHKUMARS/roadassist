@@ -39,6 +39,9 @@ const API_ROUTES = {
 
     REJECT_EMERGENCY_REQUEST: (requestId: string) =>
       `/mechanic/emergency-requests/${requestId}/reject`,
+
+    ASSIGNED_REQUEST: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}`,
   },
 
   ADMIN: {

@@ -71,6 +71,7 @@ import { UpdateMechanicAvailabilityUseCase } from "../application/useCase/mechan
 import { GetNearbyEmergencyRequestsUseCase } from "../application/useCase/mechanic/GetNearbyEmergencyRequestsUseCase.js";
 import { AcceptEmergencyRequestUseCase } from "../application/useCase/mechanic/AcceptEmergencyRequestUseCase.js";
 import { RejectEmergencyRequestUseCase as RejectEmergencyRequestMechanicUseCase } from "../application/useCase/mechanic/RejectEmergencyRequestUseCase.js";
+import { GetMechanicAssignedRequestUseCase } from "../application/useCase/mechanic/GetMechanicAssignedRequestUseCase.js";
 import { GetEmergencyRequestStatusUseCase } from "../application/useCase/emergency/GetEmergencyRequestStatusUseCase.js";
 import { GetUserEmergencyRequestsUseCase } from "../application/useCase/emergency/GetUserEmergencyRequestsUseCase.js";
 import { MechanicEmergencyController } from "../presentation/controllers/mechanic/MechanicEmergencyController.js";
@@ -336,11 +337,16 @@ const rejectEmergencyRequestMechanicUseCase = new RejectEmergencyRequestMechanic
     emergencyRequestRepository
 )
 
+const getMechanicAssignedRequestUseCase = new GetMechanicAssignedRequestUseCase(
+    emergencyRequestRepository
+)
+
 export const mechanicEmergencyController = new MechanicEmergencyController(
     updateMechanicAvailabilityUseCase,
     getNearbyEmergencyRequestsUseCase,
     acceptEmergencyRequestUseCase,
-    rejectEmergencyRequestMechanicUseCase
+    rejectEmergencyRequestMechanicUseCase,
+    getMechanicAssignedRequestUseCase
 )
 
 // ─── Emergency Request Status (User side) ───────────────────────────────────

@@ -37,3 +37,14 @@ export interface IGetUserEmergencyRequestsUseCase {
     execute(userId: string): Promise<EmergencyRequest[]>;
 }
 
+export interface IGetMechanicAssignedRequestUseCase {
+    execute(requestId: string, mechanicId: string): Promise<{
+        request: EmergencyRequest;
+        mechanicDetails: {
+            fullName: string;
+            email: string;
+            phoneNumber: string;
+        } | null;
+    }>;
+}
+

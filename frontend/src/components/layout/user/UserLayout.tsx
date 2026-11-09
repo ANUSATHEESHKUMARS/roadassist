@@ -7,13 +7,11 @@ import { Header } from "./Header";
 export const UserLayout: React.FC = () => {
   const { pathname } = useLocation();
 
-  // Landing page should not display dashboard layout
-  const isLandingPage = pathname === "/";
-
+const isLandingPage =
+    pathname === "/" || pathname === "/user";
   return (
     <div className="min-h-screen bg-background text-foreground">
       {isLandingPage ? (
-        // Landing Page
         <main className="min-h-screen">
           <Outlet />
         </main>

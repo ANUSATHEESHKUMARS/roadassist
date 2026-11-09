@@ -6,6 +6,7 @@ import RoleRoute from "./RoleRoutes";
 import MechanicOnboardingPage from "@/pages/mechanic/mechanicOnboardingPage";
 import MechanicDashboardPage from "@/pages/mechanic/MechanicDashboardPage";
 import MechanicServiceRequestsPage from "@/pages/mechanic/MechanicServiceRequestsPage";
+import MechanicAcceptedRequestPage from "@/pages/mechanic/MechanicAcceptedRequestPage";
 import { MechanicLayout } from "@/components/mechanic/MechanicLayout";
 
 
@@ -13,7 +14,6 @@ export const mechanicRoutes: RouteObject[] = [
     {
         element: <ProtectedRoute />,
         children: [
-            // Users and mechanics can access onboarding
             {
                 element: <RoleRoute allowedRoles={["user", "mechanic"]} />,
                 children: [
@@ -24,7 +24,6 @@ export const mechanicRoutes: RouteObject[] = [
                 ],
             },
 
-            // Only approved mechanics can access mechanic pages
             {
                 element: <RoleRoute allowedRoles={["mechanic"]} />,
                 children: [
@@ -39,6 +38,10 @@ export const mechanicRoutes: RouteObject[] = [
                                 path: "/mechanic/service-requests",
                                 element: <MechanicServiceRequestsPage />,
                             },
+                            {
+                                path: "/mechanic/emergency-requests/:requestId",
+                                element: <MechanicAcceptedRequestPage />,
+                            },
                         ],
                     },
                 ],
@@ -46,3 +49,4 @@ export const mechanicRoutes: RouteObject[] = [
         ],
     },
 ];
+

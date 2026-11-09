@@ -1,5 +1,6 @@
 import type {
     EmergencyRequestDetail,
+    EmergencyRequestStatusResponse,
     MechanicAvailabilityResponse,
 } from "@/types/emergencyRequest";
 
@@ -53,6 +54,17 @@ export const mechanicEmergencyService = {
         const response = await apiClient.post<
             ApiResponse<EmergencyRequestDetail>
         >(API_ROUTES.MECHANIC.REJECT_EMERGENCY_REQUEST(requestId));
+
+        return response.data.data;
+    },
+
+    /** Get an assigned request's details (for the accepting mechanic) */
+    async getAssignedRequest(
+        requestId: string
+    ): Promise<EmergencyRequestStatusResponse> {
+        const response = await apiClient.get<
+            ApiResponse<EmergencyRequestStatusResponse>
+        >(API_ROUTES.MECHANIC.ASSIGNED_REQUEST(requestId));
 
         return response.data.data;
     },
