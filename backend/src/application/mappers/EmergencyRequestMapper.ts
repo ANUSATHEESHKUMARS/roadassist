@@ -19,6 +19,7 @@ export class EmergencyRequestMapper {
             document.issueImages ?? [],
             document.status,
             document.assignedMechanicId?.toString() ?? null,
+            (document.rejectedByMechanicIds ?? []).map((id) => id.toString()),
 
             document._id.toString(),
             document.createdAt,
@@ -26,5 +27,3 @@ export class EmergencyRequestMapper {
         )
     }
 }
-
-

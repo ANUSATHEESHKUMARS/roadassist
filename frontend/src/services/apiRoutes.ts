@@ -30,6 +30,15 @@ const API_ROUTES = {
     UPLOAD_MEDIA: "/mechanic/media/upload",
     MY_APPLICATION: "/mechanic/my-application",
     BOOKINGS: "/mechanic/bookings",
+
+    AVAILABILITY: "/mechanic/availability",
+    NEARBY_EMERGENCY_REQUESTS: "/mechanic/emergency-requests/nearby",
+
+    ACCEPT_EMERGENCY_REQUEST: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}/accept`,
+
+    REJECT_EMERGENCY_REQUEST: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}/reject`,
   },
 
   ADMIN: {
@@ -67,6 +76,10 @@ const API_ROUTES = {
   EMERGENCY_REQUEST: {
     BASE: "/emergency-requests",
     UPLOAD_IMAGES: "/emergency-requests/images",
+    MY_REQUESTS: "/emergency-requests/my-requests",
+
+    BY_ID: (requestId: string) =>
+      `/emergency-requests/${requestId}`,
   },
 
   BOOKING: {

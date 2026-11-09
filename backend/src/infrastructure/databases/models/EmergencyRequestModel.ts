@@ -19,12 +19,17 @@ export interface IEmergencyRequestDocument extends Document {
         longitude: number;
         address?: string
     }
+    geoLocation: {
+        type: "Point";
+        coordinates: [number, number];
+    }
     emergencyIssueCategory: EmergencyIssueCategory;
     issueTitle: string;
     issueDescription: string;
     issueImages: string[];
     status: EmergencyRequestStatus;
     assignedMechanicId: Types.ObjectId | null;
+    rejectedByMechanicIds: Types.ObjectId[];
 
     createdAt: Date;
     updatedAt: Date
@@ -59,6 +64,17 @@ const emergencyRequestSchema = new Schema<IEmergencyRequestDocument>({
         address: {
             type: String,
             trim: true
+        }
+    },
+    geoLocation: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point"
+        },
+        coordinates: {
+            type: [Number],
+            default: undefined
         }
     },
     emergencyIssueCategory: {
@@ -115,13 +131,19 @@ const emergencyRequestSchema = new Schema<IEmergencyRequestDocument>({
     },
     assignedMechanicId: {
         type: Schema.Types.ObjectId,
-        ref: "Mechanic",
+        ref: "User",
         default: null
-    }
+    },
+    rejectedByMechanicIds: [{
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    }]
 }, {
     timestamps: true,
     versionKey: false
 })
 
+
+emergencyRequestSchema.index({ geoLocation: "2dsphere" });
 
 export const EmergencyRequestModel = model<IEmergencyRequestDocument>("EmergencyRequest", emergencyRequestSchema)

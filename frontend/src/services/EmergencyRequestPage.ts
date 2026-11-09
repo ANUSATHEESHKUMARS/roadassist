@@ -1,5 +1,7 @@
 import type {
   CreateEmergencyRequestPayload,
+  EmergencyRequestDetail,
+  EmergencyRequestStatusResponse,
 } from "@/types/emergencyRequest";
 
 import apiClient from "./apiClient";
@@ -45,6 +47,26 @@ export const emergencyRequestService = {
     const response = await apiClient.post<
       ApiResponse<CreatedEmergencyRequest>
     >(API_ROUTES.EMERGENCY_REQUEST.BASE, payload);
+
+    return response.data.data;
+  },
+
+  /** Get all emergency requests for the current user */
+  async getMyRequests(): Promise<EmergencyRequestDetail[]> {
+    const response = await apiClient.get<
+      ApiResponse<EmergencyRequestDetail[]>
+    >(API_ROUTES.EMERGENCY_REQUEST.MY_REQUESTS);
+
+    return response.data.data;
+  },
+
+  /** Get a single request with assigned mechanic details */
+  async getRequestStatus(
+    requestId: string
+  ): Promise<EmergencyRequestStatusResponse> {
+    const response = await apiClient.get<
+      ApiResponse<EmergencyRequestStatusResponse>
+    >(API_ROUTES.EMERGENCY_REQUEST.BY_ID(requestId));
 
     return response.data.data;
   },

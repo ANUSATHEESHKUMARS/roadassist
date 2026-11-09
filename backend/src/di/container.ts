@@ -66,6 +66,15 @@ import { ResetPasswordController } from "../presentation/controllers/ResetPasswo
 import { ApproveMechanicApplicationUseCase } from "../application/useCase/admin/ApproveMechanicApplicationUseCase.js";
 import { RejectMechanicApplicationUseCase } from "../application/useCase/admin/RejectMechanicApplicationUseCase.js";
 import { SwitchActiveRoleUseCase } from "../application/useCase/auth/SwitchActiveRoleUseCase.js";
+import { MongoMechanicAvailabilityRepository } from "../infrastructure/repositories/MongoMechanicAvailabilityRepository.js";
+import { UpdateMechanicAvailabilityUseCase } from "../application/useCase/mechanic/UpdateMechanicAvailabilityUseCase.js";
+import { GetNearbyEmergencyRequestsUseCase } from "../application/useCase/mechanic/GetNearbyEmergencyRequestsUseCase.js";
+import { AcceptEmergencyRequestUseCase } from "../application/useCase/mechanic/AcceptEmergencyRequestUseCase.js";
+import { RejectEmergencyRequestUseCase as RejectEmergencyRequestMechanicUseCase } from "../application/useCase/mechanic/RejectEmergencyRequestUseCase.js";
+import { GetEmergencyRequestStatusUseCase } from "../application/useCase/emergency/GetEmergencyRequestStatusUseCase.js";
+import { GetUserEmergencyRequestsUseCase } from "../application/useCase/emergency/GetUserEmergencyRequestsUseCase.js";
+import { MechanicEmergencyController } from "../presentation/controllers/mechanic/MechanicEmergencyController.js";
+import { EmergencyRequestStatusController } from "../presentation/controllers/emergency/EmergencyRequestStatusController.js";
 
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
@@ -306,4 +315,45 @@ const resetPasswordUseCase =
     export const resetPasswordController = new ResetPasswordController(resetPasswordUseCase)
 
 
-    
+// ─── Mechanic Emergency (Availability, Nearby, Accept/Reject) ───────────────
+
+const mechanicAvailabilityRepository = new MongoMechanicAvailabilityRepository()
+
+const updateMechanicAvailabilityUseCase = new UpdateMechanicAvailabilityUseCase(
+    mechanicAvailabilityRepository
+)
+
+const getNearbyEmergencyRequestsUseCase = new GetNearbyEmergencyRequestsUseCase(
+    emergencyRequestRepository,
+    mechanicAvailabilityRepository
+)
+
+const acceptEmergencyRequestUseCase = new AcceptEmergencyRequestUseCase(
+    emergencyRequestRepository
+)
+
+const rejectEmergencyRequestMechanicUseCase = new RejectEmergencyRequestMechanicUseCase(
+    emergencyRequestRepository
+)
+
+export const mechanicEmergencyController = new MechanicEmergencyController(
+    updateMechanicAvailabilityUseCase,
+    getNearbyEmergencyRequestsUseCase,
+    acceptEmergencyRequestUseCase,
+    rejectEmergencyRequestMechanicUseCase
+)
+
+// ─── Emergency Request Status (User side) ───────────────────────────────────
+
+const getEmergencyRequestStatusUseCase = new GetEmergencyRequestStatusUseCase(
+    emergencyRequestRepository
+)
+
+const getUserEmergencyRequestsUseCase = new GetUserEmergencyRequestsUseCase(
+    emergencyRequestRepository
+)
+
+export const emergencyRequestStatusController = new EmergencyRequestStatusController(
+    getEmergencyRequestStatusUseCase,
+    getUserEmergencyRequestsUseCase
+)

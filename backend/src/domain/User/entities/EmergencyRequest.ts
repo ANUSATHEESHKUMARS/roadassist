@@ -35,6 +35,7 @@ export class EmergencyRequest {
         public issueImages : string[] = [],
         public status: EmergencyRequestStatus = "pending",
         public assignedMechanicId: string | null = null,
+        public rejectedByMechanicIds: string[] = [],
         public id?: string,
         public createdAt?: Date,
         public updatedAt?: Date

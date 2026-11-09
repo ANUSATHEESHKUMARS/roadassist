@@ -3,6 +3,7 @@ import {
   auth,
   mechanicApplicationController,
   uploadMediaController,
+  mechanicEmergencyController,
 } from "../../di/container.js";
 import { asyncHandler } from "../../shared/helper/asyncHandler.js";
 import { uploadMedia } from "../middlewares/uploadMedia.js";
@@ -32,6 +33,32 @@ mechanicRouter.post(
   auth,
   uploadMedia.single("file"),
   asyncHandler(uploadMediaController.handle)
+);
+
+// ─── Mechanic Emergency Endpoints ───────────────────────────────────────────
+
+mechanicRouter.patch(
+  "/availability",
+  auth,
+  asyncHandler(mechanicEmergencyController.updateAvailability)
+);
+
+mechanicRouter.get(
+  "/emergency-requests/nearby",
+  auth,
+  asyncHandler(mechanicEmergencyController.getNearbyRequests)
+);
+
+mechanicRouter.post(
+  "/emergency-requests/:id/accept",
+  auth,
+  asyncHandler(mechanicEmergencyController.acceptRequest)
+);
+
+mechanicRouter.post(
+  "/emergency-requests/:id/reject",
+  auth,
+  asyncHandler(mechanicEmergencyController.rejectRequest)
 );
 
 export default mechanicRouter;

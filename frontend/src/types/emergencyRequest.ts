@@ -10,7 +10,12 @@ export type EmergencyIssueCategory =
     | "noise"
     | "other";
 
-
+export type EmergencyRequestStatus =
+    | "pending"
+    | "searching"
+    | "assigned"
+    | "cancelled"
+    | "completed";
 
 export interface EmergencyLocation {
     latitude: number,
@@ -38,7 +43,43 @@ export interface CreateEmergencyRequestPayload {
 
 export interface EmergencyRequestResponse {
     id: string,
-    status: "pending" | "searching" | "assigned" | "cancelled" | "completed";
+    status: EmergencyRequestStatus;
 }
 
+/** Shape returned by GET /emergency-requests/:id */
+export interface EmergencyRequestDetail {
+    id?: string;
+    _id?: string;
+    userId: string;
+    vehicleId: string;
+    location: EmergencyLocation;
+    emergencyIssueCategory: EmergencyIssueCategory;
+    issueTitle: string;
+    issueDescription?: string;
+    issueImages: string[];
+    status: EmergencyRequestStatus;
+    assignedMechanicId: string | null;
+    rejectedByMechanicIds: string[];
+    createdAt?: string;
+    updatedAt?: string;
+}
 
+/** Shape returned by GET /emergency-requests/:id (populated) */
+export interface EmergencyRequestStatusResponse {
+    request: EmergencyRequestDetail;
+    mechanicDetails: {
+        fullName: string;
+        email: string;
+        phoneNumber: string;
+    } | null;
+}
+
+/** Shape of mechanic availability */
+export interface MechanicAvailabilityResponse {
+    mechanicId: string;
+    isAvailable: boolean;
+    latitude: number;
+    longitude: number;
+    id?: string;
+    updatedAt?: string;
+}
