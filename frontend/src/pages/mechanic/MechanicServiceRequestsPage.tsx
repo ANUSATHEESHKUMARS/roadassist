@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { EmergencyRequestDetail } from "@/types/emergencyRequest";
 import { mechanicEmergencyService } from "@/services/mechanic/mechanicEmergencyService";
 import { useToast } from "@/components/ui/toast/ToastProvider";
+import { socket } from "@/services/socket/socket";
 
 import {
     Card,
@@ -76,16 +77,69 @@ export default function MechanicServiceRequestsPage() {
         }
     }, []);
 
-    useEffect(() => {
+useEffect(() => {
+
+    // Fetch existing requests when the page loads
+    void fetchRequests();
+
+    // Handle incoming emergency requests
+    const handleNewEmergencyRequest = (
+        request: EmergencyRequestDetail
+    ) => {
+        console.log("New emergency request received:", request);
+
+        setRequests((previousRequests) => {
+
+            const requestId = request.id ?? request._id;
+
+            // Prevent duplicate requests
+            const alreadyExists = previousRequests.some(
+                (item) => (item.id ?? item._id) === requestId
+            );
+
+            if (alreadyExists) {
+                return previousRequests;
+            }
+
+            return [request, ...previousRequests];
+        });
+    };
+
+    // Fetch requests again after connecting or reconnecting
+    const handleConnect = () => {
+        console.log("Mechanic socket connected:", socket.id);
         void fetchRequests();
+    };
 
-        // Auto-refresh every 15 seconds
-        const interval = setInterval(() => {
-            void fetchRequests();
-        }, 15_000);
+    socket.on("connect", handleConnect);
 
-        return () => clearInterval(interval);
-    }, [fetchRequests]);
+    socket.on(
+        "new_emergency_request",
+        handleNewEmergencyRequest
+    );
+
+    // Establish socket connection
+    socket.connect();
+
+    // Keep polling temporarily as a fallback
+    const interval = setInterval(() => {
+        void fetchRequests();
+    }, 15_000);
+
+    return () => {
+        clearInterval(interval);
+
+        socket.off("connect", handleConnect);
+
+        socket.off(
+            "new_emergency_request",
+            handleNewEmergencyRequest
+        );
+
+        socket.disconnect();
+    };
+
+}, [fetchRequests]);
 
     const handleAccept = async (requestId: string) => {
         setActionLoading(requestId);
@@ -94,7 +148,6 @@ export default function MechanicServiceRequestsPage() {
             await mechanicEmergencyService.acceptRequest(requestId);
             showToast("Emergency request accepted successfully!", "success");
 
-            // Navigate to the accepted request detail page
             navigate(`/mechanic/emergency-requests/${requestId}`);
         } catch (err: unknown) {
             const message =
@@ -114,7 +167,6 @@ export default function MechanicServiceRequestsPage() {
             await mechanicEmergencyService.rejectRequest(requestId);
             showToast("Request rejected.", "info");
 
-            // Remove from list
             setRequests((prev) =>
                 prev.filter((r) => (r.id ?? r._id) !== requestId)
             );

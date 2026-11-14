@@ -76,15 +76,16 @@ import { GetEmergencyRequestStatusUseCase } from "../application/useCase/emergen
 import { GetUserEmergencyRequestsUseCase } from "../application/useCase/emergency/GetUserEmergencyRequestsUseCase.js";
 import { MechanicEmergencyController } from "../presentation/controllers/mechanic/MechanicEmergencyController.js";
 import { EmergencyRequestStatusController } from "../presentation/controllers/emergency/EmergencyRequestStatusController.js";
-
+import { SocketMechanicNotificationService } from "../infrastructure/services/SocketMechanicNotification.js";
+import type { Server } from "socket.io";
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
 
-const userRepository = new MongoUserRepository();
+export const userRepository = new MongoUserRepository();
 
 const passwordHasher = new BcryptPasswordHasher();
 
-const tokenService = new JwtTokenService()
+export const tokenService = new JwtTokenService()
 
 export const auth = authMiddleware(tokenService, userRepository)
 
@@ -222,27 +223,39 @@ const saveMechanicDraftUseCase = new SaveMechanicDraftUseCase(
     mechanicApplicationRepository,
     mechanicApplicationValidator
 )
+const mechanicAvailabilityRepository = new MongoMechanicAvailabilityRepository()
 
 
 const emergencyRequestRepository = new EmergencyRequestRepository();
 
-// Application Layer (Validators)
 const createEmergencyRequestValidator = new CreateEmerencyRequestValidator();
 
-// Application Layer (Use Cases)
-const createEmergencyRequestUseCase = new CreateEmergencyRequestUseCase(
-    emergencyRequestRepository,
-    vehiceRepository,
-    createEmergencyRequestValidator
-);
+export function createEmergencyDependencies(io: Server) {
 
+    const mechanicNotificationService =
+        new SocketMechanicNotificationService(io);
+
+    const createEmergencyRequestUseCase =
+        new CreateEmergencyRequestUseCase(
+            emergencyRequestRepository,
+            vehiceRepository,
+            createEmergencyRequestValidator,
+            mechanicAvailabilityRepository,
+            mechanicNotificationService
+        );
+
+    const createEmergencyRequestController =
+        new CreateEmergencyRequestController(
+            createEmergencyRequestUseCase
+        );
+
+    return {
+        createEmergencyRequestController
+    };
+
+}
 const emergencyImageUploadUseCase = new UploadEmergencyImagesUseCase(
     s3StorageService
-);
-
-// Presentation Layer (Controllers)
-export const createEmergencyRequestController = new CreateEmergencyRequestController(
-    createEmergencyRequestUseCase
 );
 
 export const emergencyImageUploadController = new UploadEmergencyImagesController(
@@ -318,7 +331,6 @@ const resetPasswordUseCase =
 
 // ─── Mechanic Emergency (Availability, Nearby, Accept/Reject) ───────────────
 
-const mechanicAvailabilityRepository = new MongoMechanicAvailabilityRepository()
 
 const updateMechanicAvailabilityUseCase = new UpdateMechanicAvailabilityUseCase(
     mechanicAvailabilityRepository

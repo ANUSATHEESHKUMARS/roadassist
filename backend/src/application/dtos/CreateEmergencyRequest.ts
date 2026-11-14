@@ -13,3 +13,6 @@ export interface CreateEmergencyRequestDto {
     issueImages?:string[]
 }
 
+
+
+

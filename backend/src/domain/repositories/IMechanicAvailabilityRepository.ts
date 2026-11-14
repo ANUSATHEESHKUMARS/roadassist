@@ -9,5 +9,7 @@ export interface IMechanicAvailabilityRepository {
     ): Promise<MechanicAvailability>;
 
     findByMechanicId(mechanicId: string): Promise<MechanicAvailability | null>;
+
+    findNearbyAvailableMechanics(latitude: number, longitude: number, radiusKm: number): Promise<MechanicAvailability[]>
 }
 

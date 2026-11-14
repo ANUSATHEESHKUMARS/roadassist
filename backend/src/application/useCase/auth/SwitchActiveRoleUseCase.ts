@@ -25,7 +25,6 @@ export class SwitchActiveRoleUseCase
 
         const { activeRole } = dto;
 
-        // Validate requested role
         if (!allowedRoles.includes(activeRole)) {
             throw new ForbiddenError(
                 "Invalid role requested",
@@ -33,7 +32,6 @@ export class SwitchActiveRoleUseCase
             );
         }
 
-        // Find the authenticated user
         const user = await this.userRepository.findById(userId);
 
         if (!user) {
@@ -43,7 +41,6 @@ export class SwitchActiveRoleUseCase
             );
         }
 
-        // Check account status
         if (user.status !== "active") {
             throw new ForbiddenError(
                 "Your account is blocked",
@@ -51,7 +48,6 @@ export class SwitchActiveRoleUseCase
             );
         }
 
-        // Check whether the user is authorized for this role
         if (!user.roles.includes(activeRole)) {
             throw new ForbiddenError(
                 `You are not authorized to switch to ${activeRole}`,
@@ -59,7 +55,6 @@ export class SwitchActiveRoleUseCase
             );
         }
 
-        // Update active role in MongoDB
         const updatedUser =
             await this.userRepository.updateActiveRole(
                 userId,

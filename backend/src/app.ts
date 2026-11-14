@@ -1,56 +1,56 @@
-import { authcontroller, verifyotpcontroller } from './di/container.js'
-import { errorHandlingMiddleware } from './presentation/middlewares/ErrorHandlingMiddleware.js'
-import createRoutes from './presentation/routes/index.js'
-import express from 'express'
-import cookieParser from 'cookie-parser'
-import vehilceRouter from './presentation/routes/vehicleRoutes.js'
-import cors from 'cors'
-import adminRouter from './presentation/routes/adminRoutes.js'
-import superadminRouter from './presentation/routes/superAdminRoutes.js'
-import mediaRouter from './presentation/routes/mediaRoutes.js'
-import mechanicRouter from './presentation/routes/mechanicRoutes.js'
-import emergencyRouter from './presentation/routes/emergencyRequestRoute.js'
 
-const app = express()
+import { authcontroller, verifyotpcontroller } from './di/container.js';
+import { errorHandlingMiddleware } from './presentation/middlewares/ErrorHandlingMiddleware.js';
+import createRoutes from './presentation/routes/index.js';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import vehilceRouter from './presentation/routes/vehicleRoutes.js';
+import cors from 'cors';
+import adminRouter from './presentation/routes/adminRoutes.js';
+import superadminRouter from './presentation/routes/superAdminRoutes.js';
+import mediaRouter from './presentation/routes/mediaRoutes.js';
+import mechanicRouter from './presentation/routes/mechanicRoutes.js';
 
-app.use((req, res, next) => {
-    console.log("REQUEST ENTERED EXPRESS:", req.method, req.url)
-    next()
-})
+import { createEmergencyRequestRouter } from './presentation/routes/emergencyRequestRoute.js';
+import { CreateEmergencyRequestController } from './presentation/controllers/EmergencyRequestController.js';
 
-app.use(express.json())
-app.use(cookieParser())
-app.use(cors({
-    origin:"http://localhost:5173",
-    credentials:true
-}))
-app.get('/', (req, res) => {
-    console.log(' ROOT ROUTE REACHED')
+export function createApp(
+    createEmergencyRequestController: CreateEmergencyRequestController
+) {
+    const app = express();
 
-    res.status(200).json({
-        message: 'Server is working'
-    })
-})
+    app.use((req, res, next) => {
+        console.log("REQUEST ENTERED EXPRESS:", req.method, req.url);
+        next();
+    });
 
-app.use('/api', createRoutes(authcontroller,verifyotpcontroller))
+    app.use(express.json());
+    app.use(cookieParser());
 
-app.use('/api/admin' , adminRouter)
+    app.use(cors({
+        origin: "http://localhost:5173",
+        credentials: true
+    }));
 
-app.use('/api/vehicle' ,vehilceRouter )
-    
+    app.get('/', (req, res) => {
+        res.status(200).json({
+            message: 'Server is working'
+        });
+    });
 
-app.use('/api/superadmin' , superadminRouter)
+    app.use('/api', createRoutes(authcontroller, verifyotpcontroller));
+    app.use('/api/admin', adminRouter);
+    app.use('/api/vehicle', vehilceRouter);
+    app.use('/api/superadmin', superadminRouter);
+    app.use('/api/media', mediaRouter);
+    app.use('/api/mechanic', mechanicRouter);
 
-app.use('/api/media',mediaRouter )
+    app.use(
+        '/api/emergency-requests',
+        createEmergencyRequestRouter(createEmergencyRequestController)
+    );
 
-app.use('/api/mechanic',mechanicRouter )
+    app.use(errorHandlingMiddleware);
 
-
-app.use('/api/emergency-requests',emergencyRouter)
-
-app.use(errorHandlingMiddleware)
-
-export default app
-
-
-
+    return app;
+}

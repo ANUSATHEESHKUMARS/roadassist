@@ -51,7 +51,6 @@ export const emergencyRequestService = {
     return response.data.data;
   },
 
-  /** Get all emergency requests for the current user */
   async getMyRequests(): Promise<EmergencyRequestDetail[]> {
     const response = await apiClient.get<
       ApiResponse<EmergencyRequestDetail[]>
@@ -60,7 +59,6 @@ export const emergencyRequestService = {
     return response.data.data;
   },
 
-  /** Get a single request with assigned mechanic details */
   async getRequestStatus(
     requestId: string
   ): Promise<EmergencyRequestStatusResponse> {

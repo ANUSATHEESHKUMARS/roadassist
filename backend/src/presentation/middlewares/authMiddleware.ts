@@ -13,8 +13,12 @@ export const authMiddleware = (
     return async (req: Request, res: Response, next: NextFunction) => {
 
         try {
-            // 1. Get access token
             const token = req.cookies?.accessToken;
+
+
+            console.log("REST authentication:");
+            console.log("Cookie received:", !!req.headers.cookie);
+            console.log("Access token received:", !!token);
 
             if (!token) {
                 throw new UnauthorizedError(
@@ -23,11 +27,12 @@ export const authMiddleware = (
                 );
             }
 
-            // 2. Verify access token
             let payload;
 
             try {
                 payload = tokenService.verifyAccessToken(token);
+                console.log("Access token valid");
+                console.log("Payload:", payload);
             } catch {
                 throw new UnauthorizedError(
                     "Invalid or expired access token",
@@ -35,7 +40,6 @@ export const authMiddleware = (
                 );
             }
 
-            // 3. Validate user ID
             if (!payload.userId) {
                 throw new UnauthorizedError(
                     "Invalid access token",
@@ -43,7 +47,6 @@ export const authMiddleware = (
                 );
             }
 
-            // 4. Fetch latest user from database
             const user = await userRepository.findById(payload.userId);
 
             if (!user) {
@@ -53,7 +56,6 @@ export const authMiddleware = (
                 );
             }
 
-            // 5. Check account status
             if (user.status !== "active") {
                 throw new ForbiddenError(
                     "Your account has been blocked. Please contact support.",
@@ -61,7 +63,6 @@ export const authMiddleware = (
                 );
             }
 
-            // 6. Validate active role
             if (!user.roles.includes(user.activeRole)) {
                 throw new ForbiddenError(
                     "Invalid active role",
@@ -69,7 +70,6 @@ export const authMiddleware = (
                 );
             }
 
-            // 7. Attach latest user information
             req.user = {
                 userId: user.userId!,
                 email: user.email,

@@ -46,7 +46,6 @@ export interface EmergencyRequestResponse {
     status: EmergencyRequestStatus;
 }
 
-/** Shape returned by GET /emergency-requests/:id */
 export interface EmergencyRequestDetail {
     id?: string;
     _id?: string;
@@ -64,7 +63,6 @@ export interface EmergencyRequestDetail {
     updatedAt?: string;
 }
 
-/** Shape returned by GET /emergency-requests/:id (populated) */
 export interface EmergencyRequestStatusResponse {
     request: EmergencyRequestDetail;
     mechanicDetails: {
@@ -74,7 +72,6 @@ export interface EmergencyRequestStatusResponse {
     } | null;
 }
 
-/** Shape of mechanic availability */
 export interface MechanicAvailabilityResponse {
     mechanicId: string;
     isAvailable: boolean;

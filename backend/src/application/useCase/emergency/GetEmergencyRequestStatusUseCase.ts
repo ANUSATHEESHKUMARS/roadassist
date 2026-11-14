@@ -28,7 +28,6 @@ export class GetEmergencyRequestStatusUseCase implements IGetEmergencyRequestSta
             throw new NotfoundError("Emergency request not found");
         }
 
-        // Ensure the user owns this request
         if (result.request.userId !== userId) {
             throw new ForbiddenError("You are not authorized to view this request");
         }

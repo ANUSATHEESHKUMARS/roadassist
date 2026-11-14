@@ -28,7 +28,6 @@ export class GetMechanicAssignedRequestUseCase implements IGetMechanicAssignedRe
             throw new NotfoundError("Emergency request not found");
         }
 
-        // Mechanic must be the assigned mechanic to view details
         if (result.request.assignedMechanicId !== mechanicId) {
             throw new ForbiddenError("You are not assigned to this request");
         }

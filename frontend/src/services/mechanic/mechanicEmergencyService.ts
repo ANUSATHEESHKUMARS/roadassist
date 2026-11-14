@@ -14,7 +14,6 @@ interface ApiResponse<T> {
 }
 
 export const mechanicEmergencyService = {
-    /** Toggle availability and send current location */
     async updateAvailability(
         isAvailable: boolean,
         latitude: number,
@@ -31,7 +30,6 @@ export const mechanicEmergencyService = {
         return response.data.data;
     },
 
-    /** Fetch emergency requests within 5 km */
     async getNearbyRequests(): Promise<EmergencyRequestDetail[]> {
         const response = await apiClient.get<
             ApiResponse<EmergencyRequestDetail[]>
@@ -40,7 +38,6 @@ export const mechanicEmergencyService = {
         return response.data.data;
     },
 
-    /** Accept an emergency request */
     async acceptRequest(requestId: string): Promise<EmergencyRequestDetail> {
         const response = await apiClient.post<
             ApiResponse<EmergencyRequestDetail>
@@ -49,7 +46,6 @@ export const mechanicEmergencyService = {
         return response.data.data;
     },
 
-    /** Reject an emergency request */
     async rejectRequest(requestId: string): Promise<EmergencyRequestDetail> {
         const response = await apiClient.post<
             ApiResponse<EmergencyRequestDetail>

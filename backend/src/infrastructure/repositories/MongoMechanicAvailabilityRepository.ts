@@ -56,5 +56,31 @@ export class MongoMechanicAvailabilityRepository implements IMechanicAvailabilit
             document.updatedAt
         );
     }
+   async findNearbyAvailableMechanics(latitude: number, longitude: number, radiusKm: number): Promise<MechanicAvailability[]> {
+        const radiusInMeters = radiusKm * 1000
+
+        const document = await MechanicAvailabilityModel.find({
+            isAvailable:true,
+            geoLocation:{
+                $nearSphere:{
+                    $geometry:{
+                        type:"Point",
+                        coordinates:[longitude,latitude]
+                    },
+                    $maxDistance:radiusInMeters
+                }
+            }
+        }).exec()
+
+        return document.map((document) => new MechanicAvailability(
+            document.mechanicId.toString(),
+            document.isAvailable,
+            document.geoLocation.coordinates[1],
+            document.geoLocation.coordinates[0],
+            document._id.toString(),
+            document.updatedAt
+
+        ))
+    }
 }
 

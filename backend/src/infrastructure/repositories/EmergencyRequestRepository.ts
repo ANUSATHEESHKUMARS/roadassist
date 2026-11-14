@@ -84,7 +84,7 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
             rejectedByMechanicIds: { $ne: mechanicObjectId },
             assignedMechanicId: null,
         })
-            .sort({ createdAt: -1 })
+           
             .limit(20)
             .exec();
 
@@ -184,7 +184,6 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
             phoneNumber: string;
         } | null;
 
-        // Build domain entity — assignedMechanicId needs to be the string id
         const domainRequest = new EmergencyRequest(
             document.userId.toString(),
             document.vehicleId.toString(),

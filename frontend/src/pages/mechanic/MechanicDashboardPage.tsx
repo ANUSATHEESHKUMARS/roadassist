@@ -4,6 +4,7 @@ import type { EmergencyRequestDetail } from "@/types/emergencyRequest";
 import { mechanicEmergencyService } from "@/services/mechanic/mechanicEmergencyService";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 
+import {socket} from "@/services/socket/socket"
 import {
     Activity,
     Bell,
@@ -73,13 +74,11 @@ export default function MechanicDashboardPage() {
     const [locationLoading, setLocationLoading] = useState(false);
     const [locationError, setLocationError] = useState("");
 
-    // ── Nearby requests (shown on dashboard overview) ─────────────
     const [nearbyRequests, setNearbyRequests] = useState<
         EmergencyRequestDetail[]
     >([]);
     const [nearbyLoading, setNearbyLoading] = useState(false);
 
-    // Fetch nearby requests when online
     const fetchNearby = useCallback(async () => {
         if (!isOnline) return;
         setNearbyLoading(true);
@@ -88,26 +87,68 @@ export default function MechanicDashboardPage() {
                 await mechanicEmergencyService.getNearbyRequests();
             setNearbyRequests(data);
         } catch {
-            // Silently handle — will retry on interval
         } finally {
             setNearbyLoading(false);
         }
     }, [isOnline]);
 
     useEffect(() => {
-        if (!isOnline) {
-            setNearbyRequests([]);
-            return;
-        }
-        void fetchNearby();
-        const interval = setInterval(() => void fetchNearby(), 15_000);
-        return () => clearInterval(interval);
-    }, [isOnline, fetchNearby]);
+    if (!isOnline) {
+        return;
+    }
 
-    // Toggle availability via API
+    socket.connect();
+
+    const handleNewEmergencyRequest = (
+        request: EmergencyRequestDetail
+    ) => {
+        setNearbyRequests((previousRequests) => {
+
+            const requestId = request.id ?? request._id;
+
+            const alreadyExists = previousRequests.some(
+                (item) => (item.id ?? item._id) === requestId
+            );
+
+            if (alreadyExists) {
+                return previousRequests;
+            }
+
+            return [request, ...previousRequests];
+        });
+
+        showToast(
+            "A new emergency request has arrived!",
+            "success"
+        );
+    };
+
+    socket.on(
+        "new_emergency_request",
+        handleNewEmergencyRequest
+    );
+
+    return () => {
+        socket.off(
+            "new_emergency_request",
+            handleNewEmergencyRequest
+        );
+
+        socket.disconnect();
+    };
+}, [isOnline, showToast]);
+    // useEffect(() => {
+    //     if (!isOnline) {
+    //         setNearbyRequests([]);
+    //         return;
+    //     }
+    //     void fetchNearby();
+    //     const interval = setInterval(() => void fetchNearby(), 15_000);
+    //     return () => clearInterval(interval);
+    // }, [isOnline, fetchNearby]);
+
     const handleAvailabilityChange = async () => {
         if (isOnline) {
-            // Going offline
             setAvailabilityLoading(true);
             try {
                 await mechanicEmergencyService.updateAvailability(
@@ -126,7 +167,6 @@ export default function MechanicDashboardPage() {
             return;
         }
 
-        // Going online — need location first
         if (!locationEnabled || !locationCoords) {
             setLocationError(
                 "Enable your location before going online."
@@ -154,7 +194,6 @@ export default function MechanicDashboardPage() {
         }
     };
 
-    // Enable/refresh geolocation
     const handleEnableLocation = () => {
         if (!navigator.geolocation) {
             setLocationError(
@@ -208,11 +247,11 @@ export default function MechanicDashboardPage() {
     return (
         <div className="min-h-screen bg-background text-foreground">
             <div className="flex min-h-screen">
-             
+
                 {/* Main Content */}
                 <div className="min-w-0 flex-1">
                     {/* Header */}
-                  
+
 
                     {/* Dashboard Content */}
                     <main className="space-y-6 p-4 sm:p-6 lg:p-8">
@@ -241,11 +280,10 @@ export default function MechanicDashboardPage() {
                                 <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                                     <div className="flex items-start gap-3">
                                         <div
-                                            className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
-                                                isOnline
-                                                    ? "bg-emerald-500/10 text-emerald-400"
-                                                    : "bg-muted text-muted-foreground"
-                                            }`}
+                                            className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${isOnline
+                                                ? "bg-emerald-500/10 text-emerald-400"
+                                                : "bg-muted text-muted-foreground"
+                                                }`}
                                         >
                                             <Power className="size-5" />
                                         </div>
@@ -257,11 +295,10 @@ export default function MechanicDashboardPage() {
                                                 </h2>
 
                                                 <span
-                                                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-                                                        isOnline
-                                                            ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                                                            : "border-border bg-muted text-muted-foreground"
-                                                    }`}
+                                                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${isOnline
+                                                        ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                                                        : "border-border bg-muted text-muted-foreground"
+                                                        }`}
                                                 >
                                                     {isOnline
                                                         ? "ONLINE"
@@ -324,8 +361,8 @@ export default function MechanicDashboardPage() {
                                         {locationLoading
                                             ? "Getting Location..."
                                             : locationEnabled
-                                              ? "Refresh Location"
-                                              : "Enable Location"}
+                                                ? "Refresh Location"
+                                                : "Enable Location"}
                                     </Button>
                                 </div>
 
@@ -345,8 +382,8 @@ export default function MechanicDashboardPage() {
                                     nearbyLoading
                                         ? "..."
                                         : String(
-                                              nearbyRequests.length
-                                          ).padStart(2, "0")
+                                            nearbyRequests.length
+                                        ).padStart(2, "0")
                                 }
                                 description={
                                     isOnline
@@ -602,11 +639,10 @@ function SidebarItem({
         <button
             type="button"
             onClick={onClick}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
-                active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            }`}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${active
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
         >
             <Icon className="size-4 shrink-0" />
             <span className="flex-1">{label}</span>
