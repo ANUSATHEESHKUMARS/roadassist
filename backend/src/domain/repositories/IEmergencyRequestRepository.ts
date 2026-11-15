@@ -29,5 +29,15 @@ export interface IEmergencyRequestRepository {
             email: string;
             phoneNumber: string;
         } | null;
-    } | null>
+    } | null>;
+    findByIdWithCustomerDetails(requestId: string): Promise<{
+        request: EmergencyRequest;
+        customerDetails: {
+            fullName: string;
+            email: string;
+            phoneNumber: string
+        } | null
+    } | null> 
+
+findByAssignedMechanicId(mechanicId:string):Promise<EmergencyRequest[]>
 }

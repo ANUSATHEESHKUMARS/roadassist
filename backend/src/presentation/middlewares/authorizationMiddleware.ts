@@ -17,7 +17,11 @@ export const authorizeRoles = (...allowedRoles: UserRole[]) => {
             return;
         }
 
-        const hasPermission = allowedRoles.some(role => req.user!.roles.includes(role))
+        const hasPermission = allowedRoles.some(
+            role =>
+                req.user!.roles.includes(role) &&
+                req.user!.activeRole === role
+        );
 
         if (!hasPermission) {
             next(

@@ -71,13 +71,14 @@ import { UpdateMechanicAvailabilityUseCase } from "../application/useCase/mechan
 import { GetNearbyEmergencyRequestsUseCase } from "../application/useCase/mechanic/GetNearbyEmergencyRequestsUseCase.js";
 import { AcceptEmergencyRequestUseCase } from "../application/useCase/mechanic/AcceptEmergencyRequestUseCase.js";
 import { RejectEmergencyRequestUseCase as RejectEmergencyRequestMechanicUseCase } from "../application/useCase/mechanic/RejectEmergencyRequestUseCase.js";
-import { GetMechanicAssignedRequestUseCase } from "../application/useCase/mechanic/GetMechanicAssignedRequestUseCase.js";
+import { GetAssignedEmergencyRequestDetailsUseCase } from "../application/useCase/mechanic/GetMechanicAssignedRequestUseCase.js";
 import { GetEmergencyRequestStatusUseCase } from "../application/useCase/emergency/GetEmergencyRequestStatusUseCase.js";
 import { GetUserEmergencyRequestsUseCase } from "../application/useCase/emergency/GetUserEmergencyRequestsUseCase.js";
 import { MechanicEmergencyController } from "../presentation/controllers/mechanic/MechanicEmergencyController.js";
 import { EmergencyRequestStatusController } from "../presentation/controllers/emergency/EmergencyRequestStatusController.js";
 import { SocketMechanicNotificationService } from "../infrastructure/services/SocketMechanicNotification.js";
 import type { Server } from "socket.io";
+import { GetMechanicAcceptedRequestsUseCase } from "../application/useCase/mechanic/GetMechanicAcceptedRequestUseCase.js";
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
 
@@ -349,16 +350,19 @@ const rejectEmergencyRequestMechanicUseCase = new RejectEmergencyRequestMechanic
     emergencyRequestRepository
 )
 
-const getMechanicAssignedRequestUseCase = new GetMechanicAssignedRequestUseCase(
+const getAssignedEmergencyRequestDetailsUseCase = new GetAssignedEmergencyRequestDetailsUseCase(
     emergencyRequestRepository
 )
+
+const getMechanicAcceptRequestUseCase = new GetMechanicAcceptedRequestsUseCase(emergencyRequestRepository)
 
 export const mechanicEmergencyController = new MechanicEmergencyController(
     updateMechanicAvailabilityUseCase,
     getNearbyEmergencyRequestsUseCase,
     acceptEmergencyRequestUseCase,
     rejectEmergencyRequestMechanicUseCase,
-    getMechanicAssignedRequestUseCase
+    getAssignedEmergencyRequestDetailsUseCase,
+    getMechanicAcceptRequestUseCase
 )
 
 // ─── Emergency Request Status (User side) ───────────────────────────────────

@@ -1,11 +1,17 @@
+
 import { Request, Response } from "express";
+
 import { CommonResponse } from "../../../shared/types/CommonResponse.js";
 import { HttpStatusCode } from "../../../application/enum/httpCodes.js";
-import { IUpdateMechanicAvailabilityUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
-import { IGetNearbyEmergencyRequestsUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
-import { IAcceptEmergencyRequestUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
-import { IRejectEmergencyRequestUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
-import { IGetMechanicAssignedRequestUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
+
+import {
+    IUpdateMechanicAvailabilityUseCase,
+    IGetNearbyEmergencyRequestsUseCase,
+    IAcceptEmergencyRequestUseCase,
+    IRejectEmergencyRequestUseCase,
+    IGetAssignedEmergencyRequestDetailsUseCase,
+    IGetMechanicAcceptedRequestsUseCase,
+} from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
 
 export class MechanicEmergencyController {
     constructor(
@@ -13,11 +19,13 @@ export class MechanicEmergencyController {
         private readonly getNearbyEmergencyRequestsUseCase: IGetNearbyEmergencyRequestsUseCase,
         private readonly acceptEmergencyRequestUseCase: IAcceptEmergencyRequestUseCase,
         private readonly rejectEmergencyRequestUseCase: IRejectEmergencyRequestUseCase,
-        private readonly getMechanicAssignedRequestUseCase: IGetMechanicAssignedRequestUseCase
+        private readonly getAssignedEmergencyRequestDetailsUseCase: IGetAssignedEmergencyRequestDetailsUseCase,
+        private readonly getMechanicAcceptedRequestsUseCase: IGetMechanicAcceptedRequestsUseCase
     ) {}
 
     updateAvailability = async (req: Request, res: Response): Promise<void> => {
         const userId = req.user?.userId;
+
         if (!userId) {
             const response: CommonResponse = {
                 success: false,
@@ -49,6 +57,7 @@ export class MechanicEmergencyController {
 
     getNearbyRequests = async (req: Request, res: Response): Promise<void> => {
         const userId = req.user?.userId;
+
         if (!userId) {
             const response: CommonResponse = {
                 success: false,
@@ -58,7 +67,8 @@ export class MechanicEmergencyController {
             return;
         }
 
-        const requests = await this.getNearbyEmergencyRequestsUseCase.execute(userId);
+        const requests =
+            await this.getNearbyEmergencyRequestsUseCase.execute(userId);
 
         const response: CommonResponse<typeof requests> = {
             success: true,
@@ -71,6 +81,7 @@ export class MechanicEmergencyController {
 
     acceptRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.user?.userId;
+
         if (!userId) {
             const response: CommonResponse = {
                 success: false,
@@ -87,11 +98,12 @@ export class MechanicEmergencyController {
                 success: false,
                 message: "Invalid emergency request ID",
             };
-
             res.status(HttpStatusCode.BAD_REQUEST).json(response);
             return;
         }
-        const accepted = await this.acceptEmergencyRequestUseCase.execute(id, userId);
+
+        const accepted =
+            await this.acceptEmergencyRequestUseCase.execute(id, userId);
 
         const response: CommonResponse<typeof accepted> = {
             success: true,
@@ -104,6 +116,7 @@ export class MechanicEmergencyController {
 
     rejectRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.user?.userId;
+
         if (!userId) {
             const response: CommonResponse = {
                 success: false,
@@ -120,12 +133,12 @@ export class MechanicEmergencyController {
                 success: false,
                 message: "Invalid emergency request ID",
             };
-
             res.status(HttpStatusCode.BAD_REQUEST).json(response);
             return;
         }
 
-        const rejected = await this.rejectEmergencyRequestUseCase.execute(id, userId);
+        const rejected =
+            await this.rejectEmergencyRequestUseCase.execute(id, userId);
 
         const response: CommonResponse<typeof rejected> = {
             success: true,
@@ -136,8 +149,10 @@ export class MechanicEmergencyController {
         res.status(HttpStatusCode.OK).json(response);
     };
 
+    // Get one accepted request with customer details
     getAssignedRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.user?.userId;
+
         if (!userId) {
             const response: CommonResponse = {
                 success: false,
@@ -158,12 +173,41 @@ export class MechanicEmergencyController {
             return;
         }
 
-        const result = await this.getMechanicAssignedRequestUseCase.execute(id, userId);
+        const result =
+            await this.getAssignedEmergencyRequestDetailsUseCase.execute(
+                id,
+                userId
+            );
 
         const response: CommonResponse<typeof result> = {
             success: true,
-            message: "Assigned request details retrieved",
+            message: "Assigned request details retrieved successfully",
             data: result,
+        };
+
+        res.status(HttpStatusCode.OK).json(response);
+    };
+
+    // Get all accepted requests belonging to the logged-in mechanic
+    getAssignedRequests = async (req: Request, res: Response): Promise<void> => {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Unauthorized, please log in.",
+            };
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+            return;
+        }
+
+        const requests =
+            await this.getMechanicAcceptedRequestsUseCase.execute(userId);
+
+        const response: CommonResponse<typeof requests> = {
+            success: true,
+            message: `Found ${requests.length} accepted emergency requests`,
+            data: requests,
         };
 
         res.status(HttpStatusCode.OK).json(response);

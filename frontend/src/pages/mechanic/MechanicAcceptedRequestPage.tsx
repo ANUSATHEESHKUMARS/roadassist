@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { mechanicEmergencyService } from "@/services/mechanic/mechanicEmergencyService";
-import type { EmergencyRequestStatusResponse } from "@/types/emergencyRequest";
+import type { EmergencyRequestStatusResponse, MechanicAssignedRequestResponse } from "@/types/emergencyRequest";
 
 import {
     Card,
@@ -75,14 +75,18 @@ const ISSUE_LABELS: Record<string, string> = {
 export default function MechanicAcceptedRequestPage() {
     const { requestId } = useParams<{ requestId: string }>();
 
-    const [data, setData] = useState<EmergencyRequestStatusResponse | null>(
+    const [data, setData] = useState<MechanicAssignedRequestResponse | null>(
         null
     );
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     const fetchRequest = useCallback(async () => {
-        if (!requestId) return;
+        if (!requestId) {
+            setError("Emergency request ID is missing.");
+            setLoading(false);
+            return;
+        }
 
         try {
             const result =
@@ -170,8 +174,9 @@ export default function MechanicAcceptedRequestPage() {
                 </CardContent>
             </Card>
 
-            {/* Customer Info (from mechanicDetails — this is actually the user's details when viewed by mechanic) */}
-            {data.mechanicDetails && (
+
+            {/* Customer Info */}
+            {data.customerDetails && (
                 <Card className="border-primary/20">
                     <CardHeader className="pb-3">
                         <CardTitle className="flex items-center gap-2 text-base">
@@ -188,10 +193,15 @@ export default function MechanicAcceptedRequestPage() {
 
                             <div>
                                 <p className="font-semibold">
-                                    {data.mechanicDetails.fullName}
+                                    {data.customerDetails.fullName}
                                 </p>
+
                                 <p className="text-xs text-muted-foreground">
-                                    {data.mechanicDetails.email}
+                                    {data.customerDetails.email}
+                                </p>
+
+                                <p className="text-xs text-muted-foreground">
+                                    {data.customerDetails.phoneNumber}
                                 </p>
                             </div>
                         </div>

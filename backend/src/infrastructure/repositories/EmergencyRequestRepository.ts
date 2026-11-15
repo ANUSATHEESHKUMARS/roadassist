@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IEmergencyRequestRepository } from "../../domain/repositories/IEmergencyRequest.js";
+import { IEmergencyRequestRepository } from "../../domain/repositories/IEmergencyRequestRepository.js";
 import { EmergencyRequest } from "../../domain/User/entities/EmergencyRequest.js";
 import { EmergencyRequestModel } from "../databases/models/EmergencyRequestModel.js";
 import { EmergencyRequestMapper } from "../../application/mappers/EmergencyRequestMapper.js";
@@ -216,4 +216,109 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
 
         return { request: domainRequest, mechanicDetails };
     }
+
+
+async findByIdWithCustomerDetails(
+    requestId: string
+): Promise<{
+    request: EmergencyRequest;
+    customerDetails: {
+        fullName: string;
+        email: string;
+        phoneNumber: string;
+    } | null;
+} | null> {
+
+    // Step 1: Validate MongoDB ObjectId
+    if (!Types.ObjectId.isValid(requestId)) {
+        return null;
+    }
+
+    // Step 2: Find the request and populate the customer
+    const document = await EmergencyRequestModel.findById(requestId)
+        .populate<{
+            userId: {
+                _id: Types.ObjectId;
+                fullName: string;
+                email: string;
+                phoneNumber: string;
+            } | null;
+        }>("userId", "fullName email phoneNumber")
+        .exec();
+
+    if (!document) {
+        return null;
+    }
+const populatedUser = document.userId;
+
+// Check whether customer exists
+if (!populatedUser || typeof populatedUser !== "object") {
+    return null;
+}
+
+// Now TypeScript knows populatedUser is not null
+const customerId = populatedUser._id.toString();
+
+const domainRequest = new EmergencyRequest(
+    customerId,
+    document.vehicleId.toString(),
+    {
+        latitude: document.location.latitude,
+        longitude: document.location.longitude,
+        ...(document.location.address !== undefined && {
+            address: document.location.address,
+        }),
+    },
+    document.emergencyIssueCategory,
+    document.issueTitle,
+    document.issueDescription,
+    document.issueImages ?? [],
+    document.status,
+    document.assignedMechanicId
+        ? document.assignedMechanicId.toString()
+        : null,
+    (document.rejectedByMechanicIds ?? []).map(
+        (id: Types.ObjectId) => id.toString()
+    ),
+    document._id.toString(),
+    document.createdAt,
+    document.updatedAt
+);
+
+const customerDetails = {
+     fullName: populatedUser.fullName,
+    email: populatedUser.email,
+    phoneNumber: populatedUser.phoneNumber,
+};
+
+return {
+    request: domainRequest,
+    customerDetails,
+};
+}
+
+async findByAssignedMechanicId(
+    mechanicId: string
+): Promise<EmergencyRequest[]> {
+
+    // Validate mechanic ID
+    if (!Types.ObjectId.isValid(mechanicId)) {
+        return [];
+    }
+
+    // Find requests assigned to this mechanic
+    const documents = await EmergencyRequestModel.find({
+        assignedMechanicId: new Types.ObjectId(mechanicId),
+        status: "assigned",
+    })
+        .sort({ createdAt: -1 })
+        .exec();
+
+    // Convert MongoDB documents into domain entities
+    return documents.map((doc) =>
+        EmergencyRequestMapper.toDomain(doc)
+    );
+}
+
+
 }

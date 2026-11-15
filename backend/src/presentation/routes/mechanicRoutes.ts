@@ -7,6 +7,7 @@ import {
 } from "../../di/container.js";
 import { asyncHandler } from "../../shared/helper/asyncHandler.js";
 import { uploadMedia } from "../middlewares/uploadMedia.js";
+import { authorizeRoles } from "../middlewares/authorizationMiddleware.js";
 
 const mechanicRouter = Router();
 
@@ -40,31 +41,47 @@ mechanicRouter.post(
 mechanicRouter.patch(
   "/availability",
   auth,
+  authorizeRoles("mechanic"),
   asyncHandler(mechanicEmergencyController.updateAvailability)
 );
-
+// Nearby requests
 mechanicRouter.get(
-  "/emergency-requests/nearby",
-  auth,
-  asyncHandler(mechanicEmergencyController.getNearbyRequests)
+    "/emergency-requests/nearby",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(mechanicEmergencyController.getNearbyRequests)
 );
 
+// All accepted requests
 mechanicRouter.get(
-  "/emergency-requests/:id",
-  auth,
-  asyncHandler(mechanicEmergencyController.getAssignedRequest)
+    "/emergency-requests/assigned",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(mechanicEmergencyController.getAssignedRequests)
 );
 
-mechanicRouter.post(
-  "/emergency-requests/:id/accept",
-  auth,
-  asyncHandler(mechanicEmergencyController.acceptRequest)
+// Single assigned request
+mechanicRouter.get(
+    "/emergency-requests/:id",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(mechanicEmergencyController.getAssignedRequest)
 );
 
+// Accept request
 mechanicRouter.post(
-  "/emergency-requests/:id/reject",
-  auth,
-  asyncHandler(mechanicEmergencyController.rejectRequest)
+    "/emergency-requests/:id/accept",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(mechanicEmergencyController.acceptRequest)
+);
+
+// Reject request
+mechanicRouter.post(
+    "/emergency-requests/:id/reject",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(mechanicEmergencyController.rejectRequest)
 );
 
 export default mechanicRouter;

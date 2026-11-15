@@ -65,7 +65,7 @@ export interface EmergencyRequestDetail {
 
 export interface EmergencyRequestStatusResponse {
     request: EmergencyRequestDetail;
-    mechanicDetails: {
+    customerDetails: {
         fullName: string;
         email: string;
         phoneNumber: string;
@@ -79,4 +79,12 @@ export interface MechanicAvailabilityResponse {
     longitude: number;
     id?: string;
     updatedAt?: string;
+}
+export interface MechanicAssignedRequestResponse {
+    request: EmergencyRequestDetail;
+    customerDetails: {
+        fullName: string;
+        email: string;
+        phoneNumber: string;
+    } | null;
 }

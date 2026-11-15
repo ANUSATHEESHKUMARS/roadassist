@@ -37,10 +37,10 @@ export interface IGetUserEmergencyRequestsUseCase {
     execute(userId: string): Promise<EmergencyRequest[]>;
 }
 
-export interface IGetMechanicAssignedRequestUseCase {
+export interface IGetAssignedEmergencyRequestDetailsUseCase {
     execute(requestId: string, mechanicId: string): Promise<{
         request: EmergencyRequest;
-        mechanicDetails: {
+        customerDetails: {
             fullName: string;
             email: string;
             phoneNumber: string;
@@ -48,3 +48,6 @@ export interface IGetMechanicAssignedRequestUseCase {
     }>;
 }
 
+export interface IGetMechanicAcceptedRequestsUseCase {
+    execute(mechanicId: string): Promise<EmergencyRequest[]>;
+}

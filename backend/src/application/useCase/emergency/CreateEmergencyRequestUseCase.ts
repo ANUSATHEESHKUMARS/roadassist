@@ -1,5 +1,5 @@
 
-import { IEmergencyRequestRepository } from "../../../domain/repositories/IEmergencyRequest.js";
+import { IEmergencyRequestRepository } from "../../../domain/repositories/IEmergencyRequestRepository.js";
 import { IMechanicAvailabilityRepository } from "../../../domain/repositories/IMechanicAvailabilityRepository.js";
 import { IVehicleRepository } from "../../../domain/repositories/IVehicleRepository.js";
 import { EmergencyRequest } from "../../../domain/User/entities/EmergencyRequest.js";

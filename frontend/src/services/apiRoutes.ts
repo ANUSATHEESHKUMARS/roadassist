@@ -42,6 +42,7 @@ const API_ROUTES = {
 
     ASSIGNED_REQUEST: (requestId: string) =>
       `/mechanic/emergency-requests/${requestId}`,
+    ASSIGNED_EMERGENCY_REQUESTS: "/mechanic/emergency-requests/assigned",
   },
 
   ADMIN: {
