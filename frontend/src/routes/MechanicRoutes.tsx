@@ -8,6 +8,8 @@ import MechanicDashboardPage from "@/pages/mechanic/MechanicDashboardPage";
 import MechanicServiceRequestsPage from "@/pages/mechanic/MechanicServiceRequestsPage";
 import MechanicAcceptedRequestPage from "@/pages/mechanic/MechanicAcceptedRequestPage";
 import { MechanicLayout } from "@/components/mechanic/MechanicLayout";
+import { MechanicSchedulePage } from "@/pages/mechanic/MechanicScedulePage";
+import { MechanicServiceLocationPage } from "@/pages/mechanic/MechanicServiceLocation";
 
 
 export const mechanicRoutes: RouteObject[] = [
@@ -42,6 +44,14 @@ export const mechanicRoutes: RouteObject[] = [
                                 path: "/mechanic/emergency-requests/:requestId",
                                 element: <MechanicAcceptedRequestPage />,
                             },
+                            {
+                                path:"/mechanic/schedule",
+                                element:<MechanicSchedulePage/>
+                            },
+                            {
+                                path:"/mechanic/service-location",
+                                element:<MechanicServiceLocationPage/>
+                            }
                         ],
                     },
                 ],

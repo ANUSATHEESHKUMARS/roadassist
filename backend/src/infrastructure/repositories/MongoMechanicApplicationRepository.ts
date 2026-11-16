@@ -37,18 +37,30 @@ export class MongoMechanicApplicaitonRepository
         return MechanicApplicationMapper.toDomain(document)
     }
 
-    async update(applicationId: string, application: MechanicApplication): Promise<MechanicApplication | null> {
-        if (!Types.ObjectId.isValid(applicationId)) {
-            return null
-        }
-        const data = MechanicApplicationMapper.toPersistence(application)
-        const document = await this.updateDocument(applicationId, data)
-        if (!document) {
-            return null
-        }
-        return MechanicApplicationMapper.toDomain(document)
+   async update(
+    applicationId: string,
+    application: MechanicApplication,
+    unsetFields: string[] = []
+): Promise<MechanicApplication | null> {
+
+    if (!Types.ObjectId.isValid(applicationId)) {
+        return null;
     }
 
+    const data = MechanicApplicationMapper.toPersistence(application);
+
+    const document = await this.updateDocument(
+        applicationId,
+        data,
+        unsetFields
+    );
+
+    if (!document) {
+        return null;
+    }
+
+    return MechanicApplicationMapper.toDomain(document);
+}
     async findByStatus(status: MechanicApplicationStatus): Promise<MechanicApplication[]> {
         const document = await MechanicApplicationModel.find({ status }).exec()
 

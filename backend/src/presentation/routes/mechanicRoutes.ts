@@ -95,6 +95,13 @@ mechanicRouter.patch(
   authorizeRoles("mechanic"),
   asyncHandler(mechanicEmergencyController.confirmArrival)
 )
-
+mechanicRouter.patch(
+    "/service-location",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(
+        mechanicApplicationController.updateServiceLocation
+    )
+);
 
 export default mechanicRouter;

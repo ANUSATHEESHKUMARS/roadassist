@@ -8,6 +8,7 @@ import {
     UserRound,
     Settings,
     Wrench,
+    CalendarClock
 } from "lucide-react";
 
 const mainNavItems = [
@@ -26,6 +27,12 @@ const mainNavItems = [
         icon: CalendarDays,
         path: "/mechanic/bookings",
     },
+    {
+        label: "My Schedule",
+        icon: CalendarClock,
+        path: "/mechanic/schedule",
+    },
+
 ];
 
 const bottomNavItems = [

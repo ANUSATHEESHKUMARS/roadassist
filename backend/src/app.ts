@@ -13,6 +13,7 @@ import mechanicRouter from './presentation/routes/mechanicRoutes.js';
 
 import { createEmergencyRequestRouter } from './presentation/routes/emergencyRequestRoute.js';
 import { CreateEmergencyRequestController } from './presentation/controllers/EmergencyRequestController.js';
+import sceduleRouter from './presentation/routes/sceduleRoute.js';
 
 export function createApp(
     createEmergencyRequestController: CreateEmergencyRequestController
@@ -44,11 +45,12 @@ export function createApp(
     app.use('/api/superadmin', superadminRouter);
     app.use('/api/media', mediaRouter);
     app.use('/api/mechanic', mechanicRouter);
-
+    app.use("/api/mechanic/schedule", sceduleRouter);
     app.use(
         '/api/emergency-requests',
         createEmergencyRequestRouter(createEmergencyRequestController)
     );
+
 
     app.use(errorHandlingMiddleware);
 

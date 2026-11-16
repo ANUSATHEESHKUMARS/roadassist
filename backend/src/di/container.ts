@@ -85,6 +85,12 @@ import { RedisMechanicLocationStore } from "../infrastructure/services/RedisMech
 import { JoinEmergencyTrackingUseCase } from "../application/useCase/user/JoinEmergencyTrackingUseCase.js";
 import { GetActiveEmergencyRequestUseCase } from "../application/useCase/user/GetActiveEmergencyRequestUseCase.js";
 import { ConfirmArrivalUseCase } from "../application/useCase/mechanic/ConfirmArrivalUseCase.js";
+import { MechanicScheduleRepository } from "../infrastructure/repositories/MechanicScheduleRepository.js";
+import { CreateMechanicScheduleUseCase } from "../application/useCase/mechanic/CreateMechanicScheduleUseCase.js";
+import { GetMechanicScheduleUseCase } from "../application/useCase/mechanic/GetMechanicSceduleUseCase.js";
+import { UpdateMechanicScheduleUseCase } from "../application/useCase/mechanic/UpdateMechanicScheduleUseCase.js";
+import { MechanicScheduleController } from "../presentation/controllers/mechanic/CreateScheduleController.js";
+import { UpdateMechanicServiceLocationUseCase } from "../application/useCase/mechanic/UpdateMechanicServiceLocatioUseCase.js";
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
 
@@ -274,7 +280,9 @@ const submitMechanicApplicationUseCase = new SubmitMechanicApplicationUseCase(me
 
 const getMyMechanicApplicationUseCase = new GetMyMechanicApplicationUseCase(mechanicApplicationRepository)
 
-export const mechanicApplicationController = new MechanicApplicationController(saveMechanicDraftUseCase, submitMechanicApplicationUseCase, getMyMechanicApplicationUseCase)
+const updateMechanicServiceLocationuseCase = new UpdateMechanicServiceLocationUseCase(mechanicApplicationRepository)
+
+export const mechanicApplicationController = new MechanicApplicationController(saveMechanicDraftUseCase, submitMechanicApplicationUseCase, getMyMechanicApplicationUseCase,updateMechanicServiceLocationuseCase)
 
 
 
@@ -409,3 +417,22 @@ export const emergencyRequestStatusController = new EmergencyRequestStatusContro
     getActiveEmergencyRequestUseCase
 )
 export {getActiveEmergencyRequestUseCase}
+
+const mechanicScheduleRepository = new MechanicScheduleRepository()
+
+const createMechanicScheduleUseCase = new CreateMechanicScheduleUseCase(mechanicScheduleRepository)
+
+const getMechanicScheduleUseCase = new GetMechanicScheduleUseCase(mechanicScheduleRepository)
+
+
+const updateMechanicSceduleUseCase = new UpdateMechanicScheduleUseCase(mechanicScheduleRepository)
+
+export const mechanicScheduleController =
+    new MechanicScheduleController(
+        createMechanicScheduleUseCase,
+        getMechanicScheduleUseCase,
+        updateMechanicSceduleUseCase
+    );
+
+
+    

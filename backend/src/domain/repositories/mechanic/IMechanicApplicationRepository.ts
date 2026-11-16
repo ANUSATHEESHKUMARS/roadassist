@@ -10,7 +10,8 @@ export interface IMechanicApplicationRepository {
 
      update(
           applicationId: string,
-          application: MechanicApplication
+          application: MechanicApplication,
+          unsetFields?:string[]
      ): Promise<MechanicApplication | null>;
 
      findByStatus(status : MechanicApplicationStatus):Promise<MechanicApplication[]>

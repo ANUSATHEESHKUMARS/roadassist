@@ -1,31 +1,50 @@
 
 import { Request, Response } from "express";
+
 import { CommonResponse } from "../../../shared/types/CommonResponse.js";
+
 import { SaveMechanicApplicationDraftDto } from "../../../application/dtos/mechanic/SavemechanicApplicationDraftDto.js";
+
 import { ISubmitMechanicApplicationUseCase } from "../../../application/interfaces/mechanic/ISubmitMechanicApplicationUseCase.js";
+
 import { ISaveMechanicApplicationDraftUseCase } from "../../../application/interfaces/mechanic/ISaveMechanicApplicationDraftUseCase.js";
+
 import { IGetMyMechanicApplicationUseCase } from "../../../application/interfaces/mechanic/IGetMyMechanicApplicationUseCase.js";
+
 import { MechanicApplicationMapper } from "../../../application/mappers/MechanicApplicationMapper.js";
+
 import { HttpStatusCode } from "../../../application/enum/httpCodes.js";
+
+import { IUpdateMechanicServiceLocationUseCase } from "../../../domain/repositories/mechanic/IUpdateMechanicServiceLoatonUseCase.js";
+
+import { UpdateMechanicServiceLocationDto } from "../../../application/dtos/mechanic/UpdateMechanicservicelocationDto.js";
 
 
 export class MechanicApplicationController {
+
     constructor(
         private readonly saveMechanicDraftUseCase: ISaveMechanicApplicationDraftUseCase,
+
         private readonly submitMechanicApplicationUseCase: ISubmitMechanicApplicationUseCase,
-        private readonly getMyMechanicApplicationUseCase: IGetMyMechanicApplicationUseCase
+
+        private readonly getMyMechanicApplicationUseCase: IGetMyMechanicApplicationUseCase,
+
+        private readonly updateMechanicServiceLocationUseCase: IUpdateMechanicServiceLocationUseCase
     ) { }
 
+
+    // Save mechanic application draft
     saveDraft = async (req: Request, res: Response): Promise<void> => {
-        const userId = req.user?.userId
+
+        const userId = req.user?.userId;
 
         if (!userId) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Authentication required"
+            };
 
-            const response : CommonResponse = {
-                success:false,
-                message:"Authentication required"
-            }
-            res.status(HttpStatusCode.UNAUTHORIZED).json(response)
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response);
             return;
         }
 
@@ -36,33 +55,19 @@ export class MechanicApplicationController {
             dto
         );
 
-      const response : CommonResponse <typeof application>= {
-        success:true,
-        message:"Mechanic applicatin draft saved succesfullyy",
-        data:application
-      }
-      res.status(HttpStatusCode.OK).json(response)
-    }
-    submitApplication = async (req: Request, res: Response): Promise<void> => {
-        const userId = req.user?.userId
-        if (!userId) {
-         const response:CommonResponse = {
-            success:false,
-            message:"Authentication required"
-         }
-         res.status(HttpStatusCode.UNAUTHORIZED).json(response)
-            return
-        }
-        const application = await this.submitMechanicApplicationUseCase.execute(userId)
-           const response: CommonResponse<typeof application> = {
+        const response: CommonResponse<typeof application> = {
             success: true,
-            message: "Mechanic application submitted successfully",
-            data: application,
+            message: "Mechanic application draft saved successfully",
+            data: application
         };
-        res.status(HttpStatusCode.OK).json(response)
-    }
 
-    getMyApplication = async (req: Request, res: Response): Promise<void> => {
+        res.status(HttpStatusCode.OK).json(response);
+    };
+
+
+    // Submit mechanic application
+    submitApplication = async (req: Request, res: Response): Promise<void> => {
+
         const userId = req.user?.userId;
 
         if (!userId) {
@@ -70,11 +75,40 @@ export class MechanicApplicationController {
                 success: false,
                 message: "Authentication required"
             };
+
             res.status(HttpStatusCode.UNAUTHORIZED).json(response);
             return;
         }
 
-        const application = await this.getMyMechanicApplicationUseCase.execute(userId);
+        const application = await this.submitMechanicApplicationUseCase.execute(userId);
+
+        const response: CommonResponse<typeof application> = {
+            success: true,
+            message: "Mechanic application submitted successfully",
+            data: application
+        };
+
+        res.status(HttpStatusCode.OK).json(response);
+    };
+
+
+    // Get current mechanic application
+    getMyApplication = async (req: Request, res: Response): Promise<void> => {
+
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Authentication required"
+            };
+
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+            return;
+        }
+
+        const application =
+            await this.getMyMechanicApplicationUseCase.execute(userId);
 
         if (!application) {
             const response: CommonResponse = {
@@ -82,6 +116,7 @@ export class MechanicApplicationController {
                 message: "No mechanic application found",
                 data: null
             };
+
             res.status(HttpStatusCode.OK).json(response);
             return;
         }
@@ -91,6 +126,40 @@ export class MechanicApplicationController {
             message: "Mechanic application retrieved successfully",
             data: MechanicApplicationMapper.toResponse(application)
         };
+
         res.status(HttpStatusCode.OK).json(response);
-    }
+    };
+
+
+    // Update mechanic service location
+    updateServiceLocation = async (req: Request, res: Response): Promise<void> => {
+
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Authentication required"
+            };
+
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+            return;
+        }
+
+        const dto = req.body as UpdateMechanicServiceLocationDto;
+
+        const application =
+            await this.updateMechanicServiceLocationUseCase.execute(
+                userId,
+                dto
+            );
+
+        const response: CommonResponse<ReturnType<typeof MechanicApplicationMapper.toResponse>> = {
+            success: true,
+            message: "Service location updated successfully",
+            data: MechanicApplicationMapper.toResponse(application)
+        };
+
+        res.status(HttpStatusCode.OK).json(response);
+    };
 }

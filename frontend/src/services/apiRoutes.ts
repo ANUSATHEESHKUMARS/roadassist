@@ -24,12 +24,20 @@ const API_ROUTES = {
     BY_ID: (vehicleId: string) => `/vehicle/${vehicleId}`,
   },
 
+
   MECHANIC: {
     DRAFT: "/mechanic/draft",
     SUBMIT: "/mechanic/submit",
     UPLOAD_MEDIA: "/mechanic/media/upload",
     MY_APPLICATION: "/mechanic/my-application",
     BOOKINGS: "/mechanic/bookings",
+    SERVICE_LOCATION: "/mechanic/service-location",
+      SCHEDULE:{
+    BASE:"/mechanic/schedule",
+    CREATE:"/mechanic/schedule/create",
+    UPDATE:"/mechanic/schedule/update",
+    
+  },
 
     AVAILABILITY: "/mechanic/availability",
     NEARBY_EMERGENCY_REQUESTS: "/mechanic/emergency-requests/nearby",
