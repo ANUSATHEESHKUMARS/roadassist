@@ -12,6 +12,7 @@ import {
     IGetAssignedEmergencyRequestDetailsUseCase,
     IGetMechanicAcceptedRequestsUseCase,
 } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
+import { IStartEmergencyTravelUseCase } from "../../../application/interfaces/mechanic/IStartEmergencyTravelUseCase.js";
 
 export class MechanicEmergencyController {
     constructor(
@@ -20,7 +21,8 @@ export class MechanicEmergencyController {
         private readonly acceptEmergencyRequestUseCase: IAcceptEmergencyRequestUseCase,
         private readonly rejectEmergencyRequestUseCase: IRejectEmergencyRequestUseCase,
         private readonly getAssignedEmergencyRequestDetailsUseCase: IGetAssignedEmergencyRequestDetailsUseCase,
-        private readonly getMechanicAcceptedRequestsUseCase: IGetMechanicAcceptedRequestsUseCase
+        private readonly getMechanicAcceptedRequestsUseCase: IGetMechanicAcceptedRequestsUseCase,
+        private readonly startemergencyTravelUseCase :  IStartEmergencyTravelUseCase
     ) {}
 
     updateAvailability = async (req: Request, res: Response): Promise<void> => {
@@ -212,4 +214,40 @@ export class MechanicEmergencyController {
 
         res.status(HttpStatusCode.OK).json(response);
     };
+startTravel = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+        const response: CommonResponse = {
+            success: false,
+            message: "Unauthorized, please log in.",
+        };
+
+        res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+        return;
+    }
+
+    const { id } = req.params;
+
+    if (!id || Array.isArray(id)) {
+        const response: CommonResponse = {
+            success: false,
+            message: "Invalid emergency request ID",
+        };
+
+        res.status(HttpStatusCode.BAD_REQUEST).json(response);
+        return;
+    }
+
+    const updatedRequest =
+        await this.startemergencyTravelUseCase.execute(id, userId);
+
+    const response: CommonResponse<typeof updatedRequest> = {
+        success: true,
+        message: "Travel started successfully",
+        data: updatedRequest,
+    };
+
+    res.status(HttpStatusCode.OK).json(response);
+};
 }

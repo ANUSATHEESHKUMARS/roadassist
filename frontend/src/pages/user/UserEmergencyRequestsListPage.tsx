@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { emergencyRequestService } from "@/services/EmergencyRequestPage";
+import { emergencyRequestService } from "@/services/EmergencyRequestService";
 import type { EmergencyRequestDetail } from "@/types/emergencyRequest";
 
 import {

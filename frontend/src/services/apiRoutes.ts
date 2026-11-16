@@ -43,6 +43,9 @@ const API_ROUTES = {
     ASSIGNED_REQUEST: (requestId: string) =>
       `/mechanic/emergency-requests/${requestId}`,
     ASSIGNED_EMERGENCY_REQUESTS: "/mechanic/emergency-requests/assigned",
+    START_EMERGENCY_TRAVEL :(requestId : string) => `/mechanic/emergency-requests/${requestId}/start-travel`,
+    CONFIRM_EMERGENCY_ARRIVAL: (requestId: string) =>
+    `/mechanic/emergency-requests/${requestId}/confirm-arrival`,
   },
 
   ADMIN: {
@@ -81,6 +84,7 @@ const API_ROUTES = {
     BASE: "/emergency-requests",
     UPLOAD_IMAGES: "/emergency-requests/images",
     MY_REQUESTS: "/emergency-requests/my-requests",
+    MY_ACTIVE_REQUEST: "/emergency-requests/my-active-request",
 
     BY_ID: (requestId: string) =>
       `/emergency-requests/${requestId}`,

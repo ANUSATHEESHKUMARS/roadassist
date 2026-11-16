@@ -3,12 +3,14 @@ import { CommonResponse } from "../../../shared/types/CommonResponse.js";
 import { HttpStatusCode } from "../../../application/enum/httpCodes.js";
 import { IGetEmergencyRequestStatusUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
 import { IGetUserEmergencyRequestsUseCase } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
+import { IGetActiveEmergencyRequestUseCase } from "../../../application/interfaces/IGetActiveEmergencyRequestUseCase.js";
 
 
 export class EmergencyRequestStatusController {
     constructor(
         private readonly getEmergencyRequestStatusUseCase: IGetEmergencyRequestStatusUseCase,
-        private readonly getUserEmergencyRequestsUseCase: IGetUserEmergencyRequestsUseCase
+        private readonly getUserEmergencyRequestsUseCase: IGetUserEmergencyRequestsUseCase,
+        private readonly getActiveEmergencyRequestUseCase:IGetActiveEmergencyRequestUseCase
     ) { }
 
     getRequestStatus = async (req: Request, res: Response): Promise<void> => {
@@ -66,5 +68,32 @@ export class EmergencyRequestStatusController {
 
         res.status(HttpStatusCode.OK).json(response);
     };
+
+    getActiveRequest = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+        const response: CommonResponse = {
+            success: false,
+            message: "Unauthorized, please log in.",
+        };
+
+        res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+        return;
+    }
+
+    const activeRequest =
+        await this.getActiveEmergencyRequestUseCase.execute(userId);
+
+    const response: CommonResponse<typeof activeRequest> = {
+        success: true,
+        message: activeRequest
+            ? "Active emergency request retrieved"
+            : "No active emergency request found",
+        data: activeRequest,
+    };
+
+    res.status(HttpStatusCode.OK).json(response);
+};
 }
 

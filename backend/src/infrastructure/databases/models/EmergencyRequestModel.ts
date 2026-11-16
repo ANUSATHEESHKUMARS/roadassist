@@ -1,13 +1,6 @@
 import { model, Schema, Types, Document } from "mongoose";
-import { EmergencyIssueCategory } from "../../../domain/User/entities/EmergencyRequest.js";
+import type { EmergencyIssueCategory, EmergencyRequestStatus} from "../../../domain/User/entities/EmergencyRequest.js";
 
-export type EmergencyRequestStatus =
-
-    | "pending"
-    | "searching"
-    | "assigned"
-    | "cancelled"
-    | "completed"
 
 
 export interface IEmergencyRequestDocument extends Document {
@@ -123,6 +116,8 @@ const emergencyRequestSchema = new Schema<IEmergencyRequestDocument>({
             "pending",
             "searching",
             "assigned",
+            "on_the_way",
+            "arrived",
             "cancelled",
             "completed"
         ],
@@ -145,5 +140,23 @@ const emergencyRequestSchema = new Schema<IEmergencyRequestDocument>({
 
 
 emergencyRequestSchema.index({ geoLocation: "2dsphere" });
+emergencyRequestSchema.index(
+    { userId: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            status: {
+                $in: [
+                    "pending",
+                    "searching",
+                    "assigned",
+                    "on_the_way",
+                    "arrived"
+                ]
+            }
+        },
+        name: "unique_active_emergency_request_per_user"
+    }
+);
 
 export const EmergencyRequestModel = model<IEmergencyRequestDocument>("EmergencyRequest", emergencyRequestSchema)

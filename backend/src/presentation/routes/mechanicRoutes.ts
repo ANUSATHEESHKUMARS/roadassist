@@ -44,7 +44,7 @@ mechanicRouter.patch(
   authorizeRoles("mechanic"),
   asyncHandler(mechanicEmergencyController.updateAvailability)
 );
-// Nearby requests
+
 mechanicRouter.get(
     "/emergency-requests/nearby",
     auth,
@@ -52,7 +52,6 @@ mechanicRouter.get(
     asyncHandler(mechanicEmergencyController.getNearbyRequests)
 );
 
-// All accepted requests
 mechanicRouter.get(
     "/emergency-requests/assigned",
     auth,
@@ -60,7 +59,6 @@ mechanicRouter.get(
     asyncHandler(mechanicEmergencyController.getAssignedRequests)
 );
 
-// Single assigned request
 mechanicRouter.get(
     "/emergency-requests/:id",
     auth,
@@ -68,7 +66,6 @@ mechanicRouter.get(
     asyncHandler(mechanicEmergencyController.getAssignedRequest)
 );
 
-// Accept request
 mechanicRouter.post(
     "/emergency-requests/:id/accept",
     auth,
@@ -76,12 +73,21 @@ mechanicRouter.post(
     asyncHandler(mechanicEmergencyController.acceptRequest)
 );
 
-// Reject request
 mechanicRouter.post(
     "/emergency-requests/:id/reject",
     auth,
     authorizeRoles("mechanic"),
     asyncHandler(mechanicEmergencyController.rejectRequest)
 );
+
+mechanicRouter.patch(
+  "/emergency-requests/:id/start-travel",
+  auth,
+  authorizeRoles("mechanic"),
+  asyncHandler(mechanicEmergencyController
+    .startTravel
+  )
+)
+
 
 export default mechanicRouter;

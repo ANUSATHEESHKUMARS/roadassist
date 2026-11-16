@@ -1,8 +1,9 @@
+
 import { parse } from "cookie";
 import type { Socket } from "socket.io";
 
-import { ITokenService } from "../../application/contracts/ITokenService.js";
-import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
+import type { ITokenService } from "../../application/contracts/ITokenService.js";
+import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 
 export const socketAuthMiddleware = (
     tokenService: ITokenService,
@@ -45,16 +46,20 @@ export const socketAuthMiddleware = (
                 return next(new Error("Your account is blocked"));
             }
 
-            // 5. Check active role
+            // Verify that the active role belongs to this user.
             if (!user.roles.includes(user.activeRole)) {
                 return next(new Error("Invalid active role"));
             }
 
-            if (user.activeRole !== "mechanic") {
-                return next(new Error("Mechanic access required"));
+            // Allow only mechanics and customers.
+            if (
+                user.activeRole !== "mechanic" &&
+                user.activeRole !== "user"
+            ) {
+                return next(new Error("Socket access not allowed"));
             }
 
-            // 6. Store verified identity on the socket
+            // Store verified identity.
             socket.data.userId = user.userId!;
             socket.data.email = user.email;
             socket.data.roles = user.roles;

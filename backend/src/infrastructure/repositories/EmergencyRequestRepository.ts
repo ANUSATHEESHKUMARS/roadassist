@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { IEmergencyRequestRepository } from "../../domain/repositories/IEmergencyRequestRepository.js";
-import { EmergencyRequest } from "../../domain/User/entities/EmergencyRequest.js";
+import { EmergencyRequest, EmergencyRequestStatus } from "../../domain/User/entities/EmergencyRequest.js";
 import { EmergencyRequestModel } from "../databases/models/EmergencyRequestModel.js";
 import { EmergencyRequestMapper } from "../../application/mappers/EmergencyRequestMapper.js";
 
@@ -60,6 +60,36 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
 
         return documents.map((doc) => EmergencyRequestMapper.toDomain(doc))
     }
+
+    async findActiveByUserId(
+    userId: string
+): Promise<EmergencyRequest | null> {
+
+    if (!Types.ObjectId.isValid(userId)) {
+        return null;
+    }
+
+    const document = await EmergencyRequestModel.findOne({
+        userId: new Types.ObjectId(userId),
+        status: {
+            $in: [
+                "pending",
+                "searching",
+                "assigned",
+                "on_the_way",
+                "arrived"
+            ]
+        }
+    })
+        .sort({ createdAt: -1 })
+        .exec();
+
+    if (!document) {
+        return null;
+    }
+
+    return EmergencyRequestMapper.toDomain(document);
+}
 
     async findNearbyPending(
         latitude: number,
@@ -309,7 +339,7 @@ async findByAssignedMechanicId(
     // Find requests assigned to this mechanic
     const documents = await EmergencyRequestModel.find({
         assignedMechanicId: new Types.ObjectId(mechanicId),
-        status: "assigned",
+        status: ["assigned" , "on_the_way","arrived"]
     })
         .sort({ createdAt: -1 })
         .exec();
@@ -320,5 +350,41 @@ async findByAssignedMechanicId(
     );
 }
 
+async updateAssignedRequestStatus(
+    requestId: string,
+    mechanicId: string,
+    currentStatus: EmergencyRequestStatus,
+    newStatus: EmergencyRequestStatus
+): Promise<EmergencyRequest | null> {
 
+    if (
+        !Types.ObjectId.isValid(requestId) ||
+        !Types.ObjectId.isValid(mechanicId)
+    ) {
+        return null;
+    }
+
+    const document = await EmergencyRequestModel.findOneAndUpdate(
+        {
+            _id: new Types.ObjectId(requestId),
+            assignedMechanicId: new Types.ObjectId(mechanicId),
+            status: currentStatus
+        },
+        {
+            $set: {
+                status: newStatus
+            }
+        },
+        {
+            new: true,
+            runValidators: true
+        }
+    ).exec();
+
+    if (!document) {
+        return null;
+    }
+
+    return EmergencyRequestMapper.toDomain(document);
+}
 }

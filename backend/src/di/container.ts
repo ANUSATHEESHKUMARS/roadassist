@@ -79,6 +79,11 @@ import { EmergencyRequestStatusController } from "../presentation/controllers/em
 import { SocketMechanicNotificationService } from "../infrastructure/services/SocketMechanicNotification.js";
 import type { Server } from "socket.io";
 import { GetMechanicAcceptedRequestsUseCase } from "../application/useCase/mechanic/GetMechanicAcceptedRequestUseCase.js";
+import { StartEmergencyTravelUseCase } from "../application/useCase/mechanic/StartEmergencyTravelUseCase.js";
+import { UpdateMechanicLiveLocationUseCase } from "../application/useCase/mechanic/UpdateMechanicLiveLocationUseCase.js";
+import { RedisMechanicLocationStore } from "../infrastructure/services/RedisMechanicLocationStore.js";
+import { JoinEmergencyTrackingUseCase } from "../application/useCase/user/JoinEmergencyTrackingUseCase.js";
+import { GetActiveEmergencyRequestUseCase } from "../application/useCase/user/GetActiveEmergencyRequestUseCase.js";
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
 
@@ -356,13 +361,23 @@ const getAssignedEmergencyRequestDetailsUseCase = new GetAssignedEmergencyReques
 
 const getMechanicAcceptRequestUseCase = new GetMechanicAcceptedRequestsUseCase(emergencyRequestRepository)
 
+const startemergencyTravelUseCase = new StartEmergencyTravelUseCase(emergencyRequestRepository)
+
+const mechanicLocationStore = new RedisMechanicLocationStore();
+const updateMechanicLiveLocationUseCase = new  UpdateMechanicLiveLocationUseCase(emergencyRequestRepository,
+    mechanicLocationStore
+)
+
+export {updateMechanicLiveLocationUseCase}
+
 export const mechanicEmergencyController = new MechanicEmergencyController(
     updateMechanicAvailabilityUseCase,
     getNearbyEmergencyRequestsUseCase,
     acceptEmergencyRequestUseCase,
     rejectEmergencyRequestMechanicUseCase,
     getAssignedEmergencyRequestDetailsUseCase,
-    getMechanicAcceptRequestUseCase
+    getMechanicAcceptRequestUseCase,
+    startemergencyTravelUseCase
 )
 
 // ─── Emergency Request Status (User side) ───────────────────────────────────
@@ -375,7 +390,16 @@ const getUserEmergencyRequestsUseCase = new GetUserEmergencyRequestsUseCase(
     emergencyRequestRepository
 )
 
+
+const joinEmergencyTrackingUseCase = new JoinEmergencyTrackingUseCase(emergencyRequestRepository)
+
+export {joinEmergencyTrackingUseCase}
+
+const getActiveEmergencyRequestUseCase = new GetActiveEmergencyRequestUseCase(emergencyRequestRepository)
+
 export const emergencyRequestStatusController = new EmergencyRequestStatusController(
     getEmergencyRequestStatusUseCase,
-    getUserEmergencyRequestsUseCase
+    getUserEmergencyRequestsUseCase,
+    getActiveEmergencyRequestUseCase
 )
+export {getActiveEmergencyRequestUseCase}

@@ -14,6 +14,8 @@ export type EmergencyRequestStatus =
     | "pending"
     | "searching"
     | "assigned"
+    | "on_the_way"
+    | "arrived"
     | "cancelled"
     | "completed";
 
@@ -65,7 +67,7 @@ export interface EmergencyRequestDetail {
 
 export interface EmergencyRequestStatusResponse {
     request: EmergencyRequestDetail;
-    customerDetails: {
+    mechanicDetails: {
         fullName: string;
         email: string;
         phoneNumber: string;

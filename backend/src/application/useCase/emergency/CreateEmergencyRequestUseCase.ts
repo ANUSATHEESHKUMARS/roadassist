@@ -3,6 +3,7 @@ import { IEmergencyRequestRepository } from "../../../domain/repositories/IEmerg
 import { IMechanicAvailabilityRepository } from "../../../domain/repositories/IMechanicAvailabilityRepository.js";
 import { IVehicleRepository } from "../../../domain/repositories/IVehicleRepository.js";
 import { EmergencyRequest } from "../../../domain/User/entities/EmergencyRequest.js";
+import { ConflictError } from "../../../shared/errors/ConflitError.js";
 import { ForbiddenError } from "../../../shared/errors/ForbiddenError.js";
 import { UnauthorizedError } from "../../../shared/errors/UnauthorizedError.js";
 import { CreateEmergencyRequestDto } from "../../dtos/CreateEmergencyRequest.js";
@@ -33,6 +34,15 @@ export class CreateEmergencyRequestUseCase implements ICreateEmergencyRequestUse
                 "AUTHENTICATION_IS_REQUIRED"
             );
         }
+
+     const activeRequest = await this.emergencyRequestRepository.findActiveByUserId(userId)
+
+     if(activeRequest){
+        throw new ConflictError("You alredy have an active emergency request",
+            "ACTIVE_EMERGENCY_REQUEST_EXISTS"
+        )
+     }
+
 
         const vehicle = await this.vehicleRepository.findById(dto.vehicleId);
 

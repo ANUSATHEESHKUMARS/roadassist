@@ -30,13 +30,13 @@ export const mechanicEmergencyService = {
 
         return response.data.data;
     },
-async getAssignedRequests(): Promise<EmergencyRequestDetail[]> {
-    const response = await apiClient.get<
-        ApiResponse<EmergencyRequestDetail[]>
-    >(API_ROUTES.MECHANIC.ASSIGNED_EMERGENCY_REQUESTS);
+    async getAssignedRequests(): Promise<EmergencyRequestDetail[]> {
+        const response = await apiClient.get<
+            ApiResponse<EmergencyRequestDetail[]>
+        >(API_ROUTES.MECHANIC.ASSIGNED_EMERGENCY_REQUESTS);
 
-    return response.data.data;
-},
+        return response.data.data;
+    },
     async getNearbyRequests(): Promise<EmergencyRequestDetail[]> {
         const response = await apiClient.get<
             ApiResponse<EmergencyRequestDetail[]>
@@ -61,7 +61,6 @@ async getAssignedRequests(): Promise<EmergencyRequestDetail[]> {
         return response.data.data;
     },
 
-    /** Get an assigned request's details (for the accepting mechanic) */
     async getAssignedRequest(
         requestId: string
     ): Promise<MechanicAssignedRequestResponse> {
@@ -72,4 +71,17 @@ async getAssignedRequests(): Promise<EmergencyRequestDetail[]> {
         return response.data.data;
     },
 
+    async startTravel(requestId: string): Promise<EmergencyRequestDetail> {
+        const response = await apiClient.patch<ApiResponse<EmergencyRequestDetail>>(API_ROUTES.MECHANIC.START_EMERGENCY_TRAVEL(requestId))
+        return response.data.data
+    },
+    async confirmArrival(requestId: string): Promise<EmergencyRequestDetail> {
+    const response = await apiClient.patch<
+        ApiResponse<EmergencyRequestDetail>
+    >(
+        API_ROUTES.MECHANIC.CONFIRM_EMERGENCY_ARRIVAL(requestId)
+    );
+
+    return response.data.data;
+}
 };

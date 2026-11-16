@@ -68,4 +68,11 @@ export const emergencyRequestService = {
 
     return response.data.data;
   },
+  async getMyActiveRequest(): Promise<EmergencyRequestDetail | null> {
+    const response = await apiClient.get<
+        ApiResponse<EmergencyRequestDetail | null>
+    >(API_ROUTES.EMERGENCY_REQUEST.MY_ACTIVE_REQUEST);
+
+    return response.data.data;
+},
 };

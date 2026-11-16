@@ -7,7 +7,7 @@ import { Input } from "../../components/ui/input";
 import LocationPicker from "../../components/emergency/LocationPicker";
 import IssueImageUpload from "../../components/emergency/IssueImageUpload";
 import { CheckCircle, CarFront, ArrowRight, ArrowLeft, Check } from "lucide-react";
-import { emergencyRequestService } from "../../services/EmergencyRequestPage";
+import { emergencyRequestService } from "../../services/EmergencyRequestService";
 
 import type {
   EmergencyIssueCategory,
@@ -87,50 +87,79 @@ export default function EmergencyRequestPage() {
   const [submitting, setSubmitting] = useState(false);
   const [pageError, setPageError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  useEffect(() => {
+  
+useEffect(() => {
     let active = true;
 
-    async function loadVehicles() {
-      try {
-        const response = await getVehicles();
+    async function initializePage() {
+        try {
+            // First, check for an existing active request
+            const activeRequest =
+                await emergencyRequestService.getMyActiveRequest();
 
-        if (!active) return;
+            if (!active) return;
 
-        // The API returns { vehicles: Vehicle[] } or Vehicle[] — handle both shapes
-        const raw: unknown[] = Array.isArray(response)
-          ? response
-          : Array.isArray(response?.vehicles)
-          ? response.vehicles
-          : [];
+            if (activeRequest) {
+                const requestId = activeRequest.id ?? activeRequest._id;
 
-        const mapped: EmergencyVehicleOption[] = raw.map((v: any) => ({
-          id: v.id ?? v._id ?? "",
-          brand: v.brand ?? "",
-          model: v.model ?? "",
-          registratioNumber: v.registrationNumber ?? v.registratioNumber ?? "",
-          vehicleType: v.vehicleType,
-        }));
+                if (!requestId) {
+                    setPageError(
+                        "Unable to identify your existing emergency request."
+                    );
+                    return;
+                }
 
-        setVehicles(mapped);
-      } catch (error) {
-        console.error("Failed to load vehicles:", error);
+                navigate(`/user/emergency-requests/${requestId}`, {
+                    replace: true,
+                });
 
-        if (active) {
-          setPageError("Unable to load your vehicles. Please try again.");
+                return;
+            }
+
+            // No active request: load registered vehicles
+            const response = await getVehicles();
+
+            if (!active) return;
+
+            const raw: unknown[] = Array.isArray(response)
+                ? response
+                : Array.isArray(response?.vehicles)
+                    ? response.vehicles
+                    : [];
+
+            const mapped: EmergencyVehicleOption[] = raw.map((v: any) => ({
+                id: v.id ?? v._id ?? "",
+                brand: v.brand ?? "",
+                model: v.model ?? "",
+                registratioNumber:
+                    v.registrationNumber ?? v.registratioNumber ?? "",
+                vehicleType: v.vehicleType,
+            }));
+
+            setVehicles(mapped);
+
+        } catch (error) {
+            console.error("Failed to initialize emergency page:", error);
+
+            if (active) {
+                setPageError(
+                    "Unable to check your active request. Please try again."
+                );
+            }
+        } finally {
+            if (active) {
+                setLoadingVehicles(false);
+            }
         }
-      } finally {
-        if (active) {
-          setLoadingVehicles(false);
-        }
-      }
     }
 
-    void loadVehicles();
+    void initializePage();
 
     return () => {
-      active = false;
+        active = false;
     };
-  }, []);
+}, [navigate]);
+
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

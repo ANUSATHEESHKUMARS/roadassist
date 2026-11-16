@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { emergencyRequestService } from "@/services/EmergencyRequestPage";
+import { emergencyRequestService } from "@/services/EmergencyRequestService";
 import type { EmergencyRequestStatusResponse } from "@/types/emergencyRequest";
-
+import { socket } from "@/services/socket/socket"
+import EmergencyTrackingMap from "@/components/emergency/EmergencyTrackingMap";
 import {
     Card,
     CardContent,
@@ -88,6 +89,19 @@ export default function EmergencyRequestStatusPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    interface MechanicLiveLocation {
+        requestId: string;
+        mechanicId: string;
+        latitude: number;
+        longitude: number;
+        accuracy: number;
+        heading: number | null;
+        speed: number | null;
+        updatedAt: string;
+    }
+
+    const [mechanicLocation, setMechanicLocation] =
+        useState<MechanicLiveLocation | null>(null);
     const fetchStatus = useCallback(async () => {
         if (!requestId) return;
         try {
@@ -113,6 +127,60 @@ export default function EmergencyRequestStatusPage() {
         return () => clearInterval(interval);
     }, [fetchStatus]);
 
+    useEffect(() => {
+        if (!requestId || !data) return;
+
+        // Only join tracking when a mechanic has been assigned.
+        if (
+            !data.request.assignedMechanicId ||
+            !["assigned", "on_the_way", "arrived"].includes(data.request.status)
+        ) {
+            return;
+        }
+
+        const handleConnect = () => {
+            console.log("Customer socket connected:", socket.id);
+
+            socket.emit("join_emergency_tracking", {
+                requestId
+            });
+        };
+
+        const handleTrackingJoined = (response: {
+            requestId: string;
+            message: string;
+        }) => {
+            console.log("Joined tracking room:", response);
+        };
+
+        const handleLocationUpdate = (location: MechanicLiveLocation) => {
+            console.log("Mechanic location received:", location);
+
+            setMechanicLocation(location);
+        };
+
+        const handleTrackingError = (response: { message: string }) => {
+            console.error("Tracking error:", response.message);
+        };
+
+        socket.on("connect", handleConnect);
+        socket.on("emergency_tracking_joined", handleTrackingJoined);
+        socket.on("mechanic_location_updated", handleLocationUpdate);
+        socket.on("emergency_tracking_error", handleTrackingError);
+
+        if (!socket.connected) {
+            socket.connect();
+        } else {
+            handleConnect();
+        }
+
+        return () => {
+            socket.off("connect", handleConnect);
+            socket.off("emergency_tracking_joined", handleTrackingJoined);
+            socket.off("mechanic_location_updated", handleLocationUpdate);
+            socket.off("emergency_tracking_error", handleTrackingError);
+        };
+    }, [requestId, data?.request.assignedMechanicId, data?.request.status]);
     if (loading) {
         return (
             <div className="flex min-h-[50vh] items-center justify-center">
@@ -149,6 +217,7 @@ export default function EmergencyRequestStatusPage() {
     const StatusIcon = statusCfg.icon;
 
     return (
+
         <div className="mx-auto max-w-2xl space-y-6 p-4 sm:p-6">
             {/* Back */}
             <Link to="/user">
@@ -180,11 +249,11 @@ export default function EmergencyRequestStatusPage() {
 
                     {(request.status === "pending" ||
                         request.status === "searching") && (
-                        <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                            <Loader2 className="size-4 animate-spin" />
-                            Looking for a nearby mechanic…
-                        </p>
-                    )}
+                            <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                                <Loader2 className="size-4 animate-spin" />
+                                Looking for a nearby mechanic…
+                            </p>
+                        )}
                 </CardContent>
             </Card>
 
@@ -229,6 +298,25 @@ export default function EmergencyRequestStatusPage() {
                 </Card>
             )}
 
+            {request.assignedMechanicId &&
+                ["assigned", "on_the_way", "arrived"].includes(request.status) && (
+                    <section className="mt-6 space-y-4">
+                        <h2 className="text-lg font-semibold">
+                            Live Mechanic Tracking
+                        </h2>
+
+                        <EmergencyTrackingMap
+                            customerLocation={request.location}
+                            mechanicLocation={mechanicLocation}
+                        />
+
+                        {!mechanicLocation && (
+                            <p className="text-sm text-muted-foreground">
+                                Waiting for the mechanic's live location...
+                            </p>
+                        )}
+                    </section>
+                )}
             {/* Request Details */}
             <Card>
                 <CardHeader className="pb-3">

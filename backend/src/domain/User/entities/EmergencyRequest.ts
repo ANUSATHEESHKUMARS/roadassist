@@ -2,6 +2,8 @@ export type EmergencyRequestStatus =
     | "pending"
     | "searching"
     | "assigned"
+    | "on_the_way"
+    | "arrived"
     | "cancelled"
     | "completed";
 

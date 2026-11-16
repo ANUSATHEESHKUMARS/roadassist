@@ -5,13 +5,17 @@ import { Server } from 'socket.io';
 
 import { connectRedis } from './infrastructure/redis.js';
 import { socketAuthMiddleware } from './presentation/middlewares/SocketAuthMiddleware.js';
+import { MechanicLocationSocketHandler } from './presentation/socket/MechanicLocationSocketHandler.js';
+import {  CustomerTrackingSocketHandler } from './presentation/socket/CustomerTrackingSocketHandler.js';
 
 dotenv.config();
 
 const {
     createEmergencyDependencies,
     tokenService,
-    userRepository
+    userRepository,
+    updateMechanicLiveLocationUseCase,
+    joinEmergencyTrackingUseCase
 } = await import('./di/container.js');
 
 const { connectDB } =
@@ -29,19 +33,35 @@ const io = new Server({
 
 io.use(socketAuthMiddleware(tokenService, userRepository));
 
+const mechanicLocationSocketHandler =
+    new MechanicLocationSocketHandler(
+        io,
+        updateMechanicLiveLocationUseCase
+    );
+
+    const customerTrackingSocketHandler = new CustomerTrackingSocketHandler(joinEmergencyTrackingUseCase)
+
 io.on('connection', (socket) => {
-    const mechanicId = socket.data.userId;
+    const userId = socket.data.userId;
+    const activeRole = socket.data.activeRole;
 
-    socket.join(`mechanic:${mechanicId}`);
+    if (activeRole === "mechanic") {
+        socket.join(`mechanic:${userId}`);
 
-    console.log('Mechanic connected:', mechanicId);
-    console.log('Joined room:', `mechanic:${mechanicId}`);
+        console.log("Mechanic connected:", userId);
 
-    socket.on('disconnect', () => {
-        console.log('Mechanic disconnected:', mechanicId);
+        mechanicLocationSocketHandler.register(socket);
+    }
+
+    if (activeRole === "user") {
+        console.log("Customer connected:", userId);
+        customerTrackingSocketHandler.register(socket)
+    }
+
+    socket.on("disconnect", () => {
+        console.log(`${activeRole} disconnected:`, userId);
     });
 });
-
 const { createEmergencyRequestController } =
     createEmergencyDependencies(io);
 

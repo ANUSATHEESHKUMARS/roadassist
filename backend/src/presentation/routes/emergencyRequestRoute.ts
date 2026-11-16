@@ -36,6 +36,13 @@ export function createEmergencyRequestRouter(
         asyncHandler(emergencyRequestStatusController.getUserRequests)
     );
 
+    // Get user's active emergency request
+emergencyRouter.get(
+    '/my-active-request',
+    auth,
+    asyncHandler(emergencyRequestStatusController.getActiveRequest)
+);
+
     emergencyRouter.get(
         '/:id',
         auth,
