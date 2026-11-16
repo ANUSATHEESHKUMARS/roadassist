@@ -13,6 +13,7 @@ import {
     IGetMechanicAcceptedRequestsUseCase,
 } from "../../../application/interfaces/IMechanicEmergencyUseCases.js";
 import { IStartEmergencyTravelUseCase } from "../../../application/interfaces/mechanic/IStartEmergencyTravelUseCase.js";
+import { IConfirmArrivalUseCase } from "../../../application/interfaces/mechanic/IConfirmArrivalUseCase.js";
 
 export class MechanicEmergencyController {
     constructor(
@@ -22,7 +23,8 @@ export class MechanicEmergencyController {
         private readonly rejectEmergencyRequestUseCase: IRejectEmergencyRequestUseCase,
         private readonly getAssignedEmergencyRequestDetailsUseCase: IGetAssignedEmergencyRequestDetailsUseCase,
         private readonly getMechanicAcceptedRequestsUseCase: IGetMechanicAcceptedRequestsUseCase,
-        private readonly startemergencyTravelUseCase :  IStartEmergencyTravelUseCase
+        private readonly startemergencyTravelUseCase: IStartEmergencyTravelUseCase,
+        private readonly confirmArrivalUseCase: IConfirmArrivalUseCase
     ) {}
 
     updateAvailability = async (req: Request, res: Response): Promise<void> => {
@@ -245,6 +247,43 @@ startTravel = async (req: Request, res: Response): Promise<void> => {
     const response: CommonResponse<typeof updatedRequest> = {
         success: true,
         message: "Travel started successfully",
+        data: updatedRequest,
+    };
+
+    res.status(HttpStatusCode.OK).json(response);
+};
+
+confirmArrival = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+        const response: CommonResponse = {
+            success: false,
+            message: "Unauthorized, please log in.",
+        };
+
+        res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+        return;
+    }
+
+    const { id } = req.params;
+
+    if (!id || Array.isArray(id)) {
+        const response: CommonResponse = {
+            success: false,
+            message: "Invalid emergency request ID",
+        };
+
+        res.status(HttpStatusCode.BAD_REQUEST).json(response);
+        return;
+    }
+
+    const updatedRequest =
+        await this.confirmArrivalUseCase.execute(id, userId);
+
+    const response: CommonResponse<typeof updatedRequest> = {
+        success: true,
+        message: "Arrival confirmed successfully",
         data: updatedRequest,
     };
 

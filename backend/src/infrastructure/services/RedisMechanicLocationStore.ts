@@ -5,11 +5,12 @@ import type {
 } from "../../application/interfaces/mechanic/IMechanicLocationStore.js";
 
 import type { StoredMechanicLocation } from "../../application/dtos/mechanic/MechanicLiveLocationDto.js";
+
 export class RedisMechanicLocationStore
     implements IMechanicLocationStore {
 
     private readonly prefix = "mechanic-location:";
-    private readonly ttl = 60;
+    private readonly ttl = 300;
 
     async save(
         location: StoredMechanicLocation
@@ -24,5 +25,19 @@ export class RedisMechanicLocationStore
                 EX: this.ttl
             }
         );
+    }
+
+    async get(
+        requestId: string
+    ): Promise<StoredMechanicLocation | null> {
+
+        const key = `${this.prefix}${requestId}`;
+        const raw = await redisClient.get(key);
+
+        if (!raw) {
+            return null;
+        }
+
+        return JSON.parse(raw) as StoredMechanicLocation;
     }
 }

@@ -89,5 +89,12 @@ mechanicRouter.patch(
   )
 )
 
+mechanicRouter.patch(
+  "/emergency-requests/:id/confirm-arrival",
+  auth,
+  authorizeRoles("mechanic"),
+  asyncHandler(mechanicEmergencyController.confirmArrival)
+)
+
 
 export default mechanicRouter;

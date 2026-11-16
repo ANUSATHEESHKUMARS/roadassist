@@ -84,6 +84,7 @@ import { UpdateMechanicLiveLocationUseCase } from "../application/useCase/mechan
 import { RedisMechanicLocationStore } from "../infrastructure/services/RedisMechanicLocationStore.js";
 import { JoinEmergencyTrackingUseCase } from "../application/useCase/user/JoinEmergencyTrackingUseCase.js";
 import { GetActiveEmergencyRequestUseCase } from "../application/useCase/user/GetActiveEmergencyRequestUseCase.js";
+import { ConfirmArrivalUseCase } from "../application/useCase/mechanic/ConfirmArrivalUseCase.js";
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
 
@@ -363,7 +364,11 @@ const getMechanicAcceptRequestUseCase = new GetMechanicAcceptedRequestsUseCase(e
 
 const startemergencyTravelUseCase = new StartEmergencyTravelUseCase(emergencyRequestRepository)
 
-const mechanicLocationStore = new RedisMechanicLocationStore();
+const confirmArrivalUseCase =
+    new ConfirmArrivalUseCase(emergencyRequestRepository);
+
+
+export const mechanicLocationStore = new RedisMechanicLocationStore();
 const updateMechanicLiveLocationUseCase = new  UpdateMechanicLiveLocationUseCase(emergencyRequestRepository,
     mechanicLocationStore
 )
@@ -377,7 +382,8 @@ export const mechanicEmergencyController = new MechanicEmergencyController(
     rejectEmergencyRequestMechanicUseCase,
     getAssignedEmergencyRequestDetailsUseCase,
     getMechanicAcceptRequestUseCase,
-    startemergencyTravelUseCase
+    startemergencyTravelUseCase,
+    confirmArrivalUseCase
 )
 
 // ─── Emergency Request Status (User side) ───────────────────────────────────

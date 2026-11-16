@@ -1,12 +1,14 @@
 
 import type { Socket } from "socket.io";
 import { IJoinEmergencyTrackingUseCase } from "../../application/interfaces/IJoinEmergencytrackingUseCase.js";
+import type { IMechanicLocationStore } from "../../application/interfaces/mechanic/IMechanicLocationStore.js";
 
 
 export class CustomerTrackingSocketHandler {
 
     constructor(
-        private readonly joinEmergencyTrackingUseCase: IJoinEmergencyTrackingUseCase
+        private readonly joinEmergencyTrackingUseCase: IJoinEmergencyTrackingUseCase,
+        private readonly mechanicLocationStore: IMechanicLocationStore
     ) {}
 
     register(socket: Socket): void {
@@ -45,6 +47,29 @@ export class CustomerTrackingSocketHandler {
                     console.log(
                         `Customer ${userId} joined tracking room: ${room}`
                     );
+
+                    // Retrieve the latest mechanic location from Redis
+                    // and send it immediately so the customer does not
+                    // have to wait for the next GPS tick.
+                    const latestLocation =
+                        await this.mechanicLocationStore.get(data.requestId);
+
+                    if (latestLocation) {
+                        socket.emit("mechanic_location_updated", {
+                            requestId: latestLocation.requestId,
+                            mechanicId: latestLocation.mechanicId,
+                            latitude: latestLocation.latitude,
+                            longitude: latestLocation.longitude,
+                            accuracy: latestLocation.accuracy,
+                            heading: latestLocation.heading,
+                            speed: latestLocation.speed,
+                            updatedAt: latestLocation.updatedAt
+                        });
+
+                        console.log(
+                            `Sent latest Redis location to customer ${userId} for request ${data.requestId}`
+                        );
+                    }
 
                 } catch (error) {
 
