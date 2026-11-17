@@ -25,7 +25,6 @@ export class JoinEmergencyTrackingUseCase
             throw new Error("Emergency request not found");
         }
 
-        // Verify that the logged-in customer owns this request.
         if (String(request.userId) !== userId) {
             throw new Error("You are not authorized to track this request");
         }

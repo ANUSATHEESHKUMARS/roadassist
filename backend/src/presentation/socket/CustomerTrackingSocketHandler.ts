@@ -34,7 +34,6 @@ export class CustomerTrackingSocketHandler {
                         userId
                     );
 
-                    // Join only after authorization succeeds.
                     const room = `emergency-tracking:${data.requestId}`;
 
                     await socket.join(room);
@@ -48,9 +47,7 @@ export class CustomerTrackingSocketHandler {
                         `Customer ${userId} joined tracking room: ${room}`
                     );
 
-                    // Retrieve the latest mechanic location from Redis
-                    // and send it immediately so the customer does not
-                    // have to wait for the next GPS tick.
+                    
                     const latestLocation =
                         await this.mechanicLocationStore.get(data.requestId);
 

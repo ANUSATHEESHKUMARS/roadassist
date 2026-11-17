@@ -33,7 +33,6 @@ export class MechanicApplicationController {
     ) { }
 
 
-    // Save mechanic application draft
     saveDraft = async (req: Request, res: Response): Promise<void> => {
 
         const userId = req.user?.userId;
@@ -65,7 +64,6 @@ export class MechanicApplicationController {
     };
 
 
-    // Submit mechanic application
     submitApplication = async (req: Request, res: Response): Promise<void> => {
 
         const userId = req.user?.userId;
@@ -92,7 +90,6 @@ export class MechanicApplicationController {
     };
 
 
-    // Get current mechanic application
     getMyApplication = async (req: Request, res: Response): Promise<void> => {
 
         const userId = req.user?.userId;

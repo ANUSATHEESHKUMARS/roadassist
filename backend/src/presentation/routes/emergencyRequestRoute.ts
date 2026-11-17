@@ -21,7 +21,6 @@ export function createEmergencyRequestRouter(
         asyncHandler(createEmergencyRequestController.handle)
     );
 
-    // Upload emergency images
     emergencyRouter.post(
         '/images',
         auth,
@@ -29,14 +28,12 @@ export function createEmergencyRequestRouter(
         asyncHandler(emergencyImageUploadController.handle)
     );
 
-    // User-side status endpoints
     emergencyRouter.get(
         '/my-requests',
         auth,
         asyncHandler(emergencyRequestStatusController.getUserRequests)
     );
 
-    // Get user's active emergency request
 emergencyRouter.get(
     '/my-active-request',
     auth,

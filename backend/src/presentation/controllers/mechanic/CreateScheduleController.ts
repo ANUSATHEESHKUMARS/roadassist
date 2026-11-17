@@ -16,7 +16,6 @@ export class MechanicScheduleController {
         private readonly updateMechanicScheduleUseCase: IUpdateMechanicScheduleUseCase
     ) {}
 
-    // Create mechanic schedule
     createSchedule = async (
         req: Request,
         res: Response
@@ -49,7 +48,6 @@ export class MechanicScheduleController {
         res.status(HttpStatusCode.CREATED).json(response);
     };
 
-    // Get mechanic schedule
     getSchedule = async (
         req: Request,
         res: Response

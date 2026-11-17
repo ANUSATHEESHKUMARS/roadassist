@@ -153,7 +153,6 @@ export class MechanicEmergencyController {
         res.status(HttpStatusCode.OK).json(response);
     };
 
-    // Get one accepted request with customer details
     getAssignedRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.user?.userId;
 
@@ -192,7 +191,6 @@ export class MechanicEmergencyController {
         res.status(HttpStatusCode.OK).json(response);
     };
 
-    // Get all accepted requests belonging to the logged-in mechanic
     getAssignedRequests = async (req: Request, res: Response): Promise<void> => {
         const userId = req.user?.userId;
 

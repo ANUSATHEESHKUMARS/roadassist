@@ -46,7 +46,6 @@ export const socketAuthMiddleware = (
                 return next(new Error("Your account is blocked"));
             }
 
-            // Verify that the active role belongs to this user.
             if (!user.roles.includes(user.activeRole)) {
                 return next(new Error("Invalid active role"));
             }

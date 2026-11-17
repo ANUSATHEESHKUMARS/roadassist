@@ -62,34 +62,34 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
     }
 
     async findActiveByUserId(
-    userId: string
-): Promise<EmergencyRequest | null> {
+        userId: string
+    ): Promise<EmergencyRequest | null> {
 
-    if (!Types.ObjectId.isValid(userId)) {
-        return null;
-    }
-
-    const document = await EmergencyRequestModel.findOne({
-        userId: new Types.ObjectId(userId),
-        status: {
-            $in: [
-                "pending",
-                "searching",
-                "assigned",
-                "on_the_way",
-                "arrived"
-            ]
+        if (!Types.ObjectId.isValid(userId)) {
+            return null;
         }
-    })
-        .sort({ createdAt: -1 })
-        .exec();
 
-    if (!document) {
-        return null;
+        const document = await EmergencyRequestModel.findOne({
+            userId: new Types.ObjectId(userId),
+            status: {
+                $in: [
+                    "pending",
+                    "searching",
+                    "assigned",
+                    "on_the_way",
+                    "arrived"
+                ]
+            }
+        })
+            .sort({ createdAt: -1 })
+            .exec();
+
+        if (!document) {
+            return null;
+        }
+
+        return EmergencyRequestMapper.toDomain(document);
     }
-
-    return EmergencyRequestMapper.toDomain(document);
-}
 
     async findNearbyPending(
         latitude: number,
@@ -114,7 +114,7 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
             rejectedByMechanicIds: { $ne: mechanicObjectId },
             assignedMechanicId: null,
         })
-           
+
             .limit(20)
             .exec();
 
@@ -248,143 +248,136 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
     }
 
 
-async findByIdWithCustomerDetails(
-    requestId: string
-): Promise<{
-    request: EmergencyRequest;
-    customerDetails: {
-        fullName: string;
-        email: string;
-        phoneNumber: string;
-    } | null;
-} | null> {
+    async findByIdWithCustomerDetails(
+        requestId: string
+    ): Promise<{
+        request: EmergencyRequest;
+        customerDetails: {
+            fullName: string;
+            email: string;
+            phoneNumber: string;
+        } | null;
+    } | null> {
 
-    // Step 1: Validate MongoDB ObjectId
-    if (!Types.ObjectId.isValid(requestId)) {
-        return null;
-    }
-
-    // Step 2: Find the request and populate the customer
-    const document = await EmergencyRequestModel.findById(requestId)
-        .populate<{
-            userId: {
-                _id: Types.ObjectId;
-                fullName: string;
-                email: string;
-                phoneNumber: string;
-            } | null;
-        }>("userId", "fullName email phoneNumber")
-        .exec();
-
-    if (!document) {
-        return null;
-    }
-const populatedUser = document.userId;
-
-// Check whether customer exists
-if (!populatedUser || typeof populatedUser !== "object") {
-    return null;
-}
-
-// Now TypeScript knows populatedUser is not null
-const customerId = populatedUser._id.toString();
-
-const domainRequest = new EmergencyRequest(
-    customerId,
-    document.vehicleId.toString(),
-    {
-        latitude: document.location.latitude,
-        longitude: document.location.longitude,
-        ...(document.location.address !== undefined && {
-            address: document.location.address,
-        }),
-    },
-    document.emergencyIssueCategory,
-    document.issueTitle,
-    document.issueDescription,
-    document.issueImages ?? [],
-    document.status,
-    document.assignedMechanicId
-        ? document.assignedMechanicId.toString()
-        : null,
-    (document.rejectedByMechanicIds ?? []).map(
-        (id: Types.ObjectId) => id.toString()
-    ),
-    document._id.toString(),
-    document.createdAt,
-    document.updatedAt
-);
-
-const customerDetails = {
-     fullName: populatedUser.fullName,
-    email: populatedUser.email,
-    phoneNumber: populatedUser.phoneNumber,
-};
-
-return {
-    request: domainRequest,
-    customerDetails,
-};
-}
-
-async findByAssignedMechanicId(
-    mechanicId: string
-): Promise<EmergencyRequest[]> {
-
-    // Validate mechanic ID
-    if (!Types.ObjectId.isValid(mechanicId)) {
-        return [];
-    }
-
-    // Find requests assigned to this mechanic
-    const documents = await EmergencyRequestModel.find({
-        assignedMechanicId: new Types.ObjectId(mechanicId),
-        status: ["assigned" , "on_the_way","arrived"]
-    })
-        .sort({ createdAt: -1 })
-        .exec();
-
-    // Convert MongoDB documents into domain entities
-    return documents.map((doc) =>
-        EmergencyRequestMapper.toDomain(doc)
-    );
-}
-
-async updateAssignedRequestStatus(
-    requestId: string,
-    mechanicId: string,
-    currentStatus: EmergencyRequestStatus,
-    newStatus: EmergencyRequestStatus
-): Promise<EmergencyRequest | null> {
-
-    if (
-        !Types.ObjectId.isValid(requestId) ||
-        !Types.ObjectId.isValid(mechanicId)
-    ) {
-        return null;
-    }
-
-    const document = await EmergencyRequestModel.findOneAndUpdate(
-        {
-            _id: new Types.ObjectId(requestId),
-            assignedMechanicId: new Types.ObjectId(mechanicId),
-            status: currentStatus
-        },
-        {
-            $set: {
-                status: newStatus
-            }
-        },
-        {
-            new: true,
-            runValidators: true
+        if (!Types.ObjectId.isValid(requestId)) {
+            return null;
         }
-    ).exec();
 
-    if (!document) {
-        return null;
+        const document = await EmergencyRequestModel.findById(requestId)
+            .populate<{
+                userId: {
+                    _id: Types.ObjectId;
+                    fullName: string;
+                    email: string;
+                    phoneNumber: string;
+                } | null;
+            }>("userId", "fullName email phoneNumber")
+            .exec();
+
+        if (!document) {
+            return null;
+        }
+        const populatedUser = document.userId;
+
+        if (!populatedUser || typeof populatedUser !== "object") {
+            return null;
+        }
+
+        const customerId = populatedUser._id.toString();
+
+        const domainRequest = new EmergencyRequest(
+            customerId,
+            document.vehicleId.toString(),
+            {
+                latitude: document.location.latitude,
+                longitude: document.location.longitude,
+                ...(document.location.address !== undefined && {
+                    address: document.location.address,
+                }),
+            },
+            document.emergencyIssueCategory,
+            document.issueTitle,
+            document.issueDescription,
+            document.issueImages ?? [],
+            document.status,
+            document.assignedMechanicId
+                ? document.assignedMechanicId.toString()
+                : null,
+            (document.rejectedByMechanicIds ?? []).map(
+                (id: Types.ObjectId) => id.toString()
+            ),
+            document._id.toString(),
+            document.createdAt,
+            document.updatedAt
+        );
+
+        const customerDetails = {
+            fullName: populatedUser.fullName,
+            email: populatedUser.email,
+            phoneNumber: populatedUser.phoneNumber,
+        };
+
+        return {
+            request: domainRequest,
+            customerDetails,
+        };
     }
 
-    return EmergencyRequestMapper.toDomain(document);
-}
+    async findByAssignedMechanicId(
+        mechanicId: string
+    ): Promise<EmergencyRequest[]> {
+
+        if (!Types.ObjectId.isValid(mechanicId)) {
+            return [];
+        }
+
+        const documents = await EmergencyRequestModel.find({
+            assignedMechanicId: new Types.ObjectId(mechanicId),
+            status: ["assigned", "on_the_way", "arrived"]
+        })
+            .sort({ createdAt: -1 })
+            .exec();
+
+        return documents.map((doc) =>
+            EmergencyRequestMapper.toDomain(doc)
+        );
+    }
+
+    async updateAssignedRequestStatus(
+        requestId: string,
+        mechanicId: string,
+        currentStatus: EmergencyRequestStatus,
+        newStatus: EmergencyRequestStatus
+    ): Promise<EmergencyRequest | null> {
+
+        if (
+            !Types.ObjectId.isValid(requestId) ||
+            !Types.ObjectId.isValid(mechanicId)
+        ) {
+            return null;
+        }
+
+        const document = await EmergencyRequestModel.findOneAndUpdate(
+            {
+                _id: new Types.ObjectId(requestId),
+                assignedMechanicId: new Types.ObjectId(mechanicId),
+                status: currentStatus
+            },
+            {
+                $set: {
+                    status: newStatus
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        ).exec();
+
+        if (!document) {
+            return null;
+        }
+
+        return EmergencyRequestMapper.toDomain(document);
+    }
 }

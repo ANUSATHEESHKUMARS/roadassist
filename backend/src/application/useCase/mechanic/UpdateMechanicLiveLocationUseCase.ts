@@ -24,12 +24,10 @@ export class UpdateMechanicLiveLocationUseCase  implements IUpdateMechanicLiveLo
         dto: MechanicLiveLocationDto
     ): Promise<StoredMechanicLocation> {
 
-        // 1. Validate mechanic ID and request ID
         if (!mechanicId || !dto.requestId) {
             throw new Error("Mechanic ID and request ID are required");
         }
 
-        // 2. Validate coordinates
         if (
             !Number.isFinite(dto.latitude) ||
             !Number.isFinite(dto.longitude) ||
@@ -48,7 +46,6 @@ export class UpdateMechanicLiveLocationUseCase  implements IUpdateMechanicLiveLo
             throw new Error("Invalid GPS accuracy");
         }
 
-        // 3. Find emergency request
         const request =
             await this.emergencyRequestRepository.findById(dto.requestId);
 
@@ -60,12 +57,10 @@ export class UpdateMechanicLiveLocationUseCase  implements IUpdateMechanicLiveLo
             throw new Error("You are not assigned to this request");
         }
 
-        // 5. Verify request status
         if (request.status !== "on_the_way") {
             throw new Error("Location sharing is not allowed for this request");
         }
 
-        // 6. Prepare location data
         const location: StoredMechanicLocation = {
             ...dto,
             mechanicId,

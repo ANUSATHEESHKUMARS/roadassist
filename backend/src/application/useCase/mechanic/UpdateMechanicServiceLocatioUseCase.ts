@@ -29,7 +29,6 @@ export class UpdateMechanicServiceLocationUseCase
         console.log("User ID received:", userId);
 
 
-        // 1. Find mechanic application
         const application =
             await this.mechanicApplicationRepository.findByUserId(userId);
 
@@ -42,7 +41,6 @@ console.log("Mechanic application found:", application);
             );
         }
 
-        // 2. Check application ID
         if (!application.id) {
             throw new BadRequest(
                 "Application ID is missing",
@@ -50,7 +48,6 @@ console.log("Mechanic application found:", application);
             );
         }
 
-        // 3. Only approved mechanics can update location
         if (application.status !== "approved") {
             throw new ConflictError(
                 "Only approved mechanics can update their service location",
@@ -58,7 +55,6 @@ console.log("Mechanic application found:", application);
             );
         }
 
-        // 4. Validate service model
         if (!["mobile", "workshop", "both"].includes(dto.serviceModel)) {
             throw new BadRequest(
                 "Invalid service model",
@@ -75,7 +71,6 @@ console.log("Mechanic application found:", application);
             dto.serviceModel === "both";
 
 
-        // 5. Validate mobile location
         if (requiresMobileLocation) {
 
             if (!dto.serviceAddress?.trim()) {
@@ -123,7 +118,6 @@ console.log("Mechanic application found:", application);
         }
 
 
-        // 6. Validate workshop location
         if (requiresWorkshopLocation) {
 
             if (!dto.workshopAddress?.trim()) {
