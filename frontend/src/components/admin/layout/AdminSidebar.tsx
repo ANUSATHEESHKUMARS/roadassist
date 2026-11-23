@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   Images,
+  Tags,
   Users,
   Wrench,
   X,
@@ -34,6 +35,11 @@ const navItems: NavItem[] = [
     label : "Mechanic Mangement",
     path : "/admin/mechanics",
     icon : Wrench
+  },
+  {
+    label : "Mechanic Categories",
+    path : "/admin/mechanic-categories",
+    icon : Tags
   }
   
 ];

@@ -8,6 +8,7 @@ import AdminUserPage from "@/pages/admin/AdminUserpage";
 import MediaManagementPage from "@/pages/admin/MediaMangements";
 
 import MechanicApplicationsPage from "@/pages/admin/AdminMechanicpage";
+import MechanicCategoryPage from "@/pages/admin/MechanicCategoryPage";
 export const adminRoutes: RouteObject[] = [
   {
     element: <ProtectedRoute />,
@@ -24,13 +25,17 @@ export const adminRoutes: RouteObject[] = [
                 element: <AdminUserPage />,
               },
               {
-                path:'media',
-                element: <MediaManagementPage/>
+                path: 'media',
+                element: <MediaManagementPage />
 
               },
               {
-                path:"mechanics",
-                element:<MechanicApplicationsPage/>
+                path: "mechanics",
+                element: <MechanicApplicationsPage />
+              },
+              {
+                path:"mechanic-categories",
+                element:<MechanicCategoryPage/>
               }
             ],
           },

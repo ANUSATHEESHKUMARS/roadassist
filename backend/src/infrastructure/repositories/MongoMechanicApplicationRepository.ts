@@ -1,7 +1,9 @@
 import { MechanicApplicationMapper } from "../../application/mappers/MechanicApplicationMapper.js";
-import { IMechanicApplicationRepository } from "../../domain/repositories/mechanic/IMechanicApplicationRepository.js";
+import { IMechanicApplicationRepository } from "../../domain/repositories/IMechanicApplicationRepository.js";
 import { MechanicApplication, MechanicApplicationStatus } from "../../domain/User/entities/MechanicApplication.js";
+import { ITransactionContext } from "../databases/interface/ITransactionContext.js";
 import { IMechanicApplicationDocument, MechanicApplicationModel } from "../databases/models/MechanicApplicationModel.js";
+import { MongoTransactionContext } from "../databases/MongoTransactionContext.js";
 import { MongoBasRepository } from "./MongoBaseRepostory.js";
 import { Types } from "mongoose";
 
@@ -40,7 +42,8 @@ export class MongoMechanicApplicaitonRepository
    async update(
     applicationId: string,
     application: MechanicApplication,
-    unsetFields: string[] = []
+    unsetFields: string[] = [],
+    transaction?: ITransactionContext
 ): Promise<MechanicApplication | null> {
 
     if (!Types.ObjectId.isValid(applicationId)) {
@@ -49,10 +52,14 @@ export class MongoMechanicApplicaitonRepository
 
     const data = MechanicApplicationMapper.toPersistence(application);
 
+    const mongoTransaction =
+        transaction as MongoTransactionContext | undefined;
+
     const document = await this.updateDocument(
         applicationId,
         data,
-        unsetFields
+        unsetFields,
+        mongoTransaction?.session
     );
 
     if (!document) {

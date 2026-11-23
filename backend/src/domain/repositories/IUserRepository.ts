@@ -1,3 +1,4 @@
+import { ITransactionContext } from "../../infrastructure/databases/interface/ITransactionContext.js"
 import { AccountStatus, User, UserRole } from "../User/entities/User.js"
 export interface IUserRepository {
     save(user: User): Promise<User>
@@ -15,7 +16,9 @@ export interface IUserRepository {
     updatePassword(userId: string, passwordHash: string): Promise<User | null>;
 
     addRole(userId: string,
-        roles: UserRole
+        roles: UserRole,
+       
+        transaction? : ITransactionContext
     ): Promise<User | null>;
 
     updateActiveRole(userId:string,

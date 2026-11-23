@@ -1,4 +1,5 @@
-import { MechanicApplication, MechanicApplicationStatus } from "../../User/entities/MechanicApplication.js";
+import { MechanicApplication, MechanicApplicationStatus } from "../../domain/User/entities/MechanicApplication.js"
+import { ITransactionContext } from "../../infrastructure/databases/interface/ITransactionContext.js";
 
 export interface IMechanicApplicationRepository {
 
@@ -11,10 +12,11 @@ export interface IMechanicApplicationRepository {
      update(
           applicationId: string,
           application: MechanicApplication,
-          unsetFields?:string[]
+          unsetFields?: string[],
+          transaction?: ITransactionContext
      ): Promise<MechanicApplication | null>;
 
-     findByStatus(status : MechanicApplicationStatus):Promise<MechanicApplication[]>
+     findByStatus(status: MechanicApplicationStatus): Promise<MechanicApplication[]>
 
 }
 

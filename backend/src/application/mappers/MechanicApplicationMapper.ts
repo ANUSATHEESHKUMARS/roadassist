@@ -2,199 +2,321 @@
 import { Types } from "mongoose";
 
 import {
-  MechanicApplication,
-  MechanicApplicationProps,
+    MechanicApplication,
+    MechanicApplicationProps,
 } from "../../domain/User/entities/MechanicApplication.js";
 
-import { IMechanicApplicationDocument } from "../../infrastructure/databases/models/MechanicApplicationModel.js";
+import type {
+    IMechanicApplicationDocument
+} from "../../infrastructure/databases/models/MechanicApplicationModel.js";
+
 
 export class MechanicApplicationMapper {
-  static toPersistence(application: MechanicApplication) {
-    return {
-      userId: new Types.ObjectId(application.userId),
 
-      ...(application.profilePhotoKey !== undefined && {
-        profilePhotoKey: application.profilePhotoKey,
-      }),
+    // Domain Entity -> MongoDB Persistence
+    static toPersistence(application: MechanicApplication) {
 
-      ...(application.experienceYears !== undefined && {
-        experienceYears: application.experienceYears,
-      }),
+        return {
+            userId: new Types.ObjectId(application.userId),
 
-      specialization: application.specializations,
-      supportedVehicleTypes: application.supportedVehicleType,
-      serviceOffered: application.serviceOffered,
+            ...(application.profilePhotoKey !== undefined && {
+                profilePhotoKey: application.profilePhotoKey,
+            }),
 
-      ...(application.professionalDescription !== undefined && {
-        professionalDescription: application.professionalDescription,
-      }),
+            ...(application.experienceYears !== undefined && {
+                experienceYears: application.experienceYears,
+            }),
 
-      ...(application.serviceModel !== undefined && {
-        serviceModel: application.serviceModel,
-      }),
+            specializations: application.specializations.map(
+                specialization => ({
+                    categoryId: new Types.ObjectId(
+                        specialization.categoryId
+                    ),
 
-      ...(application.serviceAddress !== undefined && {
-        serviceAddress: application.serviceAddress,
-      }),
+                    subcategories: specialization.subcategories.map(
+                        subcategory => ({
+                            subcategoryId: new Types.ObjectId(
+                                subcategory.subcategoryId
+                            ),
 
-      ...(application.pincode !== undefined && {
-        pincode: application.pincode,
-      }),
+                            verificationStatus: subcategory.verificationStatus,
 
-      ...(application.latitude !== undefined && {
-        latitude: application.latitude,
-      }),
+                            ...(subcategory.reviewedBy !== undefined && {
+                                reviewedBy: new Types.ObjectId(
+                                    subcategory.reviewedBy
+                                ),
+                            }),
 
-      ...(application.longitude !== undefined && {
-        longitude: application.longitude,
-      }),
+                            ...(subcategory.reviewedAt !== undefined && {
+                                reviewedAt: subcategory.reviewedAt,
+                            }),
 
-      ...(application.serviceRadiusKm !== undefined && {
-        serviceRadiusKm: application.serviceRadiusKm,
-      }),
+                            ...(subcategory.rejectionReason !== undefined && {
+                                rejectionReason: subcategory.rejectionReason,
+                            }),
 
-      ...(application.workshopName !== undefined && {
-        workshopName: application.workshopName,
-      }),
+                            reviewHistory: (subcategory.reviewHistory ?? []).map(
+                                history => ({
+                                    decision: history.decision,
 
-      ...(application.workshopAddress !== undefined && {
-        workshopAddress: application.workshopAddress,
-      }),
+                                    reviewedBy: new Types.ObjectId(
+                                        history.reviewedBy
+                                    ),
 
-      documents: application.documents,
-      status: application.status,
+                                    reviewedAt: history.reviewedAt,
 
-      ...(application.submittedAt !== undefined && {
-        submittedAt: application.submittedAt,
-      }),
+                                    ...(history.rejectionReason !== undefined && {
+                                        rejectionReason: history.rejectionReason,
+                                    }),
+                                })
+                            ),
+                        })
+                    ),
+                })
+            ),
 
-      ...(application.reviewedBy !== undefined && {
-        reviewedBy: new Types.ObjectId(application.reviewedBy),
-      }),
+            supportedVehicleTypes: application.supportedVehicleTypes,
 
-      ...(application.reviewedAt !== undefined && {
-        reviewedAt: application.reviewedAt,
-      }),
+            ...(application.professionalDescription !== undefined && {
+                professionalDescription: application.professionalDescription,
+            }),
 
-      ...(application.reviewReason !== undefined && {
-        reviewReason: application.reviewReason,
-      }),
-    };
-  }
+            ...(application.serviceModel !== undefined && {
+                serviceModel: application.serviceModel,
+            }),
 
-  static toDomain(
-    document: IMechanicApplicationDocument
-  ): MechanicApplication {
-    const props: MechanicApplicationProps = {
-      id: document._id.toString(),
-      userId: document.userId.toString(),
+            ...(application.serviceAddress !== undefined && {
+                serviceAddress: application.serviceAddress,
+            }),
 
-      profilePhotoKey: document.profilePhotoKey ?? "",
-      experienceYears: document.experienceYears ?? 0,
+            ...(application.pincode !== undefined && {
+                pincode: application.pincode,
+            }),
 
-      specialization: document.specialization ?? [],
-      supportedVehicleTypes: document.supportedVehicleTypes ?? [],
-      serviceOffered: document.serviceOffered ?? [],
+            ...(application.latitude !== undefined && {
+                latitude: application.latitude,
+            }),
 
-      serviceModel: document.serviceModel ?? "workshop",
-      serviceAddress: document.serviceAddress ?? "",
+            ...(application.longitude !== undefined && {
+                longitude: application.longitude,
+            }),
 
-      ...(document.pincode !== undefined && {
-        pincode: document.pincode,
-      }),
+            ...(application.serviceRadiusKm !== undefined && {
+                serviceRadiusKm: application.serviceRadiusKm,
+            }),
 
-      documents: document.documents ?? [],
-      status: document.status,
+            ...(application.workshopName !== undefined && {
+                workshopName: application.workshopName,
+            }),
 
-      ...(document.professionalDescription !== undefined && {
-        professionalDescription: document.professionalDescription,
-      }),
+            ...(application.workshopAddress !== undefined && {
+                workshopAddress: application.workshopAddress,
+            }),
 
-      ...(document.latitude !== undefined && {
-        latitude: document.latitude,
-      }),
+            documents: application.documents,
 
-      ...(document.longitude !== undefined && {
-        longitude: document.longitude,
-      }),
+            status: application.status,
 
-      ...(document.serviceRadiusKm !== undefined && {
-        serviceRadiusKm: document.serviceRadiusKm,
-      }),
+            ...(application.submittedAt !== undefined && {
+                submittedAt: application.submittedAt,
+            }),
 
-      ...(document.workshopName !== undefined && {
-        workshopName: document.workshopName,
-      }),
+            ...(application.reviewedBy !== undefined && {
+                reviewedBy: new Types.ObjectId(application.reviewedBy),
+            }),
 
-      ...(document.workshopAddress !== undefined && {
-        workshopAddress: document.workshopAddress,
-      }),
+            ...(application.reviewedAt !== undefined && {
+                reviewedAt: application.reviewedAt,
+            }),
 
-      ...(document.submittedAt !== undefined && {
-        submittedAt: document.submittedAt,
-      }),
-
-      ...(document.reviewedBy != null && {
-        reviewedBy: document.reviewedBy.toString(),
-      }),
-
-      ...(document.reviewedAt !== undefined && {
-        reviewedAt: document.reviewedAt,
-      }),
-
-      ...(document.reviewReason !== undefined && {
-        reviewReason: document.reviewReason,
-      }),
-
-      ...(document.createdAt !== undefined && {
-        createdAt: document.createdAt,
-      }),
-
-      ...(document.updatedAt !== undefined && {
-        updatedAt: document.updatedAt,
-      }),
-    };
-
-    return new MechanicApplication(props);
-  }
+            ...(application.reviewReason !== undefined && {
+                reviewReason: application.reviewReason,
+            }),
+        };
+    }
 
 
-  static toResponse(application: MechanicApplication) {
-  return {
-    id: application.id,
-    userId: application.userId,
+    // MongoDB Document -> Domain Entity
+    static toDomain(
+        document: IMechanicApplicationDocument
+    ): MechanicApplication {
 
-    profilePhotoKey: application.profilePhotoKey,
-    experienceYears: application.experienceYears,
+        const props: MechanicApplicationProps = {
 
-    specializations: application.specializations,
-    supportedVehicleTypes: application.supportedVehicleType,
-    serviceOffered: application.serviceOffered,
+            id: document._id.toString(),
 
-    serviceModel: application.serviceModel,
-    serviceAddress: application.serviceAddress,
-    pincode: application.pincode,
+            userId: document.userId.toString(),
 
-    documents: application.documents,
-    status: application.status,
+            specializations: (document.specializations ?? []).map(
+                specialization => ({
+                    categoryId: specialization.categoryId.toString(),
 
-    professionalDescription:
-      application.professionalDescription,
+                    subcategories: specialization.subcategories.map(
+                        subcategory => ({
+                            subcategoryId: subcategory.subcategoryId.toString(),
 
-    latitude: application.latitude,
-    longitude: application.longitude,
-    serviceRadiusKm: application.serviceRadiusKm,
+                            verificationStatus: subcategory.verificationStatus,
 
-    workshopName: application.workshopName,
-    workshopAddress: application.workshopAddress,
+                            ...(subcategory.reviewedBy != null && {
+                                reviewedBy: subcategory.reviewedBy.toString(),
+                            }),
 
-    submittedAt: application.submittedAt,
-    reviewedBy: application.reviewedBy,
-    reviewedAt: application.reviewedAt,
-    reviewReason: application.reviewReason,
+                            ...(subcategory.reviewedAt !== undefined && {
+                                reviewedAt: subcategory.reviewedAt,
+                            }),
 
-    createdAt: application.createdAt,
-    updatedAt: application.updatedAt,
-  };
-}
+                            ...(subcategory.rejectionReason !== undefined && {
+                                rejectionReason: subcategory.rejectionReason,
+                            }),
+
+                            ...(subcategory.reviewHistory !== undefined && {
+                                reviewHistory: subcategory.reviewHistory.map(
+                                    history => ({
+                                        decision: history.decision,
+
+                                        reviewedBy: history.reviewedBy.toString(),
+
+                                        reviewedAt: history.reviewedAt,
+
+                                        ...(history.rejectionReason !== undefined && {
+                                            rejectionReason: history.rejectionReason,
+                                        }),
+                                    })
+                                ),
+                            }),
+                        })
+                    ),
+                })
+            ),
+
+            supportedVehicleTypes: document.supportedVehicleTypes ?? [],
+
+            documents: document.documents ?? [],
+
+            status: document.status,
+
+            ...(document.profilePhotoKey !== undefined && {
+                profilePhotoKey: document.profilePhotoKey,
+            }),
+
+            ...(document.experienceYears !== undefined && {
+                experienceYears: document.experienceYears,
+            }),
+
+            ...(document.professionalDescription !== undefined && {
+                professionalDescription: document.professionalDescription,
+            }),
+
+            ...(document.serviceModel !== undefined && {
+                serviceModel: document.serviceModel,
+            }),
+
+            ...(document.serviceAddress !== undefined && {
+                serviceAddress: document.serviceAddress,
+            }),
+
+            ...(document.pincode !== undefined && {
+                pincode: document.pincode,
+            }),
+
+            ...(document.latitude !== undefined && {
+                latitude: document.latitude,
+            }),
+
+            ...(document.longitude !== undefined && {
+                longitude: document.longitude,
+            }),
+
+            ...(document.serviceRadiusKm !== undefined && {
+                serviceRadiusKm: document.serviceRadiusKm,
+            }),
+
+            ...(document.workshopName !== undefined && {
+                workshopName: document.workshopName,
+            }),
+
+            ...(document.workshopAddress !== undefined && {
+                workshopAddress: document.workshopAddress,
+            }),
+
+            ...(document.submittedAt !== undefined && {
+                submittedAt: document.submittedAt,
+            }),
+
+            ...(document.reviewedBy != null && {
+                reviewedBy: document.reviewedBy.toString(),
+            }),
+
+            ...(document.reviewedAt !== undefined && {
+                reviewedAt: document.reviewedAt,
+            }),
+
+            ...(document.reviewReason !== undefined && {
+                reviewReason: document.reviewReason,
+            }),
+
+            ...(document.createdAt !== undefined && {
+                createdAt: document.createdAt,
+            }),
+
+            ...(document.updatedAt !== undefined && {
+                updatedAt: document.updatedAt,
+            }),
+        };
+
+        return new MechanicApplication(props);
+    }
+
+
+    // Domain Entity -> API Response
+    static toResponse(application: MechanicApplication) {
+
+        return {
+            id: application.id,
+
+            userId: application.userId,
+
+            profilePhotoKey: application.profilePhotoKey,
+
+            experienceYears: application.experienceYears,
+
+            specializations: application.specializations,
+
+            supportedVehicleTypes: application.supportedVehicleTypes,
+
+            professionalDescription: application.professionalDescription,
+
+            serviceModel: application.serviceModel,
+
+            serviceAddress: application.serviceAddress,
+
+            pincode: application.pincode,
+
+            latitude: application.latitude,
+
+            longitude: application.longitude,
+
+            serviceRadiusKm: application.serviceRadiusKm,
+
+            workshopName: application.workshopName,
+
+            workshopAddress: application.workshopAddress,
+
+            documents: application.documents,
+
+            status: application.status,
+
+            submittedAt: application.submittedAt,
+
+            reviewedBy: application.reviewedBy,
+
+            reviewedAt: application.reviewedAt,
+
+            reviewReason: application.reviewReason,
+
+            createdAt: application.createdAt,
+
+            updatedAt: application.updatedAt,
+        };
+    }
 }

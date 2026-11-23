@@ -32,12 +32,12 @@ const API_ROUTES = {
     MY_APPLICATION: "/mechanic/my-application",
     BOOKINGS: "/mechanic/bookings",
     SERVICE_LOCATION: "/mechanic/service-location",
-      SCHEDULE:{
-    BASE:"/mechanic/schedule",
-    CREATE:"/mechanic/schedule/create",
-    UPDATE:"/mechanic/schedule/update",
-    
-  },
+    SCHEDULE: {
+      BASE: "/mechanic/schedule",
+      CREATE: "/mechanic/schedule/create",
+      UPDATE: "/mechanic/schedule/update",
+
+    },
 
     AVAILABILITY: "/mechanic/availability",
     NEARBY_EMERGENCY_REQUESTS: "/mechanic/emergency-requests/nearby",
@@ -51,9 +51,9 @@ const API_ROUTES = {
     ASSIGNED_REQUEST: (requestId: string) =>
       `/mechanic/emergency-requests/${requestId}`,
     ASSIGNED_EMERGENCY_REQUESTS: "/mechanic/emergency-requests/assigned",
-    START_EMERGENCY_TRAVEL :(requestId : string) => `/mechanic/emergency-requests/${requestId}/start-travel`,
+    START_EMERGENCY_TRAVEL: (requestId: string) => `/mechanic/emergency-requests/${requestId}/start-travel`,
     CONFIRM_EMERGENCY_ARRIVAL: (requestId: string) =>
-    `/mechanic/emergency-requests/${requestId}/confirm-arrival`,
+      `/mechanic/emergency-requests/${requestId}/confirm-arrival`,
   },
 
   ADMIN: {
@@ -73,11 +73,27 @@ const API_ROUTES = {
     REJECT_MECHANIC_APPLICATION: (applicationId: string) =>
       `/admin/mechanic-applications/${applicationId}/reject`,
 
+    REVIEW_MECHANIC_SPECIALIZATION: (
+      applicationId: string,
+      categoryId: string,
+      subcategoryId: string
+    ) =>
+      `/admin/mechanic-applications/${applicationId}/categories/${categoryId}/subcategories/${subcategoryId}/review`,
+
     UPLOAD_MEDIA: "/admin/media/upload",
     MEDIA: "/admin/media",
 
     MEDIA_BY_ID: (mediaId: string) =>
       `/admin/media/${mediaId}`,
+    MECHANIC_CATEGORIES: {
+    BASE: "/admin/mechanic-categories",
+
+    BY_ID: (categoryId: string) =>
+        `/admin/mechanic-categories/${categoryId}`,
+
+    UPDATE_STATUS: (categoryId: string) =>
+        `/admin/mechanic-categories/${categoryId}/status`,
+},
   },
   SUPERADMIN: {
     ADMINS: "/superadmin/admins",

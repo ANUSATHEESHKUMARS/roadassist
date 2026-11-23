@@ -50,7 +50,6 @@ const useMechanicLocation = (
         setError(null);
         setIsTracking(true);
 
-        // Send the latest location to the backend.
         const sendLocation = () => {
             if (!latestLocation.current || !socket.connected) return;
 

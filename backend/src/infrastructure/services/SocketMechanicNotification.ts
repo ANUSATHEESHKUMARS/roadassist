@@ -16,6 +16,12 @@ export class SocketMechanicNotificationService
 
         const mechanicRoom = `mechanic:${mechanicId}`;
 
+            console.log("NOTIFICATION SERVICE CALLED");
+    console.log("Mechanic ID:", mechanicId);
+    console.log("Mechanic Room:", mechanicRoom);
+    console.log("Request ID:", request.id);
+
+
         this.io.to(mechanicRoom).emit("new_emergency_request", {
             id: request.id,
             userId:request.userId,
@@ -31,5 +37,6 @@ export class SocketMechanicNotificationService
             createdAt:request.createdAt,
             updatedAt:request.updatedAt
         });
+        console.log('notifiication evern emited')
     }
 }

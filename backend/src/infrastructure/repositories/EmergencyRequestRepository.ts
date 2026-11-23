@@ -91,35 +91,107 @@ export class EmergencyRequestRepository implements IEmergencyRequestRepository {
         return EmergencyRequestMapper.toDomain(document);
     }
 
-    async findNearbyPending(
-        latitude: number,
-        longitude: number,
-        radiusKm: number,
-        excludeMechanicId: string
-    ): Promise<EmergencyRequest[]> {
-        const radiusInMeters = radiusKm * 1000;
-        const mechanicObjectId = new Types.ObjectId(excludeMechanicId);
+  
+async findNearbyPending(
+    latitude: number,
+    longitude: number,
+    radiusKm: number,
+    excludeMechanicId: string
+): Promise<EmergencyRequest[]> {
 
+    try {
+        const radiusInMeters = radiusKm * 1000;
+
+        const mechanicObjectId = new Types.ObjectId(
+            excludeMechanicId
+        );
+
+        // Step 1: Log database connection details
+        console.log("========== GEO QUERY DEBUG ==========");
+
+        console.log(
+            "Database:",
+            EmergencyRequestModel.db.name
+        );
+
+        console.log(
+            "Host:",
+            EmergencyRequestModel.db.host
+        );
+
+        console.log(
+            "Collection:",
+            EmergencyRequestModel.collection.name
+        );
+
+        // Step 2: Inspect existing indexes
+        const indexes =
+            await EmergencyRequestModel.collection.indexes();
+
+        console.log(
+            "GEO INDEX:",
+            indexes.filter(
+                index => index.key.geoLocation
+            )
+        );
+
+        // Step 3: Log query parameters
+        console.log("Search coordinates:", {
+            latitude,
+            longitude
+        });
+
+        console.log("Radius in meters:", radiusInMeters);
+
+        console.log("Excluded mechanic:", excludeMechanicId);
+
+        console.log("=====================================");
+
+        // Step 4: Execute nearby emergency request query
         const documents = await EmergencyRequestModel.find({
-            status: { $in: ["pending", "searching"] },
+            status: {
+                $in: ["pending", "searching"]
+            },
+
             geoLocation: {
                 $nearSphere: {
                     $geometry: {
                         type: "Point",
-                        coordinates: [longitude, latitude],
+                        coordinates: [longitude, latitude]
                     },
-                    $maxDistance: radiusInMeters,
-                },
+                    $maxDistance: radiusInMeters
+                }
             },
-            rejectedByMechanicIds: { $ne: mechanicObjectId },
-            assignedMechanicId: null,
-        })
 
+            rejectedByMechanicIds: {
+                $ne: mechanicObjectId
+            },
+
+            assignedMechanicId: null
+
+        })
             .limit(20)
             .exec();
 
-        return documents.map((doc) => EmergencyRequestMapper.toDomain(doc));
+        console.log(
+            "Nearby emergency requests found:",
+            documents.length
+        );
+
+        // Step 5: Map MongoDB documents to domain entities
+        return documents.map(document =>
+            EmergencyRequestMapper.toDomain(document)
+        );
+
+    } catch (error) {
+        console.error(
+            "FIND NEARBY PENDING ERROR:",
+            error
+        );
+
+        throw error;
     }
+}
 
     async atomicAccept(
         requestId: string,

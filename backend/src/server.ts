@@ -6,7 +6,7 @@ import { Server } from 'socket.io';
 import { connectRedis } from './infrastructure/redis.js';
 import { socketAuthMiddleware } from './presentation/middlewares/SocketAuthMiddleware.js';
 import { MechanicLocationSocketHandler } from './presentation/socket/MechanicLocationSocketHandler.js';
-import {  CustomerTrackingSocketHandler } from './presentation/socket/CustomerTrackingSocketHandler.js';
+import { CustomerTrackingSocketHandler } from './presentation/socket/CustomerTrackingSocketHandler.js';
 import { mechanicLocationStore } from './di/container.js';
 
 
@@ -39,7 +39,7 @@ const mechanicLocationSocketHandler =
         updateMechanicLiveLocationUseCase
     );
 
-    const customerTrackingSocketHandler = new CustomerTrackingSocketHandler(joinEmergencyTrackingUseCase ,mechanicLocationStore)
+const customerTrackingSocketHandler = new CustomerTrackingSocketHandler(joinEmergencyTrackingUseCase, mechanicLocationStore)
 
 io.on('connection', (socket) => {
     const userId = socket.data.userId;
@@ -61,6 +61,8 @@ io.on('connection', (socket) => {
     socket.on("disconnect", () => {
         console.log(`${activeRole} disconnected:`, userId);
     });
+    console.log("CONNECTED MECHANIC ID:", userId);
+console.log("JOINED ROOM:", `mechanic:${userId}`);
 });
 const { createEmergencyRequestController } =
     createEmergencyDependencies(io);

@@ -91,6 +91,16 @@ import { GetMechanicScheduleUseCase } from "../application/useCase/mechanic/GetM
 import { UpdateMechanicScheduleUseCase } from "../application/useCase/mechanic/UpdateMechanicScheduleUseCase.js";
 import { MechanicScheduleController } from "../presentation/controllers/mechanic/CreateScheduleController.js";
 import { UpdateMechanicServiceLocationUseCase } from "../application/useCase/mechanic/UpdateMechanicServiceLocatioUseCase.js";
+import { MechanicCategoryRepository } from "../infrastructure/repositories/MechanicCategoryRepository.js";
+import { MechanicSpecializationValidator } from "../application/validators/MechanicSpecializationValidator.js";
+import { ReviewMechanicSpecializationUseCase } from "../application/useCase/admin/ReviewMechanicSpecializationUseCase.js";
+import { MongoTransactionManager } from "../infrastructure/databases/MongoTransactionManager.js";
+import { ReviewMechanicSpecializationController } from "../presentation/controllers/admin/ReviewMechanicSpecializationController.js";
+import { CreateMechanicCategoryUseCase } from "../infrastructure/repositories/CreateMechanicCategoryRepository.js";
+import { GetMechanicCategoriesUseCase } from "../application/useCase/admin/GetMechanicCategoryUseCase.js";
+import { MechanicCategoryController } from "../presentation/controllers/admin/MechanicCategoryController.js";
+import { UpdateMechanicCategoryStatusUseCase } from "../application/useCase/admin/UpdateMechanicCategoryStatusUseCase.js";
+import { UpdateMechanicCategoryUseCase } from "../application/useCase/admin/UpdateMechanicCategoryUseCase.js";
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
 
@@ -215,11 +225,17 @@ const mechanicApplicationRepository = new MongoMechanicApplicaitonRepository()
 const getMechanicApplicatinUseCase = new GetMechanicApplicationUseCase(mechanicApplicationRepository)
 
 
+const reviewMechanicSpecializationUseCase = new ReviewMechanicSpecializationUseCase(mechanicApplicationRepository)
+
+const transactionMapper = new MongoTransactionManager()
 const approveMechanicApplicationUseCase = new ApproveMechanicApplicationUseCase(
     mechanicApplicationRepository,
-    userRepository
+    userRepository,
+    transactionMapper
 )
 
+
+export const reviewMechanicSpecializationController = new ReviewMechanicSpecializationController(reviewMechanicSpecializationUseCase)
 const rejectdMechanicAppliationUseCase = new RejectMechanicApplicationUseCase(mechanicApplicationRepository)
 
 export const adminController = new AdminController(
@@ -227,14 +243,35 @@ export const adminController = new AdminController(
     getMechanicApplicatinUseCase,
     blockUserUseCase,
     unblockUserCase,
-approveMechanicApplicationUseCase,
-rejectdMechanicAppliationUseCase)
+    approveMechanicApplicationUseCase,
+    rejectdMechanicAppliationUseCase)
+
+const mechanicCategoryRepository = new MechanicCategoryRepository()
+
+const createMechanicCategoryUseCase = new CreateMechanicCategoryUseCase(mechanicCategoryRepository)
+
+const getMechanicCategoryUseCase = new GetMechanicCategoriesUseCase(mechanicCategoryRepository)
+
+const updateMechanicCategoryStautsUseCase = new UpdateMechanicCategoryStatusUseCase(mechanicCategoryRepository)
+
+const updateMechanicCategoryUseCase = new UpdateMechanicCategoryUseCase(mechanicCategoryRepository)
+
+export const mechaniccategoryController = new MechanicCategoryController(
+    createMechanicCategoryUseCase
+    , getMechanicCategoryUseCase,
+    updateMechanicCategoryUseCase,
+    updateMechanicCategoryStautsUseCase,
+)
 
 const mechanicApplicationValidator = new MechanicApplicationValidator()
 
+
+const mechanicSpecializationValidator = new MechanicSpecializationValidator(mechanicCategoryRepository)
 const saveMechanicDraftUseCase = new SaveMechanicDraftUseCase(
     mechanicApplicationRepository,
-    mechanicApplicationValidator
+    mechanicApplicationValidator,
+    mechanicSpecializationValidator
+
 )
 const mechanicAvailabilityRepository = new MongoMechanicAvailabilityRepository()
 
@@ -276,13 +313,13 @@ export const emergencyImageUploadController = new UploadEmergencyImagesControlle
 );
 
 
-const submitMechanicApplicationUseCase = new SubmitMechanicApplicationUseCase(mechanicApplicationRepository, mechanicApplicationValidator)
+const submitMechanicApplicationUseCase = new SubmitMechanicApplicationUseCase(mechanicApplicationRepository, mechanicApplicationValidator, mechanicSpecializationValidator)
 
 const getMyMechanicApplicationUseCase = new GetMyMechanicApplicationUseCase(mechanicApplicationRepository)
 
 const updateMechanicServiceLocationuseCase = new UpdateMechanicServiceLocationUseCase(mechanicApplicationRepository)
 
-export const mechanicApplicationController = new MechanicApplicationController(saveMechanicDraftUseCase, submitMechanicApplicationUseCase, getMyMechanicApplicationUseCase,updateMechanicServiceLocationuseCase)
+export const mechanicApplicationController = new MechanicApplicationController(saveMechanicDraftUseCase, submitMechanicApplicationUseCase, getMyMechanicApplicationUseCase, updateMechanicServiceLocationuseCase)
 
 
 
@@ -337,11 +374,11 @@ const resetPasswordUseCase =
     );
 
 
-    export const requestPasswordResetController = new RequestPasswordResetController(requestPasswordResetUseCase)
+export const requestPasswordResetController = new RequestPasswordResetController(requestPasswordResetUseCase)
 
-    export const verifyPasswordResetOtpController = new VerifyPasswordResetOtpController(verifyPasswordResetOtpUseCase)
+export const verifyPasswordResetOtpController = new VerifyPasswordResetOtpController(verifyPasswordResetOtpUseCase)
 
-    export const resetPasswordController = new ResetPasswordController(resetPasswordUseCase)
+export const resetPasswordController = new ResetPasswordController(resetPasswordUseCase)
 
 
 // ─── Mechanic Emergency (Availability, Nearby, Accept/Reject) ───────────────
@@ -377,11 +414,11 @@ const confirmArrivalUseCase =
 
 
 export const mechanicLocationStore = new RedisMechanicLocationStore();
-const updateMechanicLiveLocationUseCase = new  UpdateMechanicLiveLocationUseCase(emergencyRequestRepository,
+const updateMechanicLiveLocationUseCase = new UpdateMechanicLiveLocationUseCase(emergencyRequestRepository,
     mechanicLocationStore
 )
 
-export {updateMechanicLiveLocationUseCase}
+export { updateMechanicLiveLocationUseCase }
 
 export const mechanicEmergencyController = new MechanicEmergencyController(
     updateMechanicAvailabilityUseCase,
@@ -394,7 +431,6 @@ export const mechanicEmergencyController = new MechanicEmergencyController(
     confirmArrivalUseCase
 )
 
-// ─── Emergency Request Status (User side) ───────────────────────────────────
 
 const getEmergencyRequestStatusUseCase = new GetEmergencyRequestStatusUseCase(
     emergencyRequestRepository
@@ -407,7 +443,7 @@ const getUserEmergencyRequestsUseCase = new GetUserEmergencyRequestsUseCase(
 
 const joinEmergencyTrackingUseCase = new JoinEmergencyTrackingUseCase(emergencyRequestRepository)
 
-export {joinEmergencyTrackingUseCase}
+export { joinEmergencyTrackingUseCase }
 
 const getActiveEmergencyRequestUseCase = new GetActiveEmergencyRequestUseCase(emergencyRequestRepository)
 
@@ -416,7 +452,7 @@ export const emergencyRequestStatusController = new EmergencyRequestStatusContro
     getUserEmergencyRequestsUseCase,
     getActiveEmergencyRequestUseCase
 )
-export {getActiveEmergencyRequestUseCase}
+export { getActiveEmergencyRequestUseCase }
 
 const mechanicScheduleRepository = new MechanicScheduleRepository()
 
@@ -435,4 +471,3 @@ export const mechanicScheduleController =
     );
 
 
-    

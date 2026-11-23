@@ -2,6 +2,8 @@ import { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import { UserModel } from "../databases/models/UserModel.js";
 import { User, UserRole, AuthProvider, AccountStatus } from "../../domain/User/entities/User.js";
 import { UserMapper } from "../../application/mappers/UserMapper.js";
+import { ITransactionContext } from "../databases/interface/ITransactionContext.js";
+import { MongoTransactionContext } from "../databases/MongoTransactionContext.js";
 
 
 export class MongoUserRepository implements IUserRepository {
@@ -99,19 +101,34 @@ export class MongoUserRepository implements IUserRepository {
       }
       return UserMapper.toDomain(updatedDocument)
    }
-   async addRole(userId: string, role: UserRole): Promise<User | null> {
-      const updatedDocument = await UserModel.findByIdAndUpdate(userId, {
-         $addToSet: { roles: role }
-      }, {
-         new: true,
-         runValidators: true
-      }).exec()
+ async addRole(
+    userId: string,
+    role: UserRole,
+    transaction?: ITransactionContext
+): Promise<User | null> {
 
-      if (!updatedDocument) {
-         return null
-      }
-      return UserMapper.toDomain(updatedDocument)
-   }
+    const session = transaction instanceof MongoTransactionContext
+        ? transaction.session
+        : undefined;
+
+    const updatedDocument = await UserModel.findByIdAndUpdate(
+        userId,
+        {
+            $addToSet: { roles: role }
+        },
+        {
+            new: true,
+            runValidators: true,
+            ...(session && { session })
+        } 
+    ).exec();
+
+    if (!updatedDocument) {
+        return null;
+    }
+
+    return UserMapper.toDomain(updatedDocument);
+}
    async updateActiveRole(userId: string, role: UserRole): Promise<User | null> {
       const updatedDocument = await UserModel.findOneAndUpdate({
          _id: userId,

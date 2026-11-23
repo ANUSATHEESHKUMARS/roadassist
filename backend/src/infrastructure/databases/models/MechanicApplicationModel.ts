@@ -1,163 +1,337 @@
 
-import { Schema, Types, model, Document } from "mongoose";
+import mongoose, {
+    Schema,
+    Types,
+    Document,
+    Model
+} from "mongoose";
+import {
+    MechanicApplicationStatus,
+    MechanicServiceModel,
+    SupportedVehicleType,
+    MechanicDocumentStatus,
+    SpecializationVerificationStatus
+} from "../../../domain/User/entities/MechanicApplication.js"
+
+
+const SpecializationReviewHistorySchema = new Schema({
+    decision: {
+        type: String,
+        enum: ["approved", "rejected"],
+        required: true
+    },
+
+    reviewedBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+
+    reviewedAt: {
+        type: Date,
+        required: true
+    },
+
+    rejectionReason: {
+        type: String
+    }
+
+}, { _id: false });
+
+const MechanicSubSpecializationSchema = new Schema({
+    subcategoryId: {
+        type: Schema.Types.ObjectId,
+        required: true
+    },
+
+    verificationStatus: {
+        type: String,
+        enum: ["pending", "approved", "rejected"],
+        default: "pending",
+        required: true
+    },
+
+    reviewedBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    },
+
+    reviewedAt: {
+        type: Date
+    },
+
+    rejectionReason: {
+        type: String
+    },
+
+    reviewHistory: {
+        type: [SpecializationReviewHistorySchema],
+        default: []
+    }
+
+}, { _id: false });
+
+
+const MechanicSpecializationSchema = new Schema({
+    categoryId: {
+        type: Schema.Types.ObjectId,
+        ref: "MechanicCategory",
+        required: true
+    },
+
+    subcategories: {
+        type: [MechanicSubSpecializationSchema],
+        default: []
+    }
+
+}, { _id: false });
+
+
+// ==========================================
+// 3. MECHANIC DOCUMENT SCHEMA
+// ==========================================
+
+const MechanicDocumentSchema = new Schema({
+    documentType: {
+        type: String,
+        required: true
+    },
+
+    fileKey: {
+        type: String,
+        required: true
+    },
+
+    originalName: {
+        type: String,
+        required: true
+    },
+
+    mimeType: {
+        type: String,
+        required: true
+    },
+
+    verificationStatus: {
+        type: String,
+        enum: ["pending", "verified", "rejected"],
+        default: "pending"
+    },
+
+    rejectionReason: {
+        type: String
+    }
+
+}, { _id: false });
+
+
+// ==========================================
+// 4. MECHANIC APPLICATION DOCUMENT INTERFACE
+// ==========================================
 
 export interface IMechanicApplicationDocument extends Document {
-  _id: Types.ObjectId;
-  userId: Types.ObjectId;
 
-  profilePhotoKey?: string;
-  experienceYears?: number;
-  specialization?: string[];
-  supportedVehicleTypes?: ("car" | "bike" | "auto" | "ev")[];
-  serviceOffered?: string[];
-  professionalDescription?: string;
+    userId: Types.ObjectId;
 
-  serviceModel?: "mobile" | "workshop" | "both";
-  serviceAddress?: string;
-  pincode?: string;
-  latitude?: number;
-  longitude?: number;
-  serviceRadiusKm?: number;
+    profilePhotoKey?: string;
 
-  workshopName?: string;
-  workshopAddress?: string;
+    experienceYears?: number;
 
-  documents?: {
-    documentType: string;
-    fileKey: string;
-    originalName: string;
-    mimeType: string;
-    verificationStatus: "pending" | "verified" | "rejected";
-    rejectionReason?: string;
-  }[];
+    specializations: {
+        categoryId: Types.ObjectId;
 
-  status:
-    | "incomplete"
-    | "pending"
-    | "under_review"
-    | "changes_requested"
-    | "approved"
-    | "rejected";
+        subcategories: {
+            subcategoryId: Types.ObjectId;
+            verificationStatus: SpecializationVerificationStatus;
+            reviewedBy?: Types.ObjectId;
+            reviewedAt?: Date;
+            rejectionReason?: string;
 
-  submittedAt?: Date;
-  reviewedBy?: Types.ObjectId;
-  reviewedAt?: Date;
-  reviewReason?: string;
+            reviewHistory?: {
+                decision: "approved" | "rejected";
+                reviewedBy: Types.ObjectId;
+                reviewedAt: Date;
+                rejectionReason?: string;
+            }[];
+        }[];
+    }[];
 
-  createdAt?: Date;
-  updatedAt?: Date;
+    supportedVehicleTypes: SupportedVehicleType[];
+
+    professionalDescription?: string;
+
+    serviceModel?: MechanicServiceModel;
+
+    serviceAddress?: string;
+
+    pincode?: string;
+
+    latitude?: number;
+
+    longitude?: number;
+
+    serviceRadiusKm?: number;
+
+    workshopName?: string;
+
+    workshopAddress?: string;
+
+    documents: {
+        documentType: string;
+        fileKey: string;
+        originalName: string;
+        mimeType: string;
+        verificationStatus: MechanicDocumentStatus;
+        rejectionReason?: string;
+    }[];
+
+    status: MechanicApplicationStatus;
+
+    submittedAt?: Date;
+
+    reviewedBy?: Types.ObjectId;
+
+    reviewedAt?: Date;
+
+    reviewReason?: string;
+
+    createdAt?: Date;
+
+    updatedAt?: Date;
 }
 
-const mechanicApplicationSchema =
-  new Schema<IMechanicApplicationDocument>(
-    {
-      userId: {
+
+// ==========================================
+// 5. MAIN MECHANIC APPLICATION SCHEMA
+// ==========================================
+
+const MechanicApplicationSchema = new Schema<IMechanicApplicationDocument>({
+
+    userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true,
-        unique: true,
-      },
+        unique: true
+    },
 
-      profilePhotoKey: String,
+    profilePhotoKey: {
+        type: String
+    },
 
-      experienceYears: {
+    experienceYears: {
         type: Number,
-        min: 0,
-      },
+        min: 0
+    },
 
-      specialization: [String],
+    specializations: {
+        type: [MechanicSpecializationSchema],
+        default: []
+    },
 
-      supportedVehicleTypes: [
-        {
-          type: String,
-          enum: ["car", "bike", "auto", "ev"],
-        },
-      ],
+    supportedVehicleTypes: {
+        type: [{
+            type: String,
+            enum: ["car", "bike", "auto", "ev"]
+        }],
+        default: []
+    },
 
-      serviceOffered: [String],
-      professionalDescription: String,
+    professionalDescription: {
+        type: String
+    },
 
-      serviceModel: {
+    serviceModel: {
         type: String,
-        enum: ["mobile", "workshop", "both"],
-      },
+        enum: ["mobile", "workshop", "both"]
+    },
 
-      serviceAddress: String,
+    serviceAddress: {
+        type: String
+    },
 
-      pincode: {
-        type: String,
-        trim: true,
-      },
+    pincode: {
+        type: String
+    },
 
-      latitude: Number,
-      longitude: Number,
+    latitude: {
+        type: Number
+    },
 
-      serviceRadiusKm: {
+    longitude: {
+        type: Number
+    },
+
+    serviceRadiusKm: {
         type: Number,
-        min: 0.1,
-        max:100
-      },
+        min: 0
+    },
 
-      workshopName: String,
-      workshopAddress: String,
+    workshopName: {
+        type: String
+    },
 
-      documents: [
-        {
-          documentType: {
-            type: String,
-            required: true,
-          },
-          fileKey: {
-            type: String,
-            required: true,
-          },
-          originalName: {
-            type: String,
-            required: true,
-          },
-          mimeType: {
-            type: String,
-            required: true,
-          },
-          verificationStatus: {
-            type: String,
-            enum: ["pending", "verified", "rejected"],
-            default: "pending",
-          },
-          rejectionReason: String,
-        },
-      ],
+    workshopAddress: {
+        type: String
+    },
 
-      status: {
+    documents: {
+        type: [MechanicDocumentSchema],
+        default: []
+    },
+
+    status: {
         type: String,
         enum: [
-          "incomplete",
-          "pending",
-          "under_review",
-          "changes_requested",
-          "approved",
-          "rejected",
+            "incomplete",
+            "pending",
+            "under_review",
+            "changes_requested",
+            "approved",
+            "rejected"
         ],
         default: "incomplete",
-        required: true,
-      },
-
-      submittedAt: Date,
-
-      reviewedBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-
-      reviewedAt: Date,
-      reviewReason: String,
+        required: true
     },
-    {
-      timestamps: true,
-    }
-  );
 
-export const MechanicApplicationModel = model<IMechanicApplicationDocument>(
-  "MechanicApplication",
-  mechanicApplicationSchema
-);
+    submittedAt: {
+        type: Date
+    },
+
+    reviewedBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    },
+
+    reviewedAt: {
+        type: Date
+    },
+
+    reviewReason: {
+        type: String
+    }
+
+}, {
+    timestamps: true
+});
+
+
+// ==========================================
+// 6. INDEXES
+// ==========================================
+
+MechanicApplicationSchema.index({ userId: 1 }, { unique: true });
+
+MechanicApplicationSchema.index({ status: 1, createdAt: -1 });
+
+MechanicApplicationSchema.index({
+    "specializations.categoryId": 1
+});
+
+
+
+export const MechanicApplicationModel: Model<IMechanicApplicationDocument> =
+    (mongoose.models.MechanicApplication as Model<IMechanicApplicationDocument>) ||
+    mongoose.model<IMechanicApplicationDocument>(
+        "MechanicApplication",
+        MechanicApplicationSchema
+    );

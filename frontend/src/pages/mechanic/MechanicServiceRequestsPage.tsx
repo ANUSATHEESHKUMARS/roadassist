@@ -102,7 +102,6 @@ export default function MechanicServiceRequestsPage() {
         void fetchRequests();
         void fetchAcceptedRequests();
 
-        // Handle incoming emergency requests
         const handleNewEmergencyRequest = (
             request: EmergencyRequestDetail
         ) => {
@@ -125,7 +124,6 @@ export default function MechanicServiceRequestsPage() {
             });
         };
 
-        // Fetch requests again after connecting or reconnecting
         const handleConnect = () => {
             console.log("Mechanic socket connected:", socket.id);
             void fetchRequests();
@@ -139,7 +137,6 @@ export default function MechanicServiceRequestsPage() {
             handleNewEmergencyRequest
         );
 
-        // Establish socket connection
         socket.connect();
 
         // Keep polling temporarily as a fallback

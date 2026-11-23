@@ -128,7 +128,6 @@ export class MechanicApplicationController {
     };
 
 
-    // Update mechanic service location
     updateServiceLocation = async (req: Request, res: Response): Promise<void> => {
 
         const userId = req.user?.userId;

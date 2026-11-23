@@ -1,28 +1,42 @@
+
 import {
     MechanicServiceModel,
     SupportedVehicleType,
     MechanicDocument,
 } from "../../../domain/User/entities/MechanicApplication.js";
 
+import {
+    MechanicSpecializationSelectionDto
+} from "../admin/MechanicSpecializationSelectionDto.js";
+
+
 export interface SaveMechanicApplicationDraftDto {
+
     profilePhotoKey?: string;
 
     experienceYears?: number;
-    specialization?: string[];
+
+    specializations?: MechanicSpecializationSelectionDto[];
+
     supportedVehicleTypes?: SupportedVehicleType[];
-    serviceOffered?: string[];
+
     professionalDescription?: string;
 
     serviceModel?: MechanicServiceModel;
+
     serviceAddress?: string;
-    pincode?:string,
+
+    pincode?: string;
+
     latitude?: number;
+
     longitude?: number;
+
     serviceRadiusKm?: number;
 
     workshopName?: string;
+
     workshopAddress?: string;
 
     documents?: MechanicDocument[];
 }
-

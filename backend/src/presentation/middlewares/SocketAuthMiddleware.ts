@@ -58,7 +58,6 @@ export const socketAuthMiddleware = (
                 return next(new Error("Socket access not allowed"));
             }
 
-            // Store verified identity.
             socket.data.userId = user.userId!;
             socket.data.email = user.email;
             socket.data.roles = user.roles;

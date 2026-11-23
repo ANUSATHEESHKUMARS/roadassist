@@ -1,24 +1,46 @@
 
-import { IMechanicApplicationRepository } from "../../../domain/repositories/mechanic/IMechanicApplicationRepository.js";
+import { IMechanicApplicationRepository }
+    from "../../../domain/repositories/IMechanicApplicationRepository.js";
+
 import {
-    MechanicApplication,
-    MechanicServiceModel,
+    MechanicApplication
 } from "../../../domain/User/entities/MechanicApplication.js";
-import { ConflictError } from "../../../shared/errors/ConflitError.js";
-import { BadRequest } from "../../../shared/errors/BadRequestError.js";
-import { ISubmitMechanicApplicationUseCase } from "../../interfaces/mechanic/ISubmitMechanicApplicationUseCase.js";
-import { MechanicApplicationValidator } from "../../validators/MechanicApplicationValidaor.js";
-import { SubmitMechanicApplicationDto } from "../../dtos/mechanic/SubmitMechanicApplicationDto.js";
+
+import { ConflictError }
+    from "../../../shared/errors/ConflitError.js";
+
+import { BadRequest }
+    from "../../../shared/errors/BadRequestError.js";
+
+import { ISubmitMechanicApplicationUseCase }
+    from "../../interfaces/mechanic/ISubmitMechanicApplicationUseCase.js";
+import { IMechanicSpecializationValidator } from "../../validators/interfaces/IMechanicSpecializationValidator.js";
+
+import { MechanicApplicationValidator }
+    from "../../validators/MechanicApplicationValidaor.js";
+
+import { SubmitMechanicApplicationDto }
+    from "../../dtos/mechanic/SubmitMechanicApplicationDto.js";
+
 
 export class SubmitMechanicApplicationUseCase
     implements ISubmitMechanicApplicationUseCase {
 
     constructor(
-        private readonly mechanicApplicationRepository: IMechanicApplicationRepository,
-        private readonly mechanicApplicationValidator: MechanicApplicationValidator
+        private readonly mechanicApplicationRepository:
+            IMechanicApplicationRepository,
+
+        private readonly mechanicApplicationValidator:
+            MechanicApplicationValidator,
+
+        private readonly mechanicSpecializationValidator:
+            IMechanicSpecializationValidator
     ) { }
 
+
     async execute(userId: string): Promise<MechanicApplication> {
+
+        // 1. Find the mechanic's saved application
 
         const application =
             await this.mechanicApplicationRepository.findByUserId(userId);
@@ -30,7 +52,8 @@ export class SubmitMechanicApplicationUseCase
             );
         }
 
-        
+
+        // 2. Validate application ID
 
         if (!application.id) {
             throw new BadRequest(
@@ -38,6 +61,9 @@ export class SubmitMechanicApplicationUseCase
                 "APPLICATION_ID_MISSING"
             );
         }
+
+
+        // 3. Check whether the application can be submitted
 
         if (
             application.status !== "incomplete" &&
@@ -49,142 +75,170 @@ export class SubmitMechanicApplicationUseCase
             );
         }
 
-        const serviceModel = application.serviceModel;
 
-        if (!serviceModel) {
+        // 4. Validate required service information
+
+        if (!application.serviceModel) {
             throw new BadRequest(
                 "Service model is required.",
                 "SERVICE_MODEL_REQUIRED"
             );
         }
 
+
+        // 5. Convert domain specializations into selection DTOs
+
+        const specializationSelections =
+            application.specializations.map(specialization => ({
+                categoryId: specialization.categoryId,
+
+                subcategoryIds: specialization.subcategories.map(
+                    subcategory => subcategory.subcategoryId
+                )
+            }));
+
+
+        // 6. Validate selected categories and subcategories
+        // Database-backed validation is handled by the validator.
+
+        await this.mechanicSpecializationValidator.validate(
+            specializationSelections
+        );
+
+
+        // 7. Prepare submission DTO for application validation
+
         const dto: SubmitMechanicApplicationDto = {
+
             profilePhotoKey: application.profilePhotoKey ?? "",
+
             experienceYears: application.experienceYears ?? -1,
-            specialization: application.specializations,
-            supportedVehicleTypes: application.supportedVehicleType,
-            serviceOffered: application.serviceOffered,
-            serviceModel: serviceModel as MechanicServiceModel,
+
+            specializations: specializationSelections,
+
+            supportedVehicleTypes: application.supportedVehicleTypes,
+
+            serviceModel: application.serviceModel,
+
             serviceAddress: application.serviceAddress ?? "",
-            pincode: application.pincode ?? "",
-            documents: application.documents.map((document) => ({
+
+            documents: application.documents.map(document => ({
                 documentType: document.documentType,
                 fileKey: document.fileKey,
                 originalName: document.originalName,
                 mimeType: document.mimeType,
                 verificationStatus: document.verificationStatus,
-                ...(document.rejectionReason !== undefined
-                    ? { rejectionReason: document.rejectionReason }
-                    : {}),
+
+                ...(document.rejectionReason !== undefined && {
+                    rejectionReason: document.rejectionReason
+                })
             })),
 
-            ...(application.professionalDescription !== undefined
-                ? {
-                    professionalDescription:
-                        application.professionalDescription
-                }
-                : {}),
+            ...(application.pincode !== undefined && {
+                pincode: application.pincode
+            }),
 
-            ...(application.latitude !== undefined
-                ? { latitude: application.latitude }
-                : {}),
+            ...(application.professionalDescription !== undefined && {
+                professionalDescription: application.professionalDescription
+            }),
 
-            ...(application.longitude !== undefined
-                ? { longitude: application.longitude }
-                : {}),
+            ...(application.latitude !== undefined && {
+                latitude: application.latitude
+            }),
 
-            ...(application.serviceRadiusKm !== undefined
-                ? { serviceRadiusKm: application.serviceRadiusKm }
-                : {}),
+            ...(application.longitude !== undefined && {
+                longitude: application.longitude
+            }),
 
-            ...(application.workshopName !== undefined
-                ? { workshopName: application.workshopName }
-                : {}),
+            ...(application.serviceRadiusKm !== undefined && {
+                serviceRadiusKm: application.serviceRadiusKm
+            }),
 
-            ...(application.workshopAddress !== undefined
-                ? { workshopAddress: application.workshopAddress }
-                : {}),
+            ...(application.workshopName !== undefined && {
+                workshopName: application.workshopName
+            }),
+
+            ...(application.workshopAddress !== undefined && {
+                workshopAddress: application.workshopAddress
+            })
         };
-        console.log(
-            "Documents immediately before validation:",
-            JSON.stringify(dto.documents, null, 2)
-        );
+
+
+        // 8. Validate all required submission fields
 
         this.mechanicApplicationValidator.validateSubmission(dto);
 
 
+        // 9. Construct submitted application
+        // Preserve existing specialization verification statuses.
+
         const submittedApplication = new MechanicApplication({
+
             id: application.id,
+
             userId: application.userId,
 
-            ...(application.profilePhotoKey !== undefined
-                ? { profilePhotoKey: application.profilePhotoKey }
-                : {}),
+            ...(application.profilePhotoKey !== undefined && {
+                profilePhotoKey: application.profilePhotoKey
+            }),
 
-            ...(application.experienceYears !== undefined
-                ? { experienceYears: application.experienceYears }
-                : {}),
+            ...(application.experienceYears !== undefined && {
+                experienceYears: application.experienceYears
+            }),
 
-            specialization: application.specializations,
-            supportedVehicleTypes: application.supportedVehicleType,
-            serviceOffered: application.serviceOffered,
+            specializations: application.specializations,
 
-            ...(application.professionalDescription !== undefined
-                ? { professionalDescription: application.professionalDescription }
-                : {}),
+            supportedVehicleTypes: application.supportedVehicleTypes,
 
-            ...(application.serviceModel !== undefined
-                ? { serviceModel: application.serviceModel }
-                : {}),
+            ...(application.professionalDescription !== undefined && {
+                professionalDescription: application.professionalDescription
+            }),
 
-            ...(application.serviceAddress !== undefined
-                ? { serviceAddress: application.serviceAddress }
-                : {}),
-            ...(application.pincode !== undefined
-                ? { pincode: application.pincode }
-                : {}),
+            serviceModel: application.serviceModel,
 
-            ...(application.latitude !== undefined
-                ? { latitude: application.latitude }
-                : {}),
+            ...(application.serviceAddress !== undefined && {
+                serviceAddress: application.serviceAddress
+            }),
 
-            ...(application.longitude !== undefined
-                ? { longitude: application.longitude }
-                : {}),
+            ...(application.pincode !== undefined && {
+                pincode: application.pincode
+            }),
 
-            ...(application.serviceRadiusKm !== undefined
-                ? { serviceRadiusKm: application.serviceRadiusKm }
-                : {}),
+            ...(application.latitude !== undefined && {
+                latitude: application.latitude
+            }),
 
-            ...(application.workshopName !== undefined
-                ? { workshopName: application.workshopName }
-                : {}),
+            ...(application.longitude !== undefined && {
+                longitude: application.longitude
+            }),
 
-            ...(application.workshopAddress !== undefined
-                ? { workshopAddress: application.workshopAddress }
-                : {}),
+            ...(application.serviceRadiusKm !== undefined && {
+                serviceRadiusKm: application.serviceRadiusKm
+            }),
 
-            documents: application.documents.map((document) => ({
-                documentType: document.documentType,
-                fileKey: document.fileKey,
-                originalName: document.originalName,
-                mimeType: document.mimeType,
-                verificationStatus: document.verificationStatus,
-                ...(document.rejectionReason !== undefined
-                    ? { rejectionReason: document.rejectionReason }
-                    : {}),
-            })),
+            ...(application.workshopName !== undefined && {
+                workshopName: application.workshopName
+            }),
+
+            ...(application.workshopAddress !== undefined && {
+                workshopAddress: application.workshopAddress
+            }),
+
+            documents: application.documents,
+
             status: "pending",
+
             submittedAt: new Date(),
 
-            ...(application.createdAt !== undefined
-                ? { createdAt: application.createdAt }
-                : {}),
+            ...(application.createdAt !== undefined && {
+                createdAt: application.createdAt
+            }),
 
             updatedAt: new Date()
         });
 
 
+        // 10. Save submitted application
 
         const savedApplication =
             await this.mechanicApplicationRepository.update(
@@ -198,6 +252,7 @@ export class SubmitMechanicApplicationUseCase
                 "APPLICATION_SUBMISSION_FAILED"
             );
         }
+
 
         return savedApplication;
     }

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminController, auth, uploadMediaController } from "../../di/container.js";
+import { adminController, auth, mechaniccategoryController, reviewMechanicSpecializationController, uploadMediaController } from "../../di/container.js";
 import { authorizeRoles } from "../middlewares/authorizationMiddleware.js";
 import { asyncHandler } from "../../shared/helper/asyncHandler.js";
 import { uploadMedia } from "../middlewares/uploadMedia.js";
@@ -20,7 +20,6 @@ adminRouter.delete('/media/:id', auth, authorizeRoles("admin"), asyncHandler(upl
 
 adminRouter.get('/mechanic-applications', auth, authorizeRoles("admin"), asyncHandler(adminController.getMechanicApplication))
 
-
 adminRouter.patch(
     "/mechanic-applications/:applicationId/approve",
     auth,
@@ -34,5 +33,20 @@ adminRouter.patch(
     authorizeRoles("admin"),
     asyncHandler(adminController.rejectMechanicApplication)
 );
+
+adminRouter.patch("/mechanic-applications/:applicationId/categories/:categoryId/subcategories/:subcategoryId/review",
+    auth,
+    authorizeRoles('admin'),
+    asyncHandler(reviewMechanicSpecializationController.execute)
+)
+
+adminRouter.post("/mechanic-categories", auth , authorizeRoles('admin'),asyncHandler(mechaniccategoryController.execute))
+
+adminRouter.get('/mechanic-categories',auth, asyncHandler(mechaniccategoryController.getAll))
+
+adminRouter.put('/mechanic-categories/:id', auth , authorizeRoles("admin"),asyncHandler(mechaniccategoryController.update))
+
+adminRouter.patch('/mechanic-categories/:id/status',auth,asyncHandler(mechaniccategoryController.updateStatus))
+
 export default adminRouter
 

@@ -11,6 +11,9 @@ import {
     CalendarClock
 } from "lucide-react";
 
+interface MechanicSidebarProps {
+    newRequestCount: number;
+}
 const mainNavItems = [
     {
         label: "Dashboard",
@@ -48,7 +51,7 @@ const bottomNavItems = [
     },
 ];
 
-export const MechanicSidebar: React.FC = () => {
+export const MechanicSidebar: React.FC<MechanicSidebarProps> = () => {
     return (
         <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-border bg-card md:flex">
 
