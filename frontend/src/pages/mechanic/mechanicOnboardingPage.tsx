@@ -34,16 +34,17 @@ import {
 
 
 import type {
-  MechanicApplicationStatus,
-  MechanicServiceModel,
-  SupportedVehicleType,
-  MechanicDocumentType,
+    MechanicApplicationStatus,
+    MechanicServiceModel,
+    SupportedVehicleType,
+    MechanicDocumentType,
 } from "../../types/mechanic/common";
+
 
 const INITIAL_DATA: MechanicOnboardingRequest = {
     profilePhotoKey: "",
     experienceYears: 0,
-    specialization: [],
+    specializations: [],
     supportedVehicleTypes: [],
     serviceOffered: [],
     professionalDescription: "",
@@ -150,9 +151,22 @@ export default function MechanicOnboardingPage() {
         }
 
         if (step === 2) {
-            if (formData.specialization.length === 0) {
-                validationErrors.specialization =
-                    "Select at least one specialization.";
+            const specializations = formData.specializations ?? [];
+
+            // At least one category must be selected.
+            if (specializations.length === 0) {
+                validationErrors.specializations =
+                    "Select at least one specialization category.";
+            } else {
+                // At least one subcategory must be selected.
+                const hasSelectedSubcategory = specializations.some(
+                    (item) => item.subcategoryIds.length > 0
+                );
+
+                if (!hasSelectedSubcategory) {
+                    validationErrors.specializations =
+                        "Select at least one subcategory.";
+                }
             }
 
             if (formData.supportedVehicleTypes.length === 0) {
@@ -173,7 +187,6 @@ export default function MechanicOnboardingPage() {
                     "Select at least one service offered.";
             }
         }
-
         if (step === 3) {
             const requiredDocumentTypes = [
                 "id_proof",
@@ -297,12 +310,12 @@ export default function MechanicOnboardingPage() {
         }
     };
     const handleRemoveProfilePhoto = () => {
-    handleUpdate({
-        profilePhotoKey: "",
-    });
+        handleUpdate({
+            profilePhotoKey: "",
+        });
 
-    setProfilePhotoUrl("");
-};
+        setProfilePhotoUrl("");
+    };
     const handleSaveDraft = async () => {
         if (isSavingDraft || isSubmitting || isUploadingProfilePhoto) return;
 
@@ -337,101 +350,101 @@ export default function MechanicOnboardingPage() {
         }
     };
 
-   
-const handleSubmit = async () => {
-    if (isSavingDraft || isSubmitting || isUploadingProfilePhoto) return;
 
-    if (!formData.profilePhotoKey?.trim()) {
-        showToast("Please upload your profile photo before submitting.", "error");
-        setCurrentStep(4);
-        return;
-    }
+    const handleSubmit = async () => {
+        if (isSavingDraft || isSubmitting || isUploadingProfilePhoto) return;
 
-    for (const step of [1, 2, 3]) {
-        const stepErrors = getStepErrors(step);
-
-        if (Object.keys(stepErrors).length > 0) {
-            setCurrentStep(step);
-            setErrors(stepErrors);
-
-            showToast(
-                "Please complete all required fields before submitting.",
-                "error"
-            );
-
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth",
-            });
-
+        if (!formData.profilePhotoKey?.trim()) {
+            showToast("Please upload your profile photo before submitting.", "error");
+            setCurrentStep(4);
             return;
         }
-    }
 
-    setIsSubmitting(true);
+        for (const step of [1, 2, 3]) {
+            const stepErrors = getStepErrors(step);
 
-    try {
-        console.log("Step 1: Saving mechanic draft...");
+            if (Object.keys(stepErrors).length > 0) {
+                setCurrentStep(step);
+                setErrors(stepErrors);
 
-        const draftResponse = await saveMechanicDraft(formData);
+                showToast(
+                    "Please complete all required fields before submitting.",
+                    "error"
+                );
 
-        console.log("Draft response:", draftResponse);
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                });
 
-        if (!draftResponse.success) {
-            throw new Error(
-                draftResponse.message || "Failed to save the latest draft."
-            );
+                return;
+            }
         }
 
-        console.log(
-            "Documents in form state:",
-            JSON.stringify(formData.documents, null, 2)
-        );
+        setIsSubmitting(true);
 
-        console.log("Step 2: Submitting mechanic application...");
+        try {
+            console.log("Step 1: Saving mechanic draft...");
 
-        const submitResponse = await submitMechanicApplication();
+            const draftResponse = await saveMechanicDraft(formData);
 
-        console.log("Submit response:", submitResponse);
+            console.log("Draft response:", draftResponse);
 
-        if (!submitResponse.success) {
-            throw new Error(
-                submitResponse.message || "Application submission failed."
+            if (!draftResponse.success) {
+                throw new Error(
+                    draftResponse.message || "Failed to save the latest draft."
+                );
+            }
+
+            console.log(
+                "Documents in form state:",
+                JSON.stringify(formData.documents, null, 2)
             );
-        }
 
-        setIsSubmittedSuccess(true);
+            console.log("Step 2: Submitting mechanic application...");
 
-        showToast(
-            "Your mechanic application was submitted successfully.",
-            "success"
-        );
+            const submitResponse = await submitMechanicApplication();
 
-        navigate("/user/mechanic-application");
-    } catch (error: unknown) {
-        console.error("Submit mechanic application error:", error);
+            console.log("Submit response:", submitResponse);
 
-        if (axios.isAxiosError(error)) {
-            console.error("Request URL:", error.config?.url);
-            console.error("Status:", error.response?.status);
-            console.error(
-                "Backend response:",
-                JSON.stringify(error.response?.data, null, 2)
+            if (!submitResponse.success) {
+                throw new Error(
+                    submitResponse.message || "Application submission failed."
+                );
+            }
+
+            setIsSubmittedSuccess(true);
+
+            showToast(
+                "Your mechanic application was submitted successfully.",
+                "success"
             );
-        }
 
-        showToast(
-            error instanceof Error
-                ? error.message
-                : "Failed to submit your application. Please try again.",
-            "error"
-        );
-    } finally {
-        // Always stop the loading state after the operation settles.
-        setIsSubmitting(false);
-        console.log("Submission process finished.");
-    }
-};
+            navigate("/user/mechanic-application");
+        } catch (error: unknown) {
+            console.error("Submit mechanic application error:", error);
+
+            if (axios.isAxiosError(error)) {
+                console.error("Request URL:", error.config?.url);
+                console.error("Status:", error.response?.status);
+                console.error(
+                    "Backend response:",
+                    JSON.stringify(error.response?.data, null, 2)
+                );
+            }
+
+            showToast(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to submit your application. Please try again.",
+                "error"
+            );
+        } finally {
+            // Always stop the loading state after the operation settles.
+            setIsSubmitting(false);
+            console.log("Submission process finished.");
+        }
+    };
 
 
     if (isSubmittedSuccess) {
@@ -524,15 +537,15 @@ const handleSubmit = async () => {
 
                     <div className="mt-6">
                         {currentStep === 1 && (
-  <MechanicPersonalDetailsForm
-    data={formData}
-    onChange={handleUpdate}
-    errors={errors}
-    profilePhotoUrl={profilePhotoUrl}
-    isUploadingProfilePhoto={isUploadingProfilePhoto}
-    onProfilePhotoUpload={handleProfilePhotoUpload}
-    onRemoveProfilePhoto={handleRemoveProfilePhoto}
-/>
+                            <MechanicPersonalDetailsForm
+                                data={formData}
+                                onChange={handleUpdate}
+                                errors={errors}
+                                profilePhotoUrl={profilePhotoUrl}
+                                isUploadingProfilePhoto={isUploadingProfilePhoto}
+                                onProfilePhotoUpload={handleProfilePhotoUpload}
+                                onRemoveProfilePhoto={handleRemoveProfilePhoto}
+                            />
                         )}
 
                         {currentStep === 2 && (

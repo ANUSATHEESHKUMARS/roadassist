@@ -45,11 +45,15 @@ export interface DocumentEntry {
   fileSize?: number;
 }
 
+export interface MechanicSpecializationSelection {
+    categoryId: string;
+    subcategoryIds: string[];
+}
 
 export interface MechanicOnboardingRequest {
   profilePhotoKey?: string;
   experienceYears: number;
-  specialization: string[];
+  specializations: MechanicSpecializationSelection[];
   supportedVehicleTypes: string[];
   serviceOffered: string[];
   professionalDescription?: string;
@@ -81,7 +85,6 @@ export interface MechanicApplicationData {
   createdAt?: string;
   updatedAt?: string;
 }
-
 
 
 export interface OnboardingApiResponse {

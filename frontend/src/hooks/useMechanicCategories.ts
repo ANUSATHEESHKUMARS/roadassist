@@ -130,16 +130,20 @@ export const useMechanicCategories = () => {
                 await mechanicCategoryService.updateStatus(id, dto);
 
             setCategories((prev) => {
-                // Remove inactive category when inactive items are hidden.
                 if (!includeInactive && !updatedCategory.isActive) {
                     return prev.filter((category) => category.id !== id);
                 }
 
-                return prev.map((category) =>
-                    category.id === id ? updatedCategory : category
-                );
-            });
+                const exists = prev.some((category) => category.id === id);
 
+                if (exists) {
+                    return prev.map((category) =>
+                        category.id === id ? updatedCategory : category
+                    );
+                }
+
+                return [updatedCategory, ...prev];
+            });
             return updatedCategory;
 
         } catch (error) {

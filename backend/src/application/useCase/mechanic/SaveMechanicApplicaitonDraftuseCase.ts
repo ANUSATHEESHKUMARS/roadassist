@@ -20,7 +20,6 @@ import {
 import {
     MechanicApplicationValidator
 } from "../../validators/MechanicApplicationValidaor.js";
-import { IMechanicCategoryRepository } from "../../../domain/repositories/admin/IMechanicCategoryRepository.js";
 import { IMechanicSpecializationValidator } from "../../validators/interfaces/IMechanicSpecializationValidator.js";
 
 

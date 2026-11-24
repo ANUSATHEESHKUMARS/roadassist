@@ -104,7 +104,7 @@ const MechanicCategoryPage = () => {
         isActive: boolean
     ) => {
         try {
-            await updateCategoryStatus(id, {isActive});
+            await updateCategoryStatus(id, { isActive });
 
             showToast(
                 `Category ${isActive ? "activated" : "deactivated"} successfully.`,
@@ -203,10 +203,10 @@ const MechanicCategoryPage = () => {
 
                     <p className="mt-2 text-2xl font-bold text-foreground">
                         {categories.reduce(
-                            (total: number, category: MechanicCategory) =>
+                            (total, category) =>
                                 total +
-                                category.subcategories.filter(
-                                    (item: MechanicSubcategory) => item.isActive
+                                (category.subcategories ?? []).filter(
+                                    (item) => item.isActive
                                 ).length,
                             0
                         )}

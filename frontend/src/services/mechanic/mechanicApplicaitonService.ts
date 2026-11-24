@@ -116,7 +116,16 @@ export interface MyMechanicApplicationResponse {
     userId: string;
     status: string;
     experienceYears?: number;
-    specializations?: string[];
+      specializations?: {
+      categoryId: string;
+      subcategories: {
+        subcategoryId: string;
+        verificationStatus: "pending" | "approved" | "rejected";
+        reviewedBy?: string;
+        reviewedAt?: string;
+        rejectionReason?: string;
+      }[];
+    }[];
     supportedVehicleTypes?: string[];
     serviceOffered?: string[];
     serviceModel?: string;

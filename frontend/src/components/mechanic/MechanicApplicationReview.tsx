@@ -6,6 +6,8 @@ import type {
   MechanicOnboardingRequest,
 } from "@/types/mechanic/mechanicOnboarding";
 
+import { useMechanicCategories } from "@/hooks/useMechanicCategories";
+
 interface ReviewProps {
   data: MechanicOnboardingRequest;
   onEditStep: (step: number) => void;
@@ -15,6 +17,32 @@ export const MechanicApplicationReview: React.FC<ReviewProps> = ({
   data,
   onEditStep,
 }) => {
+  const { categories, loading, error } = useMechanicCategories();
+
+  // Convert selected category and subcategory IDs into readable names.
+  const selectedSpecializations = (data.specializations ?? []).map(
+    (selection) => {
+      const category = categories.find(
+        (item) => item.id === selection.categoryId
+      );
+
+      const subcategories = (selection.subcategoryIds ?? []).map(
+        (subcategoryId) => {
+          const subcategory = category?.subcategories?.find(
+            (item) => item.id === subcategoryId
+          );
+
+          return subcategory?.name ?? "Unknown subcategory";
+        }
+      );
+
+      return {
+        categoryName: category?.name ?? "Unknown category",
+        subcategories,
+      };
+    }
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -67,14 +95,49 @@ export const MechanicApplicationReview: React.FC<ReviewProps> = ({
             </p>
           </div>
 
-          <div>
+          {/* Dynamic Specializations */}
+          <div className="sm:col-span-2">
             <span className="text-[10px] text-muted-foreground uppercase font-semibold">
               Specializations
             </span>
 
-            <p className="text-foreground mt-1 capitalize">
-              {data.specialization?.join(", ") || "None selected"}
-            </p>
+            {loading ? (
+              <p className="text-muted-foreground mt-1">
+                Loading specializations...
+              </p>
+            ) : error ? (
+              <p className="text-destructive mt-1">
+                Unable to load specialization names.
+              </p>
+            ) : selectedSpecializations.length === 0 ? (
+              <p className="text-muted-foreground mt-1">
+                None selected
+              </p>
+            ) : (
+              <div className="mt-2 space-y-3">
+                {selectedSpecializations.map((selection, index) => (
+                  <div
+                    key={`${selection.categoryName}-${index}`}
+                    className="space-y-1"
+                  >
+                    <p className="font-semibold text-foreground">
+                      {selection.categoryName}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {selection.subcategories.map((subcategory, subIndex) => (
+                        <span
+                          key={`${subcategory}-${subIndex}`}
+                          className="rounded-md bg-background border border-border px-2 py-1 text-muted-foreground"
+                        >
+                          {subcategory}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>

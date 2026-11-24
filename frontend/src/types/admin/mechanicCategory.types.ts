@@ -1,7 +1,5 @@
 
-/* ================================
-   MECHANIC SUBCATEGORY
-================================ */
+
 
 export interface MechanicSubcategory {
     id?: string;
@@ -12,9 +10,7 @@ export interface MechanicSubcategory {
 }
 
 
-/* ================================
-   MECHANIC CATEGORY
-================================ */
+
 
 export interface MechanicCategory {
     id: string;
@@ -28,9 +24,7 @@ export interface MechanicCategory {
 }
 
 
-/* ================================
-   CREATE CATEGORY DTO
-================================ */
+
 
 export interface CreateMechanicCategoryDto {
     name: string;

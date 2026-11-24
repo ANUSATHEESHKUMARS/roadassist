@@ -109,13 +109,13 @@ export const MechanicPersonalDetailsForm: React.FC<PersonalProps> = ({
     setLocationError("");
   };
 
-const handleRemovePhoto = () => {
+  const handleRemovePhoto = () => {
     onChange({
-        profilePhotoKey: "",
+      profilePhotoKey: "",
     });
 
     onRemoveProfilePhoto();
-};
+  };
 
   return (
     <div className="space-y-7">
@@ -181,11 +181,10 @@ const handleRemovePhoto = () => {
 
             {/* Custom Upload Area */}
             <div
-              className={`rounded-lg border border-dashed border-border bg-card transition-colors ${
-                isUploadingProfilePhoto
+              className={`rounded-lg border border-dashed border-border bg-card transition-colors ${isUploadingProfilePhoto
                   ? "cursor-not-allowed opacity-60"
                   : "hover:border-primary/70 hover:bg-muted/40"
-              }`}
+                }`}
             >
               <Input
                 id="profilePhoto"
@@ -214,11 +213,10 @@ const handleRemovePhoto = () => {
 
               <Label
                 htmlFor="profilePhoto"
-                className={`flex min-h-[76px] items-center gap-3 p-3 ${
-                  isUploadingProfilePhoto
+                className={`flex min-h-[76px] items-center gap-3 p-3 ${isUploadingProfilePhoto
                     ? "cursor-not-allowed"
                     : "cursor-pointer"
-                }`}
+                  }`}
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
                   {isUploadingProfilePhoto ? (
@@ -277,16 +275,16 @@ const handleRemovePhoto = () => {
             )}
 
             {/* Remove Photo */}
-        {profilePhotoUrl && !isUploadingProfilePhoto && (
-  <button
-    type="button"
-    onClick={handleRemovePhoto}
-    className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-destructive hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-  >
-    <Trash2 className="h-3.5 w-3.5" />
-    Remove Photo
-  </button>
-)}
+            {profilePhotoUrl && !isUploadingProfilePhoto && (
+              <button
+                type="button"
+                onClick={handleRemovePhoto}
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-destructive hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Remove Photo
+              </button>
+            )}
 
             <p className="text-[11px] leading-5 text-muted-foreground">
               Your photo will be displayed on your mechanic profile.
@@ -327,11 +325,10 @@ const handleRemovePhoto = () => {
               }
               placeholder="House number, street, locality"
               aria-invalid={Boolean(errors.serviceAddress)}
-              className={`h-11 border-border bg-input text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${
-                errors.serviceAddress
+              className={`h-11 border-border bg-input text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${errors.serviceAddress
                   ? "border-destructive ring-1 ring-destructive"
                   : ""
-              }`}
+                }`}
             />
 
             {errors.serviceAddress && (
@@ -365,11 +362,10 @@ const handleRemovePhoto = () => {
               }
               placeholder="6-digit pincode"
               aria-invalid={Boolean(errors.pincode)}
-              className={`h-11 border-border bg-input font-mono text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${
-                errors.pincode
+              className={`h-11 border-border bg-input font-mono text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary ${errors.pincode
                   ? "border-destructive ring-1 ring-destructive"
                   : ""
-              }`}
+                }`}
             />
 
             {errors.pincode && (
@@ -404,11 +400,10 @@ const handleRemovePhoto = () => {
                 });
               }}
               aria-invalid={Boolean(errors.serviceRadiusKm)}
-              className={`h-11 border-border bg-input text-xs text-foreground focus-visible:ring-1 focus-visible:ring-primary ${
-                errors.serviceRadiusKm
+              className={`h-11 border-border bg-input text-xs text-foreground focus-visible:ring-1 focus-visible:ring-primary ${errors.serviceRadiusKm
                   ? "border-destructive ring-1 ring-destructive"
                   : ""
-              }`}
+                }`}
             />
 
             {errors.serviceRadiusKm && (
@@ -553,69 +548,67 @@ const handleRemovePhoto = () => {
           {/* Workshop Information */}
           {(data.serviceModel === "workshop" ||
             data.serviceModel === "both") && (
-            <>
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label
-                  htmlFor="workshopName"
-                  className="flex items-center gap-1.5 text-xs font-medium text-foreground"
-                >
-                  <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  Workshop Name *
-                </Label>
+              <>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label
+                    htmlFor="workshopName"
+                    className="flex items-center gap-1.5 text-xs font-medium text-foreground"
+                  >
+                    <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    Workshop Name *
+                  </Label>
 
-                <Input
-                  id="workshopName"
-                  value={data.workshopName ?? ""}
-                  onChange={(event) =>
-                    onChange({ workshopName: event.target.value })
-                  }
-                  placeholder="Enter your workshop name"
-                  aria-invalid={Boolean(errors.workshopName)}
-                  className={`h-11 border-border bg-input text-xs text-foreground placeholder:text-muted-foreground ${
-                    errors.workshopName
-                      ? "border-destructive ring-1 ring-destructive"
-                      : ""
-                  }`}
-                />
+                  <Input
+                    id="workshopName"
+                    value={data.workshopName ?? ""}
+                    onChange={(event) =>
+                      onChange({ workshopName: event.target.value })
+                    }
+                    placeholder="Enter your workshop name"
+                    aria-invalid={Boolean(errors.workshopName)}
+                    className={`h-11 border-border bg-input text-xs text-foreground placeholder:text-muted-foreground ${errors.workshopName
+                        ? "border-destructive ring-1 ring-destructive"
+                        : ""
+                      }`}
+                  />
 
-                {errors.workshopName && (
-                  <p role="alert" className="text-[11px] text-destructive">
-                    {errors.workshopName}
-                  </p>
-                )}
-              </div>
+                  {errors.workshopName && (
+                    <p role="alert" className="text-[11px] text-destructive">
+                      {errors.workshopName}
+                    </p>
+                  )}
+                </div>
 
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label
-                  htmlFor="workshopAddress"
-                  className="text-xs font-medium text-foreground"
-                >
-                  Workshop Address *
-                </Label>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label
+                    htmlFor="workshopAddress"
+                    className="text-xs font-medium text-foreground"
+                  >
+                    Workshop Address *
+                  </Label>
 
-                <Input
-                  id="workshopAddress"
-                  value={data.workshopAddress ?? ""}
-                  onChange={(event) =>
-                    onChange({ workshopAddress: event.target.value })
-                  }
-                  placeholder="Enter your workshop's full address"
-                  aria-invalid={Boolean(errors.workshopAddress)}
-                  className={`h-11 border-border bg-input text-xs text-foreground placeholder:text-muted-foreground ${
-                    errors.workshopAddress
-                      ? "border-destructive ring-1 ring-destructive"
-                      : ""
-                  }`}
-                />
+                  <Input
+                    id="workshopAddress"
+                    value={data.workshopAddress ?? ""}
+                    onChange={(event) =>
+                      onChange({ workshopAddress: event.target.value })
+                    }
+                    placeholder="Enter your workshop's full address"
+                    aria-invalid={Boolean(errors.workshopAddress)}
+                    className={`h-11 border-border bg-input text-xs text-foreground placeholder:text-muted-foreground ${errors.workshopAddress
+                        ? "border-destructive ring-1 ring-destructive"
+                        : ""
+                      }`}
+                  />
 
-                {errors.workshopAddress && (
-                  <p role="alert" className="text-[11px] text-destructive">
-                    {errors.workshopAddress}
-                  </p>
-                )}
-              </div>
-            </>
-          )}
+                  {errors.workshopAddress && (
+                    <p role="alert" className="text-[11px] text-destructive">
+                      {errors.workshopAddress}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
         </div>
       </section>
     </div>

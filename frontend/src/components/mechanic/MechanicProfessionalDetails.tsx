@@ -1,9 +1,11 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Briefcase, Car, Building2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+import { useMechanicCategories } from "@/hooks/useMechanicCategories";
 
 import type {
   MechanicOnboardingRequest,
@@ -52,6 +54,20 @@ const SERVICE_MODELS: {
 export const MechanicProfessionalDetailsForm: React.FC<
   ProfessionalProps
 > = ({ data, onChange, errors }) => {
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+    fetchCategories,
+  } = useMechanicCategories();
+
+  const selectedSpecializations = data.specializations ?? [];
+
+  // Fetch active categories when the component mounts.
+  useEffect(() => {
+    void fetchCategories(false);
+  }, []);
+
   const toggleVehicleType = (vehicle: VehicleSpecialization) => {
     const current = data.supportedVehicleTypes ?? [];
 
@@ -59,8 +75,6 @@ export const MechanicProfessionalDetailsForm: React.FC<
       ? current.filter((item) => item !== vehicle)
       : [...current, vehicle];
 
-    // Supported vehicles and professional specializations
-    // are separate fields.
     onChange({
       supportedVehicleTypes: updated,
     });
@@ -73,13 +87,48 @@ export const MechanicProfessionalDetailsForm: React.FC<
     onChange({ [field]: value });
   };
 
-  const updateSpecializations = (value: string) => {
-    const specialization = value
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
+  // Select or deselect a category.
+  const toggleCategory = (categoryId: string) => {
+    const exists = selectedSpecializations.some(
+      (item) => item.categoryId === categoryId
+    );
 
-    onChange({ specialization });
+    const updated = exists
+      ? selectedSpecializations.filter(
+          (item) => item.categoryId !== categoryId
+        )
+      : [
+          ...selectedSpecializations,
+          {
+            categoryId,
+            subcategoryIds: [],
+          },
+        ];
+
+    onChange({ specializations: updated });
+  };
+
+  // Select or deselect a subcategory.
+  const toggleSubcategory = (
+    categoryId: string,
+    subcategoryId: string
+  ) => {
+    const updated = selectedSpecializations.map((item) => {
+      if (item.categoryId !== categoryId) {
+        return item;
+      }
+
+      const exists = item.subcategoryIds.includes(subcategoryId);
+
+      return {
+        ...item,
+        subcategoryIds: exists
+          ? item.subcategoryIds.filter((id) => id !== subcategoryId)
+          : [...item.subcategoryIds, subcategoryId],
+      };
+    });
+
+    onChange({ specializations: updated });
   };
 
   const updateServices = (value: string) => {
@@ -162,7 +211,7 @@ export const MechanicProfessionalDetailsForm: React.FC<
             const value = event.target.value;
 
             onChange({
-              experienceYears: value === "" ? 0: Number(value),
+              experienceYears: value === "" ? 0 : Number(value),
             });
           }}
           aria-invalid={Boolean(errors.experienceYears)}
@@ -231,37 +280,119 @@ export const MechanicProfessionalDetailsForm: React.FC<
         )}
       </section>
 
-      {/* Professional Specializations */}
-      <section className="space-y-1.5">
-        <Label
-          htmlFor="specialization"
-          className="text-xs font-medium text-foreground"
-        >
-          Specializations *
-        </Label>
+      {/* Dynamic Professional Specializations */}
+      <section className="space-y-3">
+        <div>
+          <Label className="text-xs font-medium text-foreground">
+            Professional Specializations *
+          </Label>
 
-        <Input
-          id="specialization"
-          value={(data.specialization ?? []).join(", ")}
-          onChange={(event) =>
-            updateSpecializations(event.target.value)
-          }
-          placeholder="e.g. engine repair, electrical diagnostics"
-          aria-invalid={Boolean(errors.specialization)}
-          className={`h-11 border-border bg-input text-xs text-foreground ${
-            errors.specialization
-              ? "border-destructive ring-1 ring-destructive"
-              : ""
-          }`}
-        />
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Select the categories and specific services you specialize in.
+          </p>
+        </div>
 
-        <p className="text-[11px] text-muted-foreground">
-          Enter your professional skills separated by commas.
-        </p>
+        {categoriesLoading && (
+          <p className="text-xs text-muted-foreground">
+            Loading mechanic categories...
+          </p>
+        )}
 
-        {errors.specialization && (
+        {categoriesError && (
+          <p className="text-xs text-destructive">
+            Unable to load categories: {categoriesError}
+          </p>
+        )}
+
+        {!categoriesLoading &&
+          !categoriesError &&
+          categories.filter((category) => category.isActive).length === 0 && (
+            <p className="rounded-lg border border-border p-4 text-xs text-muted-foreground">
+              No active mechanic categories are currently available.
+            </p>
+          )}
+
+        <div className="space-y-3">
+          {categories
+            .filter((category) => category.isActive)
+            .map((category) => {
+              const selected = selectedSpecializations.some(
+                (item) => item.categoryId === category.id
+              );
+
+              const selectedCategory = selectedSpecializations.find(
+                (item) => item.categoryId === category.id
+              );
+
+              const activeSubcategories = (
+                category.subcategories ?? []
+              ).filter((subcategory) => subcategory.isActive);
+
+              return (
+                <div
+                  key={category.id}
+                  className="rounded-xl border border-border bg-card p-4"
+                >
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => toggleCategory(category.id!)}
+                      className="h-4 w-4 accent-primary"
+                    />
+
+                    <span className="text-sm font-semibold text-foreground">
+                      {category.name}
+                    </span>
+                  </label>
+
+                  {selected && (
+                    <div className="ml-7 mt-3 space-y-2 border-l border-border pl-4">
+                      {activeSubcategories.length > 0 ? (
+                        activeSubcategories.map((subcategory) => {
+                          const subcategorySelected =
+                            selectedCategory?.subcategoryIds.includes(
+                              subcategory.id!
+                            ) ?? false;
+
+                          return (
+                            <label
+                              key={subcategory.id}
+                              className="flex cursor-pointer items-center gap-2"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={subcategorySelected}
+                                onChange={() =>
+                                  toggleSubcategory(
+                                    category.id!,
+                                    subcategory.id!
+                                  )
+                                }
+                                className="h-3.5 w-3.5 accent-primary"
+                              />
+
+                              <span className="text-xs text-muted-foreground">
+                                {subcategory.name}
+                              </span>
+                            </label>
+                          );
+                        })
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          No active subcategories available.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+        </div>
+
+        {errors.specializations && (
           <p className="text-[11px] text-destructive">
-            {errors.specialization}
+            {errors.specializations}
           </p>
         )}
       </section>
@@ -362,4 +493,3 @@ export const MechanicProfessionalDetailsForm: React.FC<
     </div>
   );
 };
-  
