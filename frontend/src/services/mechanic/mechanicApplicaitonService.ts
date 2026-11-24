@@ -115,8 +115,10 @@ export interface MyMechanicApplicationResponse {
     id: string;
     userId: string;
     status: string;
+    profilePhotoKey?: string;
+    profilePhotoUrl?: string;
     experienceYears?: number;
-      specializations?: {
+    specializations?: {
       categoryId: string;
       subcategories: {
         subcategoryId: string;
@@ -130,13 +132,18 @@ export interface MyMechanicApplicationResponse {
     serviceOffered?: string[];
     serviceModel?: string;
     serviceAddress?: string;
+    pincode?: string;
+    latitude?: number;
+    longitude?: number;
+    serviceRadiusKm?: number;
     workshopName?: string;
     workshopAddress?: string;
-    pincode?: string;
     professionalDescription?: string;
     documents?: {
       documentType: string;
+      fileKey?: string;
       originalName: string;
+      mimeType?: string;
       verificationStatus: string;
       rejectionReason?: string;
     }[];

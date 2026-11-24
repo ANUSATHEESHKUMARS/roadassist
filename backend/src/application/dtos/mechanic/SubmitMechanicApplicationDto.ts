@@ -20,6 +20,8 @@ export interface SubmitMechanicApplicationDto {
 
     supportedVehicleTypes: SupportedVehicleType[];
 
+    serviceOffered?: string[];
+
     professionalDescription?: string;
 
     serviceModel: MechanicServiceModel;

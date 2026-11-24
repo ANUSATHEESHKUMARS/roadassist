@@ -1,4 +1,4 @@
-import { IMechanicApplicationRepository } from "../../../domain/repositories/mechanic/IMechanicApplicationRepository.js";
+import { IMechanicApplicationRepository } from "../../../domain/repositories/IMechanicApplicationRepository.js";
 import { MechanicApplication, MechanicApplicationStatus } from "../../../domain/User/entities/MechanicApplication.js";
 import { IGetMechanicApplicationUseCase } from "../../interfaces/mechanic/IGetMechanicApplicationUseCase.js";
 

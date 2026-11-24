@@ -37,6 +37,8 @@ import {
     reviewMechanicSpecialization,
 } from "@/services/admin/adminMechanicService";
 
+import { useMechanicCategories } from "@/hooks/useMechanicCategories";
+
 import type {
     MechanicApplication,
     MechanicApplicationStatus,
@@ -138,6 +140,20 @@ export default function MechanicApplicationsPage() {
 
     const [specializationRejectionReason, setSpecializationRejectionReason] =
         useState("");
+
+    const { categories } = useMechanicCategories();
+
+    const getCategoryName = (categoryId: string): string => {
+        const found = categories.find((cat) => cat.id === categoryId);
+        return found ? found.name : categoryId;
+    };
+
+    const getSubcategoryName = (categoryId: string, subcategoryId: string): string => {
+        const cat = categories.find((c) => c.id === categoryId);
+        if (!cat) return subcategoryId;
+        const sub = cat.subcategories.find((s) => s.id === subcategoryId);
+        return sub ? sub.name : subcategoryId;
+    };
 
     // ─── Fetch Applications ─────────────────────────────────
 
@@ -597,7 +613,7 @@ export default function MechanicApplicationsPage() {
                                                                         </p>
 
                                                                         <p className="mt-1 break-all text-sm font-semibold">
-                                                                            {category.categoryId}
+                                                                            {getCategoryName(category.categoryId)}
                                                                         </p>
                                                                     </div>
 
@@ -626,8 +642,7 @@ export default function MechanicApplicationsPage() {
                                                                                             <div className="min-w-0 space-y-2">
 
                                                                                                 <p className="break-all text-sm font-medium">
-                                                                                                    Subcategory ID:{" "}
-                                                                                                    {subcategory.subcategoryId}
+                                                                                                    {getSubcategoryName(category.categoryId, subcategory.subcategoryId)}
                                                                                                 </p>
 
                                                                                                 <span

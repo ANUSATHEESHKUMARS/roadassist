@@ -229,6 +229,29 @@ export const MechanicProfessionalDetailsForm: React.FC<
         )}
       </section>
 
+      {/* Professional Bio / Description */}
+      <section className="space-y-1.5">
+        <Label
+          htmlFor="professionalDescription"
+          className="text-xs font-medium text-foreground"
+        >
+          Professional Bio / Description
+        </Label>
+
+        <textarea
+          id="professionalDescription"
+          rows={3}
+          value={data.professionalDescription ?? ""}
+          onChange={(event) =>
+            onChange({
+              professionalDescription: event.target.value,
+            })
+          }
+          placeholder="Briefly describe your background, certifications, and expertise..."
+          className="w-full rounded-md border border-border bg-input px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+      </section>
+
       {/* Supported Vehicle Types */}
       <section className="space-y-2">
         <Label className="flex items-center gap-1.5 text-xs font-medium text-foreground">

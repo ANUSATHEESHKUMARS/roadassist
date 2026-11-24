@@ -158,6 +158,8 @@ export interface IMechanicApplicationDocument extends Document {
 
     supportedVehicleTypes: SupportedVehicleType[];
 
+    serviceOffered: string[];
+
     professionalDescription?: string;
 
     serviceModel?: MechanicServiceModel;
@@ -233,6 +235,11 @@ const MechanicApplicationSchema = new Schema<IMechanicApplicationDocument>({
             type: String,
             enum: ["car", "bike", "auto", "ev"]
         }],
+        default: []
+    },
+
+    serviceOffered: {
+        type: [String],
         default: []
     },
 

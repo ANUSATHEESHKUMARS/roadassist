@@ -118,6 +118,8 @@ export class SubmitMechanicApplicationUseCase
 
             supportedVehicleTypes: application.supportedVehicleTypes,
 
+            serviceOffered: application.serviceOffered,
+
             serviceModel: application.serviceModel,
 
             serviceAddress: application.serviceAddress ?? "",
@@ -189,6 +191,8 @@ export class SubmitMechanicApplicationUseCase
             specializations: application.specializations,
 
             supportedVehicleTypes: application.supportedVehicleTypes,
+
+            serviceOffered: application.serviceOffered,
 
             ...(application.professionalDescription !== undefined && {
                 professionalDescription: application.professionalDescription

@@ -4,7 +4,7 @@ import {
     MechanicApplicationProps
 } from "../../../domain/User/entities/MechanicApplication.js";
 
-import { IMechanicApplicationRepository } from "../../../domain/repositories/mechanic/IMechanicApplicationRepository.js";
+import { IMechanicApplicationRepository } from "../../../domain/repositories/IMechanicApplicationRepository.js";
 
 import { ConflictError } from "../../../shared/errors/ConflitError.js";
 import { BadRequest } from "../../../shared/errors/BadRequestError.js";
@@ -147,8 +147,8 @@ console.log("Mechanic application found:", application);
                 experienceYears: application.experienceYears
             }),
 
-            specialization: application.specializations,
-            supportedVehicleTypes: application.supportedVehicleType,
+            specializations: application.specializations,
+            supportedVehicleTypes: application.supportedVehicleTypes,
             serviceOffered: application.serviceOffered,
 
             ...(application.professionalDescription !== undefined && {

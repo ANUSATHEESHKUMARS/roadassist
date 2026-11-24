@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -11,6 +11,7 @@ import {
     CheckCircle2,
     AlertTriangle,
     Loader2,
+    Info,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -24,12 +25,16 @@ import { MechanicApplicationReview } from "@/components/mechanic/MechanicApplica
 
 import type {
     MechanicOnboardingRequest,
+    DocumentEntry,
+    MechanicSpecializationSelection,
+    MechanicType,
 } from "@/types/mechanic/mechanicOnboarding";
 
 import {
     saveMechanicDraft,
     submitMechanicApplication,
     uploadMechanicProfilePhoto,
+    getMyMechanicApplication,
 } from "@/services/mechanic/mechanicApplicaitonService";
 
 
@@ -82,11 +87,89 @@ export default function MechanicOnboardingPage() {
 
     const [isSavingDraft, setIsSavingDraft] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoadingExisting, setIsLoadingExisting] = useState(true);
+    const [existingStatus, setExistingStatus] = useState<string | null>(null);
+    const [reviewReason, setReviewReason] = useState<string | null>(null);
     const [profilePhotoUrl, setProfilePhotoUrl] = useState("");
 
     const [isUploadingProfilePhoto, setIsUploadingProfilePhoto] =
         useState(false);
     const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadExistingApplication = async () => {
+            try {
+                setIsLoadingExisting(true);
+                const response = await getMyMechanicApplication();
+
+                if (!isMounted || !response.success || !response.data) {
+                    return;
+                }
+
+                const app = response.data;
+                setExistingStatus(app.status);
+                if (app.reviewReason) {
+                    setReviewReason(app.reviewReason);
+                }
+
+                if (["pending", "under_review", "approved", "rejected"].includes(app.status)) {
+                    navigate("/user/mechanic-application", { replace: true });
+                    return;
+                }
+
+                // Restore form data from draft or changes_requested
+                const restoredSpecializations: MechanicSpecializationSelection[] = (
+                    app.specializations ?? []
+                ).map((spec) => ({
+                    categoryId: spec.categoryId,
+                    subcategoryIds: spec.subcategories.map((sub) => sub.subcategoryId),
+                }));
+
+                const restoredDocuments: DocumentEntry[] = (app.documents ?? []).map((doc) => ({
+                    documentType: doc.documentType as DocumentEntry["documentType"],
+                    fileKey: doc.fileKey ?? "",
+                    originalName: doc.originalName ?? "",
+                    mimeType: doc.mimeType ?? "application/pdf",
+                }));
+
+                setFormData({
+                    profilePhotoKey: app.profilePhotoKey ?? "",
+                    experienceYears: app.experienceYears ?? 0,
+                    specializations: restoredSpecializations,
+                    supportedVehicleTypes: app.supportedVehicleTypes ?? [],
+                    serviceOffered: app.serviceOffered ?? [],
+                    professionalDescription: app.professionalDescription ?? "",
+                    serviceModel: (app.serviceModel as MechanicType) ?? "mobile",
+                    serviceAddress: app.serviceAddress ?? "",
+                    pincode: app.pincode ?? "",
+                    latitude: app.latitude,
+                    longitude: app.longitude,
+                    serviceRadiusKm: app.serviceRadiusKm ?? 5,
+                    workshopName: app.workshopName ?? "",
+                    workshopAddress: app.workshopAddress ?? "",
+                    documents: restoredDocuments,
+                });
+
+                if (app.profilePhotoUrl) {
+                    setProfilePhotoUrl(app.profilePhotoUrl);
+                }
+            } catch (error) {
+                console.error("Error loading existing application draft:", error);
+            } finally {
+                if (isMounted) {
+                    setIsLoadingExisting(false);
+                }
+            }
+        };
+
+        void loadExistingApplication();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [navigate]);
 
     const handleUpdate = (
         fields: Partial<MechanicOnboardingRequest>
@@ -526,9 +609,29 @@ export default function MechanicOnboardingPage() {
                         Complete your service location, professional details, and
                         verification documents.
                     </p>
+
+                    {existingStatus === "changes_requested" && (
+                        <div className="mt-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-amber-500">
+                            <div className="flex items-start gap-3">
+                                <Info className="h-5 w-5 shrink-0 mt-0.5" />
+                                <div className="space-y-1">
+                                    <p className="text-sm font-semibold">Changes Requested by Admin</p>
+                                    <p className="text-xs text-amber-500/90 leading-relaxed">
+                                        {reviewReason || "Please update your details or documents as requested and resubmit your application."}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </section>
 
                 {/* Onboarding form */}
+                {isLoadingExisting ? (
+                    <main className="bg-card border border-border rounded-2xl p-12 text-center shadow-xl flex flex-col items-center justify-center space-y-3">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <p className="text-sm text-muted-foreground">Checking existing application...</p>
+                    </main>
+                ) : (
                 <main className="bg-card border border-border rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xl">
                     <OnboardingStepper
                         currentStep={currentStep}
@@ -675,6 +778,7 @@ export default function MechanicOnboardingPage() {
                         </div>
                     </footer>
                 </main>
+                )}
             </div>
 
             {/* Page footer */}

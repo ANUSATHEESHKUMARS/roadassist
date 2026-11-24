@@ -77,6 +77,8 @@ export class MechanicApplicationMapper {
 
             supportedVehicleTypes: application.supportedVehicleTypes,
 
+            serviceOffered: application.serviceOffered,
+
             ...(application.professionalDescription !== undefined && {
                 professionalDescription: application.professionalDescription,
             }),
@@ -191,6 +193,8 @@ export class MechanicApplicationMapper {
 
             supportedVehicleTypes: document.supportedVehicleTypes ?? [],
 
+            serviceOffered: document.serviceOffered ?? [],
+
             documents: document.documents ?? [],
 
             status: document.status,
@@ -283,6 +287,8 @@ export class MechanicApplicationMapper {
             specializations: application.specializations,
 
             supportedVehicleTypes: application.supportedVehicleTypes,
+
+            serviceOffered: application.serviceOffered,
 
             professionalDescription: application.professionalDescription,
 

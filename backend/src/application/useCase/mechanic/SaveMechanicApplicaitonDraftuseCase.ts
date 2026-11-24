@@ -74,6 +74,8 @@ export class SaveMechanicDraftUseCase
 
                 supportedVehicleTypes: dto.supportedVehicleTypes ?? [],
 
+                serviceOffered: dto.serviceOffered ?? [],
+
                 documents: dto.documents ?? [],
 
                 ...(dto.profilePhotoKey !== undefined && {
@@ -172,6 +174,10 @@ export class SaveMechanicDraftUseCase
             supportedVehicleTypes:
                 dto.supportedVehicleTypes ??
                 existingApplication.supportedVehicleTypes,
+
+            serviceOffered:
+                dto.serviceOffered ??
+                existingApplication.serviceOffered,
 
             documents:
                 dto.documents ??

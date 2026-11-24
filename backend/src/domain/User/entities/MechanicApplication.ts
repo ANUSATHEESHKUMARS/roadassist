@@ -75,6 +75,8 @@ export interface MechanicApplicationProps {
 
     supportedVehicleTypes?: SupportedVehicleType[];
 
+    serviceOffered?: string[];
+
     professionalDescription?: string;
 
     serviceModel?: MechanicServiceModel;
@@ -163,6 +165,10 @@ export class MechanicApplication {
 
     get supportedVehicleTypes(): SupportedVehicleType[] {
         return [...(this.props.supportedVehicleTypes ?? [])];
+    }
+
+    get serviceOffered(): string[] {
+        return [...(this.props.serviceOffered ?? [])];
     }
 
     get professionalDescription(): string | undefined {

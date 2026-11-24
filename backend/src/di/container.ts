@@ -96,7 +96,7 @@ import { MechanicSpecializationValidator } from "../application/validators/Mecha
 import { ReviewMechanicSpecializationUseCase } from "../application/useCase/admin/ReviewMechanicSpecializationUseCase.js";
 import { MongoTransactionManager } from "../infrastructure/databases/MongoTransactionManager.js";
 import { ReviewMechanicSpecializationController } from "../presentation/controllers/admin/ReviewMechanicSpecializationController.js";
-import { CreateMechanicCategoryUseCase } from "../infrastructure/repositories/CreateMechanicCategoryRepository.js";
+import { CreateMechanicCategoryUseCase } from "../application/useCase/admin/CreateMechanicCategoryUseCase.js";
 import { GetMechanicCategoriesUseCase } from "../application/useCase/admin/GetMechanicCategoryUseCase.js";
 import { MechanicCategoryController } from "../presentation/controllers/admin/MechanicCategoryController.js";
 import { UpdateMechanicCategoryStatusUseCase } from "../application/useCase/admin/UpdateMechanicCategoryStatusUseCase.js";

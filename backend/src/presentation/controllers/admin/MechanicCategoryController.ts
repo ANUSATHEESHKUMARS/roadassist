@@ -106,30 +106,36 @@ export class MechanicCategoryController {
         }
     }
 
-     update = async(req: Request, res: Response) =>{
-        const categoryId = req.params.id;
+    update = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const categoryId = req.params.id;
 
+            if (!categoryId || typeof categoryId !== "string") {
+                res.status(HttpStatusCode.BAD_REQUEST).json({
+                    success: false,
+                    message: "Invalid category ID"
+                });
+                return;
+            }
 
+            const result = await this.updateMechanicCategoryUseCase.execute(
+                categoryId,
+                req.body
+            );
 
-        if (!categoryId || typeof categoryId !== "string") {
-            res.status(HttpStatusCode.BAD_REQUEST).json({
-                success: false,
-                message: "Invalid category ID"
+            res.status(HttpStatusCode.OK).json({
+                success: true,
+                message: "Mechanic category updated successfully",
+                data: result
             });
-            return;
+        } catch (error) {
+            next(error);
         }
-        const result = await this.updateMechanicCategoryUseCase.execute(
-            categoryId,
-            req.body
-        );
-console.error("GLOBAL ERROR:");
-        return res.status(200).json({
-            success: true,
-            message: "Mechanic category updated successfully",
-            data: result
-        });
-     
-    }
+    };
     updateStatus = async (
         req: Request,
         res: Response,
