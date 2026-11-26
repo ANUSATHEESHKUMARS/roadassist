@@ -14,7 +14,12 @@ export class DeleteMediaUseCase implements IDeleteMediaUseCase{
             throw new NotfoundError("media not found" , "MEDIA_NOT_FOUND")
         }
 
-        await this.fileStorageService.delete(response.fileKey)
+        try {
+            await this.fileStorageService.delete(response.fileKey);
+        } catch (err) {
+            console.warn(`S3 object delete failed or already removed: ${response.fileKey}`, err);
+        }
+
         await this.mediaRepository.delete(id)
     }
 }

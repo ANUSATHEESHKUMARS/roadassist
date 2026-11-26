@@ -39,7 +39,10 @@ const formatDate = (dateString: string): string => {
 };
 
 const formatSectionLabel = (section: string): string => {
-    return section.charAt(0).toUpperCase() + section.slice(1);
+    return section
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 };
 
 export const MediaLibrary: React.FC<MediaLibraryProps> = ({
@@ -164,14 +167,11 @@ export const MediaLibrary: React.FC<MediaLibraryProps> = ({
                                     </div>
 
                                     <AlertDialog>
-                                        <AlertDialogTrigger >
-                                            <button
-                                                type="button"
-                                                className="flex w-full items-center justify-center gap-2 rounded-lg border border-destructive/30 px-3 py-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
-                                            >
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                                Delete
-                                            </button>
+                                        <AlertDialogTrigger
+                                            className="flex w-full items-center justify-center gap-2 rounded-lg border border-destructive/30 px-3 py-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 cursor-pointer"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                            Delete
                                         </AlertDialogTrigger>
 
                                         <AlertDialogContent>

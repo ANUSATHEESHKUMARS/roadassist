@@ -1,5 +1,5 @@
 
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 
 import { IFileStorageService } from "../../application/contracts/IFileStorageService.js";
 import { IUploadMediaUseCase } from "../../application/interfaces/IUploadMediaUseCase.js";
@@ -20,7 +20,8 @@ export class UploadMediaController {
 
   handle = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       if (!req.file) {
@@ -33,7 +34,7 @@ export class UploadMediaController {
 
       const { section } = req.body;
 
-      if (!section) {
+      if (!section || typeof section !== "string" || !section.trim()) {
         res.status(HttpStatusCode.BAD_REQUEST).json({
           success: false,
           message: "Section is required",
@@ -46,7 +47,7 @@ export class UploadMediaController {
         originalName: req.file.originalname,
         mimeType: req.file.mimetype,
         size: req.file.size,
-        section,
+        section: section.trim(),
       });
 
       const fileUrl = await this.filestorageService.getUrl(media.fileKey);
@@ -69,21 +70,14 @@ export class UploadMediaController {
         },
       });
     } catch (error: unknown) {
-      console.error("Upload media error:", error);
-
-      res.status(HttpStatusCode.INTERNAL_SERVER).json({
-        success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to upload media",
-      });
+      next(error);
     }
   };
 
   handleGet = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const media = await this.getMediaUseCase.execute();
@@ -96,31 +90,23 @@ export class UploadMediaController {
 
       res.status(HttpStatusCode.OK).json(response);
     } catch (error: unknown) {
-      console.error("Get media error:", error);
-
-      const response: CommonResponse = {
-        success: false,
-        message: "Failed to fetch media",
-      };
-
-      res.status(HttpStatusCode.INTERNAL_SERVER).json(response);
+      next(error);
     }
   };
 
   handleDelete = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     try {
       const { id } = req.params;
 
-      if (!id || Array.isArray(id)) {
-        const response: CommonResponse = {
+      if (!id || typeof id !== "string" || !id.trim()) {
+        res.status(HttpStatusCode.BAD_REQUEST).json({
           success: false,
           message: "Media ID is required",
-        };
-
-        res.status(HttpStatusCode.BAD_REQUEST).json(response);
+        });
         return;
       }
 
@@ -133,17 +119,7 @@ export class UploadMediaController {
 
       res.status(HttpStatusCode.OK).json(response);
     } catch (error: unknown) {
-      console.error("Delete media error:", error);
-
-      const response: CommonResponse = {
-        success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to delete media",
-      };
-
-      res.status(HttpStatusCode.INTERNAL_SERVER).json(response);
+      next(error);
     }
   };
 }

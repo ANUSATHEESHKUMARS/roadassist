@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/toast/ToastProvider";
 
-// import { WeeklyAvailability } from "../components/WeeklyAvailability";
 import { WeeklyAvailability } from "@/components/mechanic/WeeklyAvailabilty";
 import { ShiftTimings } from "@/components/mechanic/ShiftTimings";
 import { ScheduleSummary } from "@/components/mechanic/ScheduleSummary";
@@ -24,30 +23,29 @@ import type {
     DailySchedule,
     DayOfWeek,
     MechanicSchedule,
-} from '../../types/mechanic/mechanicSchedule'
+} from "../../types/mechanic/mechanicSchedule";
 
 const createDefaultAvailability = (): DailySchedule[] => [
-    { day: "monday", morning: false, evening: false },
-    { day: "tuesday", morning: false, evening: false },
-    { day: "wednesday", morning: false, evening: false },
-    { day: "thursday", morning: false, evening: false },
-    { day: "friday", morning: false, evening: false },
-    { day: "saturday", morning: false, evening: false },
-    { day: "sunday", morning: false, evening: false },
+    { day: "monday", morning: false, afternoon: false },
+    { day: "tuesday", morning: false, afternoon: false },
+    { day: "wednesday", morning: false, afternoon: false },
+    { day: "thursday", morning: false, afternoon: false },
+    { day: "friday", morning: false, afternoon: false },
+    { day: "saturday", morning: false, afternoon: false },
+    { day: "sunday", morning: false, afternoon: false },
 ];
 
 const createInitialForm = (): CreateMechanicScheduleDto => ({
     weeklyAvailability: createDefaultAvailability(),
     morningStartTime: "09:00",
     morningEndTime: "13:00",
-    eveningStartTime: "14:00",
-    eveningEndTime: "18:00",
+    afternoonStartTime: "14:00",
+    afternoonEndTime: "18:00",
     isActive: true,
 });
 
 export const MechanicSchedulePage: React.FC = () => {
-
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const { showToast } = useToast();
 
     const [form, setForm] = useState<CreateMechanicScheduleDto>(
@@ -58,45 +56,46 @@ export const MechanicSchedulePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
-   useEffect(() => {
-    const loadSchedule = async () => {
-        try {
-            const schedule =
-                await mechanicScheduleService.getSchedule();
+    useEffect(() => {
+        const loadSchedule = async () => {
+            try {
+                const schedule =
+                    await mechanicScheduleService.getSchedule();
 
-            setForm({
-                weeklyAvailability: schedule.weeklyAvailability,
-                morningStartTime: schedule.morningStartTime,
-                morningEndTime: schedule.morningEndTime,
-                eveningStartTime: schedule.eveningStartTime,
-                eveningEndTime: schedule.eveningEndTime,
-                isActive: schedule.isActive,
-            });
+                setForm({
+                    weeklyAvailability: schedule.weeklyAvailability,
+                    morningStartTime: schedule.morningStartTime,
+                    morningEndTime: schedule.morningEndTime,
+                    afternoonStartTime: schedule.afternoonStartTime,
+                    afternoonEndTime: schedule.afternoonEndTime,
+                    isActive: schedule.isActive,
+                });
 
-            setHasSchedule(true);
-        } catch (error) {
-            if (
-                axios.isAxiosError(error) &&
-                error.response?.status === 404
-            ) {
-                setForm(createInitialForm());
-                setHasSchedule(false);
-            } else {
-                showToast("Unable to load your schedule", "error");
+                setHasSchedule(true);
+            } catch (error) {
+                if (
+                    axios.isAxiosError(error) &&
+                    error.response?.status === 404
+                ) {
+                    setForm(createInitialForm());
+                    setHasSchedule(false);
+                } else {
+                    showToast("Unable to load your schedule", "error");
+                }
+            } finally {
+                setLoading(false);
             }
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
 
-    void loadSchedule();
+        void loadSchedule();
 
-    // Load the schedule when this page mounts.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+        // Load the schedule when this page mounts.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const handleShiftChange = (
         day: DayOfWeek,
-        shift: "morning" | "evening",
+        shift: "morning" | "afternoon",
         checked: boolean
     ) => {
         setForm((previous) => ({
@@ -113,8 +112,8 @@ export const MechanicSchedulePage: React.FC = () => {
         field:
             | "morningStartTime"
             | "morningEndTime"
-            | "eveningStartTime"
-            | "eveningEndTime",
+            | "afternoonStartTime"
+            | "afternoonEndTime",
         value: string
     ) => {
         setForm((previous) => ({
@@ -127,8 +126,8 @@ export const MechanicSchedulePage: React.FC = () => {
         const {
             morningStartTime,
             morningEndTime,
-            eveningStartTime,
-            eveningEndTime,
+            afternoonStartTime,
+            afternoonEndTime,
             weeklyAvailability,
             isActive,
         } = form;
@@ -136,8 +135,8 @@ export const MechanicSchedulePage: React.FC = () => {
         if (
             !morningStartTime ||
             !morningEndTime ||
-            !eveningStartTime ||
-            !eveningEndTime
+            !afternoonStartTime ||
+            !afternoonEndTime
         ) {
             showToast("Please configure all shift timings", "error");
             return false;
@@ -148,21 +147,21 @@ export const MechanicSchedulePage: React.FC = () => {
             return false;
         }
 
-        if (eveningStartTime >= eveningEndTime) {
-            showToast("Invalid evening shift timings", "error");
+        if (afternoonStartTime >= afternoonEndTime) {
+            showToast("Invalid afternoon shift timings", "error");
             return false;
         }
 
-        if (morningEndTime > eveningStartTime) {
+        if (morningEndTime > afternoonStartTime) {
             showToast(
-                "Morning and evening shifts cannot overlap",
+                "Morning and afternoon shifts cannot overlap",
                 "error"
             );
             return false;
         }
 
         const hasWorkingShift = weeklyAvailability.some(
-            (day) => day.morning || day.evening
+            (day) => day.morning || day.afternoon
         );
 
         if (isActive && !hasWorkingShift) {
@@ -196,8 +195,8 @@ export const MechanicSchedulePage: React.FC = () => {
                 weeklyAvailability: savedSchedule.weeklyAvailability,
                 morningStartTime: savedSchedule.morningStartTime,
                 morningEndTime: savedSchedule.morningEndTime,
-                eveningStartTime: savedSchedule.eveningStartTime,
-                eveningEndTime: savedSchedule.eveningEndTime,
+                afternoonStartTime: savedSchedule.afternoonStartTime,
+                afternoonEndTime: savedSchedule.afternoonEndTime,
                 isActive: savedSchedule.isActive,
             });
 
@@ -209,8 +208,8 @@ export const MechanicSchedulePage: React.FC = () => {
                     : "Schedule created successfully",
                 "success"
             );
-            navigate("/mechanic/service-location");
 
+            navigate("/mechanic/service-location");
         } catch (error) {
             const responseData = axios.isAxiosError(error)
                 ? error.response?.data as { message?: string } | undefined
@@ -235,7 +234,6 @@ export const MechanicSchedulePage: React.FC = () => {
 
     return (
         <div className="mx-auto max-w-6xl space-y-6">
-            {/* Page heading */}
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
                     <div className="flex items-center gap-2">
@@ -269,7 +267,6 @@ export const MechanicSchedulePage: React.FC = () => {
                 </Button>
             </div>
 
-            {/* Schedule active/inactive */}
             <Card>
                 <CardContent className="flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center">
                     <div className="space-y-1">
@@ -302,32 +299,32 @@ export const MechanicSchedulePage: React.FC = () => {
                 </CardContent>
             </Card>
 
-            {/* Shift pricing */}
             <ScheduleSummary />
 
-            {/* Weekly working days */}
             <WeeklyAvailability
                 weeklyAvailability={form.weeklyAvailability}
                 onChange={handleShiftChange}
             />
 
-            {/* Working hours */}
             <ShiftTimings
                 morningStartTime={form.morningStartTime}
                 morningEndTime={form.morningEndTime}
-                eveningStartTime={form.eveningStartTime}
-                eveningEndTime={form.eveningEndTime}
+                afternoonStartTime={form.afternoonStartTime}
+                afternoonEndTime={form.afternoonEndTime}
                 onChange={handleTimeChange}
             />
 
-            {/* Bottom save button */}
             <div className="flex justify-end">
                 <Button
                     onClick={handleSave}
                     disabled={saving}
                     className="w-full sm:w-auto"
                 >
-                    {saving ? "Saving..." : hasSchedule ? "Update Schedule" : "Save Schedule"}
+                    {saving
+                        ? "Saving..."
+                        : hasSchedule
+                          ? "Update Schedule"
+                          : "Save Schedule"}
                 </Button>
             </div>
         </div>

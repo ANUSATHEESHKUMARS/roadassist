@@ -101,6 +101,9 @@ import { GetMechanicCategoriesUseCase } from "../application/useCase/admin/GetMe
 import { MechanicCategoryController } from "../presentation/controllers/admin/MechanicCategoryController.js";
 import { UpdateMechanicCategoryStatusUseCase } from "../application/useCase/admin/UpdateMechanicCategoryStatusUseCase.js";
 import { UpdateMechanicCategoryUseCase } from "../application/useCase/admin/UpdateMechanicCategoryUseCase.js";
+import { CreateSlotBookingUseCase } from "../application/useCase/user/CreateSlotBookingUseCase.js";
+import { BookingRepository } from "../infrastructure/repositories/BookingRepository.js";
+import { BookingController } from "../presentation/controllers/Booking/BookingController.js";
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
 
@@ -462,6 +465,19 @@ const getMechanicScheduleUseCase = new GetMechanicScheduleUseCase(mechanicSchedu
 
 
 const updateMechanicSceduleUseCase = new UpdateMechanicScheduleUseCase(mechanicScheduleRepository)
+
+//booking
+
+const bookingRepository = new BookingRepository()
+
+const createSlotBookingUseCase = new CreateSlotBookingUseCase(userRepository,
+    vehiceRepository,
+    mechanicApplicationRepository
+    ,mechanicScheduleRepository,
+    bookingRepository
+)
+
+export const bookingController = new BookingController(createSlotBookingUseCase)
 
 export const mechanicScheduleController =
     new MechanicScheduleController(

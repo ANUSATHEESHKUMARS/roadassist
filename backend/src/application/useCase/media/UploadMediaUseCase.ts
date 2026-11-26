@@ -4,9 +4,7 @@ import { UploadMediaDto } from "../../dtos/UploadMediaDto.js";
 import { IFileStorageService } from "../../contracts/IFileStorageService.js";
 import { IMediaRepository } from "../../../domain/repositories/IMediaRepository.js";
 import { IUploadMediaUseCase } from "../../interfaces/IUploadMediaUseCase.js";
-
-
-
+import { BadRequest } from "../../../shared/errors/BadRequestError.js";
 
 export class UploadMediaUseCase implements IUploadMediaUseCase {
 
@@ -17,9 +15,19 @@ export class UploadMediaUseCase implements IUploadMediaUseCase {
 
     async execute(dto: UploadMediaDto): Promise<Media> {
 
+        if (!dto.buffer || !dto.mimeType) {
+            throw new BadRequest("Media file and MIME type are required", "INVALID_MEDIA_FILE");
+        }
+
+        const sanitizedSection = (dto.section || "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+
+        if (!sanitizedSection) {
+            throw new BadRequest("Valid section identifier is required", "INVALID_MEDIA_SECTION");
+        }
+
         const fileKey = await this.fileStorageService.upload(
             dto.buffer,
-            `landing/${dto.section}`,
+            `landing/${sanitizedSection}`,
             dto.mimeType
         );
 
@@ -36,7 +44,7 @@ export class UploadMediaUseCase implements IUploadMediaUseCase {
                 mimeType: dto.mimeType,
                 mediaType,
                 size: dto.size,
-                section: dto.section,
+                section: sanitizedSection,
             });
 
             const savedMedia =

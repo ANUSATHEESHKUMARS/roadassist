@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model, Model } from "mongoose";
 
 const mediaSchema = new Schema(
     {
@@ -31,6 +31,7 @@ const mediaSchema = new Schema(
         section: {
             type: String,
             required: true,
+            index: true,
         },
     },
     {
@@ -38,4 +39,6 @@ const mediaSchema = new Schema(
     }
 );
 
-export const MediaModel = model("Media", mediaSchema);
+mediaSchema.index({ section: 1, createdAt: -1 });
+
+export const MediaModel = (mongoose.models.Media as Model<any>) || model("Media", mediaSchema);

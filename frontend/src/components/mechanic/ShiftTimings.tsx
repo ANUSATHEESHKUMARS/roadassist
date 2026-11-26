@@ -14,15 +14,15 @@ import { Label } from "@/components/ui/label";
 interface ShiftTimingsProps {
     morningStartTime: string;
     morningEndTime: string;
-    eveningStartTime: string;
-    eveningEndTime: string;
+    afternoonStartTime: string;
+    afternoonEndTime: string;
 
     onChange: (
         field:
             | "morningStartTime"
             | "morningEndTime"
-            | "eveningStartTime"
-            | "eveningEndTime",
+            | "afternoonStartTime"
+            | "afternoonEndTime",
         value: string
     ) => void;
 }
@@ -30,8 +30,8 @@ interface ShiftTimingsProps {
 export const ShiftTimings: React.FC<ShiftTimingsProps> = ({
     morningStartTime,
     morningEndTime,
-    eveningStartTime,
-    eveningEndTime,
+    afternoonStartTime,
+    afternoonEndTime,
     onChange,
 }) => {
     return (
@@ -85,9 +85,9 @@ export const ShiftTimings: React.FC<ShiftTimingsProps> = ({
 
                 <div className="space-y-4">
                     <div>
-                        <h3 className="font-semibold">Evening Shift</h3>
+                        <h3 className="font-semibold">Afternoon Shift</h3>
                         <p className="text-sm text-muted-foreground">
-                            Set your evening working hours.
+                            Set your afternoon working hours.
                         </p>
                     </div>
 
@@ -96,10 +96,10 @@ export const ShiftTimings: React.FC<ShiftTimingsProps> = ({
                             <Label>Start Time</Label>
                             <Input
                                 type="time"
-                                value={eveningStartTime}
+                                value={afternoonStartTime}
                                 onChange={(event) =>
                                     onChange(
-                                        "eveningStartTime",
+                                        "afternoonStartTime",
                                         event.target.value
                                     )
                                 }
@@ -110,10 +110,10 @@ export const ShiftTimings: React.FC<ShiftTimingsProps> = ({
                             <Label>End Time</Label>
                             <Input
                                 type="time"
-                                value={eveningEndTime}
+                                value={afternoonEndTime}
                                 onChange={(event) =>
                                     onChange(
-                                        "eveningEndTime",
+                                        "afternoonEndTime",
                                         event.target.value
                                     )
                                 }

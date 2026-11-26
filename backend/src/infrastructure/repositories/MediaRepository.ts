@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { Media } from "../../domain/User/entities/Media.js";
 import { IMediaRepository } from "../../domain/repositories/IMediaRepository.js";
 import { MediaModel } from "../databases/models/MediaModel.js";
@@ -30,6 +31,10 @@ export class MediaRepository implements IMediaRepository {
     }
 
     async findById(id: string): Promise<Media | null> {
+
+        if (!Types.ObjectId.isValid(id)) {
+            return null;
+        }
 
         const document = await MediaModel.findById(id);
 
@@ -75,6 +80,10 @@ export class MediaRepository implements IMediaRepository {
     }
 
     async delete(id: string): Promise<void> {
+
+        if (!Types.ObjectId.isValid(id)) {
+            return;
+        }
 
         await MediaModel.findByIdAndDelete(id);
     }

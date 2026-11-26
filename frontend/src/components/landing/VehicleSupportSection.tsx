@@ -38,13 +38,24 @@ export const VehicleSupportSection: React.FC<VehicleSupportSectionProps> = ({ da
           ))}
         </div>
 
-        {/* Right: Large Highlight Preview Managed by CMS */}
-        {/* <div className="lg:col-span-7 h-[420px] lg:h-[500px] rounded-2xl overflow-hidden border border-border bg-card relative shadow-2xl">
-          <img
-            src={currentCategory.imageUrl}
-            alt={currentCategory.name}
-            className="w-full h-full object-cover object-center transition-all duration-500 brightness-75 scale-100"
-          />
+        {/* Right: Large Highlight Preview Managed by CMS / Media */}
+        <div className="lg:col-span-7 h-[420px] lg:h-[500px] rounded-2xl overflow-hidden border border-border bg-card relative shadow-2xl">
+          {media?.mediaType === "video" && media.url ? (
+            <video
+              src={media.url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-full h-full object-cover object-center brightness-75"
+            />
+          ) : (
+            <img
+              src={media?.url || currentCategory.imageUrl}
+              alt={currentCategory.name}
+              className="w-full h-full object-cover object-center transition-all duration-500 brightness-75 scale-100"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
 
           <div className="absolute bottom-6 left-6 right-6 p-6 rounded-xl bg-background/85 backdrop-blur-md border border-border/80 shadow-lg">
@@ -58,21 +69,7 @@ export const VehicleSupportSection: React.FC<VehicleSupportSectionProps> = ({ da
               {currentCategory.description}
             </p>
           </div>
-        </div> */}
-
-        {media?.mediaType === "image" && media.url ? (
-          <img
-            src={media.url}
-            alt="RoadAssist vehicle support"
-            className="w-full h-full object-cover object-center transition-all duration-500 brightness-75"
-          />
-        ) : (
-          <img
-            src={currentCategory.imageUrl}
-            alt={currentCategory.name}
-            className="w-full h-full object-cover object-center transition-all duration-500 brightness-75"
-          />
-        )}
+        </div>
       </div>
     </section>
   );

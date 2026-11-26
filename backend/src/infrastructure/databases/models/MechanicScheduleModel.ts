@@ -1,6 +1,6 @@
+
 import { Schema, model, Types, Document } from "mongoose";
 import {
-    DayOfWeek,
     DailySchedule
 } from "../../../domain/User/entities/MechanicSchedule.js";
 
@@ -10,8 +10,8 @@ export interface IMechanicScheduleDocument extends Document {
     weeklyAvailability: DailySchedule[];
     morningStartTime: string;
     morningEndTime: string;
-    eveningStartTime: string;
-    eveningEndTime: string;
+    afternoonStartTime: string;
+    afternoonEndTime: string;
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -37,7 +37,7 @@ const dailyScheduleSchema = new Schema<DailySchedule>(
             required: true,
             default: false
         },
-        evening: {
+        afternoon: {
             type: Boolean,
             required: true,
             default: false
@@ -67,11 +67,11 @@ const mechanicScheduleSchema =
                 type: String,
                 required: true
             },
-            eveningStartTime: {
+            afternoonStartTime: {
                 type: String,
                 required: true
             },
-            eveningEndTime: {
+            afternoonEndTime: {
                 type: String,
                 required: true
             },

@@ -22,7 +22,12 @@ import { useToast } from "@/components/ui/toast/ToastProvider";
 import {
     getMyMechanicApplication,
 } from "@/services/mechanic/mechanicApplicaitonService";
-import type { MyMechanicApplicationResponse } from "@/services/mechanic/mechanicApplicaitonService";
+
+import type {
+    MyMechanicApplicationResponse,
+} from "@/services/mechanic/mechanicApplicaitonService";
+
+import { useAuthStore } from "@/store/authStore";
 
 type ApplicationData = NonNullable<MyMechanicApplicationResponse["data"]>;
 
@@ -86,16 +91,26 @@ const statusConfig: Record<string, {
 
 const formatDate = (value?: string) => {
     if (!value) return "—";
+
     const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString();
+
+    return Number.isNaN(date.getTime())
+        ? "—"
+        : date.toLocaleString();
 };
 
 export default function MechanicApplicationStatusPage() {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const { showToast } = useToast();
+
+    const refreshUser = useAuthStore((state) => state.refreshUser);
+    const switchRole = useAuthStore((state) => state.switchRole);
+    const isSwitchingRole = useAuthStore((state) => state.isSwitchingRole);
 
     const [loading, setLoading] = useState(true);
     const [application, setApplication] = useState<ApplicationData | null>(null);
+
+    const [dashboardLoading, setDashboardLoading] = useState(false);
 
     const fetchApplication = useCallback(async () => {
         setLoading(true);
@@ -114,6 +129,46 @@ export default function MechanicApplicationStatusPage() {
     useEffect(() => {
         void fetchApplication();
     }, [fetchApplication]);
+
+    // Navigate to mechanic dashboard after approval
+    const handleGoToMechanicDashboard = async () => {
+        if (dashboardLoading || isSwitchingRole) return;
+
+        try {
+            setDashboardLoading(true);
+
+            // Step 1: Get the latest user information from backend
+            await refreshUser();
+
+            // Step 2: Read the refreshed user from Zustand
+            const updatedUser = useAuthStore.getState().user;
+
+            // Step 3: Verify mechanic role
+            if (!updatedUser?.roles.includes("mechanic")) {
+                throw new Error(
+                    "Mechanic access has not been assigned to your account yet."
+                );
+            }
+
+            // Step 4: Switch active role to mechanic
+            await switchRole("mechanic");
+
+            // Step 5: Navigate to mechanic dashboard
+            navigate("/mechanic/dashboard", { replace: true });
+
+        } catch (error) {
+            console.error("Mechanic dashboard navigation failed:", error);
+
+            showToast(
+                error instanceof Error
+                    ? error.message
+                    : "Unable to open mechanic dashboard.",
+                "error"
+            );
+        } finally {
+            setDashboardLoading(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -161,6 +216,7 @@ export default function MechanicApplicationStatusPage() {
 
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
+
             {/* Header */}
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
@@ -198,7 +254,6 @@ export default function MechanicApplicationStatusPage() {
                     </button>
                 </div>
             </div>
-
 
             {/* Status Card */}
             <div className={`rounded-xl border ${config.borderColor} ${config.bgColor} p-6`}>
@@ -251,14 +306,19 @@ export default function MechanicApplicationStatusPage() {
                 <div className="p-4 sm:p-5 space-y-5">
                     <div className="grid gap-4 sm:grid-cols-2">
                         <DetailItem label="Application ID" value={application.id} />
-                        <DetailItem label="Experience" value={application.experienceYears ? `${application.experienceYears} years` : undefined} />
+                        <DetailItem
+                            label="Experience"
+                            value={application.experienceYears ? `${application.experienceYears} years` : undefined}
+                        />
                         <DetailItem label="Service Model" value={application.serviceModel} />
                         <DetailItem label="PIN Code" value={application.pincode} />
+
                         <DetailItem
                             label="Service Address"
                             value={application.serviceAddress}
                             icon={<MapPin className="h-4 w-4" />}
                         />
+
                         <DetailItem label="Workshop Name" value={application.workshopName} />
                         <DetailItem label="Workshop Address" value={application.workshopAddress} />
                         <DetailItem label="Submitted At" value={formatDate(application.submittedAt)} />
@@ -285,6 +345,7 @@ export default function MechanicApplicationStatusPage() {
                             <p className="text-xs font-medium text-muted-foreground">
                                 Professional Description
                             </p>
+
                             <p className="text-sm whitespace-pre-wrap">
                                 {application.professionalDescription}
                             </p>
@@ -320,12 +381,13 @@ export default function MechanicApplicationStatusPage() {
                                     </div>
                                 </div>
 
-                                <span className={`text-xs font-medium ${doc.verificationStatus === "verified"
-                                    ? "text-emerald-500"
-                                    : doc.verificationStatus === "rejected"
-                                        ? "text-red-500"
-                                        : "text-amber-500"
-                                    }`}>
+                                <span className={`text-xs font-medium ${
+                                    doc.verificationStatus === "verified"
+                                        ? "text-emerald-500"
+                                        : doc.verificationStatus === "rejected"
+                                            ? "text-red-500"
+                                            : "text-amber-500"
+                                }`}>
                                     {doc.verificationStatus.charAt(0).toUpperCase() + doc.verificationStatus.slice(1)}
                                 </span>
 
@@ -339,15 +401,28 @@ export default function MechanicApplicationStatusPage() {
                     </div>
                 </div>
             )}
+
+            {/* Approved Application - Go to Mechanic Dashboard */}
             {application.status === "approved" && (
                 <div className="flex justify-end">
-                    <Link
-                        to="/mechanic/dashboard"
-                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                    <button
+                        type="button"
+                        onClick={handleGoToMechanicDashboard}
+                        disabled={dashboardLoading || isSwitchingRole}
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Go to Mechanic Dashboard
-                        <ArrowRight className="h-4 w-4" />
-                    </Link>
+                        {dashboardLoading || isSwitchingRole ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Switching Role...
+                            </>
+                        ) : (
+                            <>
+                                Go to Mechanic Dashboard
+                                <ArrowRight className="h-4 w-4" />
+                            </>
+                        )}
+                    </button>
                 </div>
             )}
 
@@ -358,7 +433,9 @@ export default function MechanicApplicationStatusPage() {
                         to="/mechanic/onboarding"
                         className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
                     >
-                        {application.status === "changes_requested" ? "Update Application" : "Continue Application"}
+                        {application.status === "changes_requested"
+                            ? "Update Application"
+                            : "Continue Application"}
                         <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>

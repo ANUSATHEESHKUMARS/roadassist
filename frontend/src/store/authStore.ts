@@ -1,5 +1,9 @@
 
-import { switchActiveRole } from "@/services/authService";
+import {
+    getCurrentUser,
+    switchActiveRole,
+} from "@/services/authService";
+
 import type { AuthUser, UserRole } from "@/types/admin/auth";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -10,6 +14,7 @@ interface AuthState {
     isSwitchingRole: boolean;
 
     setUser: (user: AuthUser) => void;
+    refreshUser: () => Promise<void>;
     switchRole: (role: UserRole) => Promise<void>;
     logout: () => void;
 }
@@ -26,7 +31,16 @@ export const useAuthStore = create<AuthState>()(
                     user,
                     isAuthenticated: true,
                 }),
+            refreshUser: async () => {
+                const response = await getCurrentUser();
 
+                const currentUser: AuthUser = response.data;
+
+                set({
+                    user: currentUser,
+                    isAuthenticated: true,
+                });
+            },
             switchRole: async (role) => {
                 const currentUser = get().user;
 

@@ -10,9 +10,14 @@ export class GetMediaUseCase implements IGetMediaUseCase {
     async execute(): Promise<MediaResponse[]> {
         const mediaList = await this.mediaRepositoty.findAll()
 
-        return Promise.all(
+        const results = await Promise.all(
             mediaList.map(async (media) => {
-                const url = await this.filestroageService.getUrl(media.fileKey)
+                let url = "";
+                try {
+                    url = await this.filestroageService.getUrl(media.fileKey);
+                } catch (error) {
+                    console.error(`Failed to get signed URL for fileKey: ${media.fileKey}`, error);
+                }
 
                 return {
                     id: media.id,
@@ -29,6 +34,7 @@ export class GetMediaUseCase implements IGetMediaUseCase {
             })
         )
 
+        return results;
     }
 
 }

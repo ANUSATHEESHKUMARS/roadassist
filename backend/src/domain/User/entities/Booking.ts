@@ -1,17 +1,22 @@
+
 import {
+  BookingType,
   BookingSlot,
   BookingStatus,
-} from "../Types/BookingTypes.js"
+} from "../Types/BookingTypes.js";
+
 export interface BookingProps {
   id?: string;
   userId: string;
   vehicleId: string;
   mechanicId: string;
+  bookingType: BookingType;
   serviceType: string;
   serviceAddress: string;
   scheduledDate: Date;
   slot: BookingSlot;
-  estimatedAmount: number;
+  bookingAmount: number;
+  estimatedAmount?: number | undefined;
   status: BookingStatus;
   createdAt?: Date;
   updatedAt?: Date;
@@ -42,6 +47,10 @@ export class Booking {
     return this.props.mechanicId;
   }
 
+  get bookingType(): BookingType {
+    return this.props.bookingType;
+  }
+
   get serviceType(): string {
     return this.props.serviceType;
   }
@@ -57,8 +66,10 @@ export class Booking {
   get slot(): BookingSlot {
     return this.props.slot;
   }
-
-  get estimatedAmount(): number {
+  get bookingAmount(): number {
+    return this.props.bookingAmount;
+  }
+  get estimatedAmount(): number | undefined {
     return this.props.estimatedAmount;
   }
 
@@ -78,4 +89,3 @@ export class Booking {
     return { ...this.props };
   }
 }
-

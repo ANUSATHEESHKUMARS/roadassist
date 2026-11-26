@@ -1,3 +1,4 @@
+
 import { DailySchedule } from "../../../domain/User/entities/MechanicSchedule.js";
 
 export interface UpdateMechanicScheduleDto {
@@ -6,8 +7,8 @@ export interface UpdateMechanicScheduleDto {
     morningStartTime?: string;
     morningEndTime?: string;
 
-    eveningStartTime?: string;
-    eveningEndTime?: string;
+    afternoonStartTime?: string;
+    afternoonEndTime?: string;
 
     isActive?: boolean;
 }

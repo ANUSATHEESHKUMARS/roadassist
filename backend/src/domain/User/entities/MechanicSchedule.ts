@@ -11,7 +11,7 @@ export type DayOfWeek =
 export interface DailySchedule {
     day: DayOfWeek;
     morning: boolean;
-    evening: boolean;
+    afternoon: boolean;
 }
 
 export class MechanicSchedule {
@@ -20,8 +20,8 @@ export class MechanicSchedule {
         public weeklyAvailability: DailySchedule[],
         public morningStartTime: string,
         public morningEndTime: string,
-        public eveningStartTime: string,
-        public eveningEndTime: string,
+        public afternoonStartTime: string,
+        public afternoonEndTime: string,
         public isActive: boolean,
         public id?: string,
         public createdAt?: Date,

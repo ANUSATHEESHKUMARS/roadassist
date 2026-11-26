@@ -30,14 +30,19 @@ export default function LandingPage() {
         const response = await getPublicMedia();
         console.log(
           "ADMIN MEDIA RECORDS:",
-          JSON.stringify(response.data, null, 2)
+          JSON.stringify(response?.data, null, 2)
         );
-        setMediaList(response.data);
+        if (Array.isArray(response?.data)) {
+          setMediaList(response.data);
+        } else {
+          setMediaList([]);
+        }
       } catch (error) {
         console.error(
           "Failed to load landing media:",
           error
         );
+        setMediaList([]);
       }
     };
 

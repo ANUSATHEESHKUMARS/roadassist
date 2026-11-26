@@ -16,8 +16,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ data , media}) => {
      
       <div className="absolute inset-0 z-0">
         <DynamicMedia
-          type={media?.mediaType ?? data.mediaType}
-          src={media?.url ?? data.mediaType}
+          type={media?.mediaType || data.mediaType}
+          src={media?.url || data.mediaUrl}
           poster={data.posterUrl}
           alt="RoadAssist dynamic background"
           className="w-full h-full object-cover brightness-[0.35] scale-105 transform motion-safe:animate-subtle-zoom"

@@ -44,30 +44,39 @@ const SECTION_OPTIONS: {
     label: string;
     value: MediaSection;
 }[] = [
-        {
-            label: "Hero Section",
-            value: "hero",
-        },
-        
-        {
-            label: "Services Section",
-            value: "services",
-        },
-        {
-            label: "Login Background",
-            value: "login",
-        },
-        {
-            label: "Register Background",
-            value: "register",
-        },
-        
-        {
-            label:"premium / Membership",
-            value : "membership"
-        }
-
-    ];
+    {
+        label: "Hero Section",
+        value: "hero",
+    },
+    {
+        label: "Services Section",
+        value: "services",
+    },
+    {
+        label: "How It Works Section",
+        value: "how-it-works",
+    },
+    {
+        label: "Vehicles Section",
+        value: "vehicles",
+    },
+    {
+        label: "Why RoadAssist Section",
+        value: "why-roadassist",
+    },
+    {
+        label: "Membership / Premium",
+        value: "membership",
+    },
+    {
+        label: "Login Background",
+        value: "login",
+    },
+    {
+        label: "Register Background",
+        value: "register",
+    },
+];
 
 
 export default function MediaManagementPage() {
@@ -104,18 +113,16 @@ export default function MediaManagementPage() {
 
     const loadMedia = async () => {
         try {
-            const response = await getMedia()
-
-            console.log("Fetched media", response.data)
-
-            setMediaList(response.data)
-
-
+            setisLoadingMedia(true);
+            const response = await getMedia();
+            setMediaList(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
-            console.error('failed to fetch media', error)
-            showToast('Failed to load media', "error")
+            console.error('Failed to fetch media', error);
+            showToast('Failed to load media', "error");
+        } finally {
+            setisLoadingMedia(false);
         }
-    }
+    };
  
 
     const handleDeleteMedia = async (id : string) => {
@@ -388,7 +395,7 @@ export default function MediaManagementPage() {
                                     }
 
                                 }}
-                                className="h-10 w-full cursor-pointer rounded-lg border border-border bg-input px-3 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="h-10 w-full cursor-pointer rounded-lg border border-border bg-input px-3 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                             >
 
                                 <option
@@ -467,7 +474,7 @@ export default function MediaManagementPage() {
 
                                     ${isDragging
                                         ? "border-primary bg-primary/10"
-                                        : "border-border bg-input/50 hover:border-purple-500/60 hover:bg-input"
+                                        : "border-border bg-input/50 hover:border-primary/60 hover:bg-input"
                                     }
 
                                     ${isUploading
@@ -529,7 +536,7 @@ export default function MediaManagementPage() {
 
                         {validationError && (
 
-                            <div className="flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-950/20 px-3 py-2 text-xs text-rose-400">
+                            <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
 
                                 <AlertCircle className="h-4 w-4 shrink-0" />
 
@@ -578,7 +585,7 @@ export default function MediaManagementPage() {
                                     !file ||
                                     !section
                                 }
-                                className="flex h-9 w-full items-center justify-center gap-2 bg-primary px-5 text-xs font-medium text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                                className="flex h-9 w-full items-center justify-center gap-2 bg-primary px-5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
 
                                 {isUploading ? (

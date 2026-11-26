@@ -14,7 +14,7 @@ export class CreateMechanicScheduleUseCase
 
     constructor(
         private readonly scheduleRepository: IMechanicScheduleRepository
-    ) {}
+    ) { }
 
     async execute(
         mechanicId: string,
@@ -37,8 +37,8 @@ export class CreateMechanicScheduleUseCase
             dto.weeklyAvailability,
             dto.morningStartTime,
             dto.morningEndTime,
-            dto.eveningStartTime,
-            dto.eveningEndTime,
+            dto.afternoonStartTime,
+            dto.afternoonEndTime,
             true
         );
 

@@ -21,7 +21,7 @@ export const mockLandingData: LandingPageData = {
     title: "When the road stops,",
     titleAccent: "help keeps moving.",
     description: "The enterprise bridge between breakdown distress and instant recovery. Real-time telemetry, automated mechanic matching, and digital dispatch in under 15 minutes.",
-    primaryButton: { label: "Request Emergency Assist", href: "/register", isPrimary: true },
+    primaryButton: { label: "Request Emergency Assist", href: "/emergency-requests", isPrimary: true },
     secondaryButton: { label: "Explore Services", href: "#services", isPrimary: false },
   },
   trustHighlights: [
@@ -152,7 +152,7 @@ export const mockLandingData: LandingPageData = {
       "Direct technician voice & telemetric tracking link",
       "Guaranteed price locks before any bolt is turned",
     ],
-    button: { label: "Trigger SOS Beacon", href: "/register", isPrimary: true },
+    button: { label: "Trigger SOS Beacon", href: "/user/emergency", isPrimary: true },
   },
   whyRoadAssist: {
     badge: "The Enterprise Difference",
@@ -211,8 +211,11 @@ export const mockLandingData: LandingPageData = {
     mediaUrl: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1920&q=80",
     heading: "Your journey shouldn't stop at the shoulder.",
     description: "Join thousands of drivers who navigate with total peace of mind. Register your vehicle today and activate full telemetric protection.",
-    primaryButton: { label: "Create Your Account", href: "/register", isPrimary: true },
-    secondaryButton: { label: "Sign In to Fleet", href: "/login", isPrimary: false },
+primaryButton: {
+    label: "Request Emergency Assist",
+    href: "/user/emergency",
+    isPrimary: true
+},    secondaryButton: { label: "Sign In to Fleet", href: "/login", isPrimary: false },
   },
   footer: {
     brandDescription: "The sovereign infrastructure for digital roadside assistance and mobile mechanics. Precision diagnostics, rapid dispatch, and total driver confidence.",

@@ -62,7 +62,7 @@ export class MechanicScheduleValidator {
     ): void {
 
         const hasWorkingShift = dto.weeklyAvailability.some(
-            day => day.morning || day.evening
+            day => day.morning || day.afternoon
         );
 
         if (!hasWorkingShift) {
@@ -81,8 +81,8 @@ export class MechanicScheduleValidator {
         const times = [
             dto.morningStartTime,
             dto.morningEndTime,
-            dto.eveningStartTime,
-            dto.eveningEndTime
+            dto.afternoonStartTime,
+            dto.afternoonEndTime
         ];
 
         const invalidTime = times.some(
@@ -106,15 +106,15 @@ export class MechanicScheduleValidator {
             );
         }
 
-        if (dto.eveningStartTime >= dto.eveningEndTime) {
+        if (dto.afternoonStartTime >= dto.afternoonEndTime) {
             throw new Error(
-                "Evening end time must be after evening start time"
+                "Afternoon end time must be after afternoon start time"
             );
         }
 
-        if (dto.morningEndTime > dto.eveningStartTime) {
+        if (dto.morningEndTime > dto.afternoonStartTime) {
             throw new Error(
-                "Morning and evening shifts must not overlap"
+                "Morning and afternoon shifts must not overlap"
             );
         }
     }

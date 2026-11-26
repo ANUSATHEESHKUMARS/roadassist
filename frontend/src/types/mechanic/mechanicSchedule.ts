@@ -11,7 +11,7 @@ export type DayOfWeek =
 export interface DailySchedule {
     day: DayOfWeek;
     morning: boolean;
-    evening: boolean;
+    afternoon: boolean;
 }
 
 export interface MechanicSchedule {
@@ -20,8 +20,8 @@ export interface MechanicSchedule {
     weeklyAvailability: DailySchedule[];
     morningStartTime: string;
     morningEndTime: string;
-    eveningStartTime: string;
-    eveningEndTime: string;
+    afternoonStartTime: string;
+    afternoonEndTime: string;
     isActive: boolean;
     createdAt?: string;
     updatedAt?: string;
@@ -31,8 +31,8 @@ export interface CreateMechanicScheduleDto {
     weeklyAvailability: DailySchedule[];
     morningStartTime: string;
     morningEndTime: string;
-    eveningStartTime: string;
-    eveningEndTime: string;
+    afternoonStartTime: string;
+    afternoonEndTime: string;
     isActive: boolean;
 }
 

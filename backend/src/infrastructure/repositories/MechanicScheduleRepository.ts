@@ -1,10 +1,10 @@
 
 import { MechanicSchedule } from "../../domain/User/entities/MechanicSchedule.js";
 
-
 import { MechanicScheduleModel } from "../databases/models/MechanicScheduleModel.js";
 import { MechanicScheduleMapper } from "../../application/mappers/MechanicScheduleMapper.js";
 import { IMechanicScheduleRepository } from "../../domain/repositories/IMechanicScheduleRepository.js";
+
 export class MechanicScheduleRepository
     implements IMechanicScheduleRepository {
 
@@ -17,8 +17,8 @@ export class MechanicScheduleRepository
             weeklyAvailability: schedule.weeklyAvailability,
             morningStartTime: schedule.morningStartTime,
             morningEndTime: schedule.morningEndTime,
-            eveningStartTime: schedule.eveningStartTime,
-            eveningEndTime: schedule.eveningEndTime,
+            afternoonStartTime: schedule.afternoonStartTime,
+            afternoonEndTime: schedule.afternoonEndTime,
             isActive: schedule.isActive
         });
 
@@ -49,8 +49,8 @@ export class MechanicScheduleRepository
             weeklyAvailability,
             morningStartTime,
             morningEndTime,
-            eveningStartTime,
-            eveningEndTime,
+            afternoonStartTime,
+            afternoonEndTime,
             isActive
         } = schedule;
 
@@ -67,11 +67,11 @@ export class MechanicScheduleRepository
                     ...(morningEndTime !== undefined && {
                         morningEndTime
                     }),
-                    ...(eveningStartTime !== undefined && {
-                        eveningStartTime
+                    ...(afternoonStartTime !== undefined && {
+                        afternoonStartTime
                     }),
-                    ...(eveningEndTime !== undefined && {
-                        eveningEndTime
+                    ...(afternoonEndTime !== undefined && {
+                        afternoonEndTime
                     }),
                     ...(isActive !== undefined && {
                         isActive

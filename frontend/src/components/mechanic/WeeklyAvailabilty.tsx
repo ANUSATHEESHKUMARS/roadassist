@@ -13,13 +13,13 @@ import { Switch } from "@/components/ui/switch";
 import type {
     DailySchedule,
     DayOfWeek,
-} from "../../types/mechanic/mechanicSchedule"
+} from "../../types/mechanic/mechanicSchedule";
 
 interface WeeklyAvailabilityProps {
     weeklyAvailability: DailySchedule[];
     onChange: (
         day: DayOfWeek,
-        shift: "morning" | "evening",
+        shift: "morning" | "afternoon",
         checked: boolean
     ) => void;
 }
@@ -58,7 +58,7 @@ export const WeeklyAvailability: React.FC<WeeklyAvailabilityProps> = ({
                     );
 
                     const morning = schedule?.morning ?? false;
-                    const evening = schedule?.evening ?? false;
+                    const afternoon = schedule?.afternoon ?? false;
 
                     return (
                         <div
@@ -86,13 +86,13 @@ export const WeeklyAvailability: React.FC<WeeklyAvailabilityProps> = ({
                             </div>
 
                             <div className="flex items-center justify-between">
-                                <span className="text-sm">Evening</span>
+                                <span className="text-sm">Afternoon</span>
                                 <Switch
-                                    checked={evening}
+                                    checked={afternoon}
                                     onCheckedChange={(checked) =>
                                         onChange(
                                             day.value,
-                                            "evening",
+                                            "afternoon",
                                             checked
                                         )
                                     }
@@ -100,12 +100,12 @@ export const WeeklyAvailability: React.FC<WeeklyAvailabilityProps> = ({
                             </div>
 
                             <p className="text-xs text-muted-foreground sm:col-span-3">
-                                {morning && evening
+                                {morning && afternoon
                                     ? "Full Day available"
                                     : morning
                                         ? "Morning only"
-                                        : evening
-                                            ? "Evening only"
+                                        : afternoon
+                                            ? "Afternoon only"
                                             : "Not available"}
                             </p>
                         </div>

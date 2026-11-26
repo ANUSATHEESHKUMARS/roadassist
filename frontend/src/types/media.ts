@@ -27,3 +27,9 @@ export interface MediaResponse {
   message: string;
   data: MediaResponseData[];
 }
+
+export interface SingleMediaResponse {
+  success: boolean;
+  message: string;
+  data: MediaResponseData;
+}
