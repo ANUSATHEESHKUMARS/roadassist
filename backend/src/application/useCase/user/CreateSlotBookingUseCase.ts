@@ -188,6 +188,10 @@ export class CreateSlotBookingUseCase {
             );
         }
 
+        const problemDescription = BookingValidator.validateProblemDescription(
+            dto.problemDescription
+        );
+
         // 10. Create the booking domain entity
         const booking = Booking.create({
             userId,
@@ -197,6 +201,7 @@ export class CreateSlotBookingUseCase {
             bookingType: "scheduled",
 
             serviceType: dto.serviceType.trim(),
+            ...(problemDescription !== undefined ? { problemDescription } : {}),
             serviceAddress: dto.serviceAddress.trim(),
 
             scheduledDate,

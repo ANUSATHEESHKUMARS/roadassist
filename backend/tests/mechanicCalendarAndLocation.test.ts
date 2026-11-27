@@ -125,6 +125,13 @@ function createHarness() {
         async findByIds(ids) {
             return ids.map((id) => users.get(id)).filter((u): u is User => Boolean(u));
         },
+        async findIdsByNameSearch(searchTerm) {
+            const q = searchTerm.trim().toLowerCase();
+            return [...users.values()]
+                .filter((u) => u.fullName.toLowerCase().includes(q))
+                .map((u) => u.userId!)
+                .filter(Boolean);
+        },
     };
 
     const vehicleRepo: IVehicleRepository = {
@@ -133,6 +140,9 @@ function createHarness() {
             return [...vehicles.values()].filter((v) => v.userId === userId);
         },
         async findById(id) { return vehicles.get(id) ?? null; },
+        async findByIds(ids) {
+            return ids.map((id) => vehicles.get(id)).filter((v): v is Vehicle => Boolean(v));
+        },
         async update() { return null; },
         async delete() { return false; },
     };
@@ -270,6 +280,19 @@ function createHarness() {
         },
         async findByMechanicId(mechanicId) {
             return [...bookings.values()].filter((b) => b.mechanicId === mechanicId);
+        },
+        async findMechanicBookings() {
+            return { bookings: [], total: 0 };
+        },
+        async getMechanicBookingCounts() {
+            return {
+                total: 0,
+                upcoming: 0,
+                today: 0,
+                inProgress: 0,
+                completed: 0,
+                cancelled: 0,
+            };
         },
         async findConflictingBooking(mechanicId, scheduledDate, slot, excludeId) {
             const now = new Date();

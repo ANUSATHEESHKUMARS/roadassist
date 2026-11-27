@@ -76,5 +76,28 @@ export class BookingValidator {
         }
         return value.trim();
     }
+
+    static validateProblemDescription(value: unknown): string | undefined {
+        if (value === undefined || value === null) {
+            return undefined;
+        }
+        if (typeof value !== "string") {
+            throw new BadRequest(
+                "Problem description must be a string",
+                "INVALID_PROBLEM_DESCRIPTION"
+            );
+        }
+        const trimmed = value.trim();
+        if (trimmed.length === 0) {
+            return undefined;
+        }
+        if (trimmed.length > 1000) {
+            throw new BadRequest(
+                "Problem description cannot exceed 1000 characters",
+                "PROBLEM_DESCRIPTION_TOO_LONG"
+            );
+        }
+        return trimmed;
+    }
 }
 

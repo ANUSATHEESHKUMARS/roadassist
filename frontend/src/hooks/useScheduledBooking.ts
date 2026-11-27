@@ -27,6 +27,7 @@ const INITIAL_STATE: ScheduledBookingState = {
     step: "vehicle",
     selectedVehicle: null,
     serviceType: "",
+    problemDescription: "",
     location: null,
     scheduledDate: "",
     slot: null,
@@ -116,6 +117,14 @@ export function useScheduledBooking() {
             serviceType,
             discoveryResult: null,
             selectedMechanic: null,
+        }));
+    }, []);
+
+    const setProblemDescription = useCallback((problemDescription: string) => {
+        setError(null);
+        setState((prev) => ({
+            ...prev,
+            problemDescription,
         }));
     }, []);
 
@@ -229,8 +238,14 @@ export function useScheduledBooking() {
             mechanicOverride?: DiscoveredMechanicItem
         ): Promise<CreateBookingReservationResponse | null> => {
             const mechanic = mechanicOverride ?? state.selectedMechanic;
-            const { selectedVehicle, serviceType, location, scheduledDate, slot } =
-                state;
+            const {
+                selectedVehicle,
+                serviceType,
+                problemDescription,
+                location,
+                scheduledDate,
+                slot,
+            } = state;
 
             if (!mechanic) {
                 setError("Please select a mechanic before confirming.");
@@ -246,10 +261,14 @@ export function useScheduledBooking() {
                 setError(null);
                 paymentSettledRef.current = false;
 
+                const trimmedDescription = problemDescription.trim();
                 const reservation = await scheduledBookingService.createReservation({
                     mechanicId: mechanic.mechanicId,
                     vehicleId: selectedVehicle.id,
                     serviceType: serviceType.trim(),
+                    ...(trimmedDescription
+                        ? { problemDescription: trimmedDescription }
+                        : {}),
                     serviceAddress: location.address.trim(),
                     scheduledDate,
                     slot,
@@ -549,6 +568,7 @@ export function useScheduledBooking() {
         setStep,
         selectVehicle,
         setServiceType,
+        setProblemDescription,
         setLocation,
         setScheduledDate,
         setSlot,

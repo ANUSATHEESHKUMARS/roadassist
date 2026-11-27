@@ -7,8 +7,11 @@ import {
     CreatePaymentOrderResponseDto,
     DiscoverMechanicsDto,
     DiscoverMechanicsResponseDto,
+    GetMechanicBookingsQueryDto,
+    GetMechanicBookingsResponseDto,
     GetMyBookingsQueryDto,
     GetMyBookingsResponseDto,
+    MechanicBookingActionResponseDto,
     VerifyPaymentDto,
     VerifyPaymentResponseDto,
     WebhookProcessResultDto,
@@ -60,7 +63,8 @@ export interface IGetBookingStatusUseCase {
 export interface IGetBookingDetailsUseCase {
     execute(
         userId: string,
-        bookingId: string
+        bookingId: string,
+        expectedRole?: "user" | "mechanic"
     ): Promise<BookingDetailsResponseDto>;
 }
 
@@ -69,5 +73,26 @@ export interface IGetMyBookingsUseCase {
         userId: string,
         query?: GetMyBookingsQueryDto
     ): Promise<GetMyBookingsResponseDto>;
+}
+
+export interface IGetMechanicBookingsUseCase {
+    execute(
+        mechanicId: string,
+        query?: GetMechanicBookingsQueryDto
+    ): Promise<GetMechanicBookingsResponseDto>;
+}
+
+export interface IStartMechanicBookingUseCase {
+    execute(
+        mechanicId: string,
+        bookingId: string
+    ): Promise<MechanicBookingActionResponseDto>;
+}
+
+export interface ICompleteMechanicBookingUseCase {
+    execute(
+        mechanicId: string,
+        bookingId: string
+    ): Promise<MechanicBookingActionResponseDto>;
 }
 

@@ -11,6 +11,7 @@ export interface BookingProps {
   mechanicId: string;
   bookingType: BookingType;
   serviceType: string;
+  problemDescription?: string | undefined;
   serviceAddress: string;
   latitude?: number | undefined;
   longitude?: number | undefined;
@@ -22,6 +23,9 @@ export interface BookingProps {
   reservationExpiresAt?: Date | undefined;
   paymentId?: string | undefined;
   confirmedAt?: Date | undefined;
+  startedAt?: Date | undefined;
+  completedAt?: Date | undefined;
+  cancelledAt?: Date | undefined;
   expiredAt?: Date | undefined;
   requestedAt?: Date | undefined;
   createdAt?: Date;
@@ -59,6 +63,10 @@ export class Booking {
 
   get serviceType(): string {
     return this.props.serviceType;
+  }
+
+  get problemDescription(): string | undefined {
+    return this.props.problemDescription;
   }
 
   get serviceAddress(): string {
@@ -101,6 +109,18 @@ export class Booking {
 
   get confirmedAt(): Date | undefined {
     return this.props.confirmedAt;
+  }
+
+  get startedAt(): Date | undefined {
+    return this.props.startedAt;
+  }
+
+  get completedAt(): Date | undefined {
+    return this.props.completedAt;
+  }
+
+  get cancelledAt(): Date | undefined {
+    return this.props.cancelledAt;
   }
 
   get expiredAt(): Date | undefined {

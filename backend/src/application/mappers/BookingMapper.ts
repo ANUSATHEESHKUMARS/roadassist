@@ -11,6 +11,9 @@ export class BookingMapper {
             mechanicId: document.mechanicId.toString(),
             bookingType: document.bookingType,
             serviceType: document.serviceType,
+            ...(document.problemDescription !== undefined
+                ? { problemDescription: document.problemDescription }
+                : {}),
             serviceAddress: document.serviceAddress,
             ...(document.latitude !== undefined ? { latitude: document.latitude } : {}),
             ...(document.longitude !== undefined ? { longitude: document.longitude } : {}),
@@ -29,6 +32,15 @@ export class BookingMapper {
                 : {}),
             ...(document.confirmedAt !== undefined
                 ? { confirmedAt: document.confirmedAt }
+                : {}),
+            ...(document.startedAt !== undefined
+                ? { startedAt: document.startedAt }
+                : {}),
+            ...(document.completedAt !== undefined
+                ? { completedAt: document.completedAt }
+                : {}),
+            ...(document.cancelledAt !== undefined
+                ? { cancelledAt: document.cancelledAt }
                 : {}),
             ...(document.expiredAt !== undefined
                 ? { expiredAt: document.expiredAt }
@@ -53,6 +65,9 @@ export class BookingMapper {
             mechanicId: booking.mechanicId,
             bookingType: booking.bookingType,
             serviceType: booking.serviceType,
+            ...(booking.problemDescription !== undefined
+                ? { problemDescription: booking.problemDescription }
+                : {}),
             serviceAddress: booking.serviceAddress,
             ...(booking.latitude !== undefined ? { latitude: booking.latitude } : {}),
             ...(booking.longitude !== undefined ? { longitude: booking.longitude } : {}),
@@ -73,6 +88,15 @@ export class BookingMapper {
                 : {}),
             ...(booking.confirmedAt !== undefined
                 ? { confirmedAt: booking.confirmedAt }
+                : {}),
+            ...(booking.startedAt !== undefined
+                ? { startedAt: booking.startedAt }
+                : {}),
+            ...(booking.completedAt !== undefined
+                ? { completedAt: booking.completedAt }
+                : {}),
+            ...(booking.cancelledAt !== undefined
+                ? { cancelledAt: booking.cancelledAt }
                 : {}),
             ...(booking.expiredAt !== undefined
                 ? { expiredAt: booking.expiredAt }

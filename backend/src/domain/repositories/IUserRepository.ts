@@ -26,5 +26,7 @@ export interface IUserRepository {
     ):Promise<User|null>
 
     findByIds(userIds: string[]): Promise<User[]>;
+
+    findIdsByNameSearch(searchTerm: string): Promise<string[]>;
 }
 

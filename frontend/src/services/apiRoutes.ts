@@ -30,7 +30,7 @@ const API_ROUTES = {
     SUBMIT: "/mechanic/submit",
     UPLOAD_MEDIA: "/mechanic/media/upload",
     MY_APPLICATION: "/mechanic/my-application",
-    BOOKINGS: "/mechanic/bookings",
+    BOOKINGS: "/bookings/mechanic",
     SERVICE_LOCATION: "/mechanic/service-location",
     SCHEDULE: {
       BASE: "/mechanic/schedule",
@@ -137,6 +137,17 @@ const API_ROUTES = {
 
     CANCEL: (bookingId: string) =>
       `/bookings/${bookingId}/cancel`,
+
+    MECHANIC_BOOKINGS: "/bookings/mechanic",
+
+    MECHANIC_BOOKING_DETAILS: (bookingId: string) =>
+      `/bookings/mechanic/${bookingId}`,
+
+    MECHANIC_START_SERVICE: (bookingId: string) =>
+      `/bookings/mechanic/${bookingId}/start`,
+
+    MECHANIC_COMPLETE_SERVICE: (bookingId: string) =>
+      `/bookings/mechanic/${bookingId}/complete`,
   },
 } as const;
 

@@ -9,8 +9,11 @@ import type {
     CreatePaymentOrderResponse,
     DiscoverMechanicsPayload,
     DiscoverMechanicsResponse,
+    GetMechanicBookingsParams,
+    GetMechanicBookingsResponse,
     GetMyBookingsParams,
     GetMyBookingsResponse,
+    MechanicBookingActionResponse,
     VerifyPaymentPayload,
     VerifyPaymentResponse,
 } from "@/types/user/scheduledBooking";
@@ -142,6 +145,75 @@ export const scheduledBookingService = {
         return unwrapResponse<GetMyBookingsResponse>(
             response.data,
             "booking history"
+        );
+    },
+
+    async getMechanicBookings(
+        params?: GetMechanicBookingsParams
+    ): Promise<GetMechanicBookingsResponse> {
+        const cleanParams: Record<string, string | number> = {};
+        if (params?.page !== undefined) cleanParams.page = params.page;
+        if (params?.limit !== undefined) cleanParams.limit = params.limit;
+        if (params?.filter) cleanParams.filter = params.filter;
+        if (params?.search?.trim()) cleanParams.search = params.search.trim();
+        if (params?.date?.trim()) cleanParams.date = params.date.trim();
+        if (params?.serviceType?.trim()) {
+            cleanParams.serviceType = params.serviceType.trim();
+        }
+        if (params?.sort) cleanParams.sort = params.sort;
+
+        const response = await apiClient.get<
+            BookingCommonResponse<GetMechanicBookingsResponse>
+        >(API_ROUTES.BOOKING.MECHANIC_BOOKINGS, { params: cleanParams });
+
+        return unwrapResponse<GetMechanicBookingsResponse>(
+            response.data,
+            "mechanic bookings"
+        );
+    },
+
+    async getMechanicBookingDetails(
+        bookingId: string
+    ): Promise<BookingDetailsResponse> {
+        const safeId = requireBookingId(bookingId);
+
+        const response = await apiClient.get<
+            BookingCommonResponse<BookingDetailsResponse>
+        >(API_ROUTES.BOOKING.MECHANIC_BOOKING_DETAILS(safeId));
+
+        return unwrapResponse<BookingDetailsResponse>(
+            response.data,
+            "mechanic booking details"
+        );
+    },
+
+    async startMechanicBooking(
+        bookingId: string
+    ): Promise<MechanicBookingActionResponse> {
+        const safeId = requireBookingId(bookingId);
+
+        const response = await apiClient.patch<
+            BookingCommonResponse<MechanicBookingActionResponse>
+        >(API_ROUTES.BOOKING.MECHANIC_START_SERVICE(safeId));
+
+        return unwrapResponse<MechanicBookingActionResponse>(
+            response.data,
+            "start service"
+        );
+    },
+
+    async completeMechanicBooking(
+        bookingId: string
+    ): Promise<MechanicBookingActionResponse> {
+        const safeId = requireBookingId(bookingId);
+
+        const response = await apiClient.patch<
+            BookingCommonResponse<MechanicBookingActionResponse>
+        >(API_ROUTES.BOOKING.MECHANIC_COMPLETE_SERVICE(safeId));
+
+        return unwrapResponse<MechanicBookingActionResponse>(
+            response.data,
+            "complete service"
         );
     },
 };

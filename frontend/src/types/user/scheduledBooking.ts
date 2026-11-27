@@ -105,6 +105,7 @@ export interface CreateBookingReservationPayload {
     mechanicId: string;
     vehicleId: string;
     serviceType: string;
+    problemDescription?: string;
     serviceAddress: string;
     scheduledDate: string;
     slot: BookingSlot;
@@ -118,6 +119,7 @@ export interface CreateBookingReservationResponse {
     mechanicId: string;
     vehicleId: string;
     serviceType: string;
+    problemDescription?: string;
     serviceAddress: string;
     scheduledDate: string;
     slot: BookingSlot;
@@ -209,6 +211,34 @@ export interface BookingVehicleSummary {
     model: string;
     registrationNumber: string;
     vehicleType: string;
+    year?: number;
+    fuelType?: string;
+    color?: string;
+    vehicleImage?: string;
+}
+
+export interface BookingCustomerSummary {
+    userId: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+}
+
+export interface BookingServiceCategory {
+    categoryId?: string;
+    categoryName: string;
+    subcategoryName?: string;
+}
+
+export interface BookingScheduleTimings {
+    dateKey: string;
+    slot: BookingSlot;
+    morningStartTime: string;
+    morningEndTime: string;
+    afternoonStartTime: string;
+    afternoonEndTime: string;
+    activeSlotStartTime: string;
+    activeSlotEndTime: string;
 }
 
 export interface BookingMechanicSummary {
@@ -271,33 +301,114 @@ export interface GetMyBookingsResponse {
 
 export interface BookingDetailsResponse {
     bookingId: string;
+    bookingReference?: string;
     userId: string;
     mechanicId: string;
     vehicleId: string;
     bookingType: string;
     serviceType: string;
+    serviceCategory?: BookingServiceCategory;
+    problemDescription?: string;
     serviceAddress: string;
     latitude?: number;
     longitude?: number;
     scheduledDate: string;
+    scheduledDateDayKey?: string;
     slot: BookingSlot;
+    scheduleTimings?: BookingScheduleTimings;
     bookingAmount: number;
     status: BookingStatus;
     reservationExpiresAt?: string;
     confirmedAt?: string;
+    startedAt?: string;
+    completedAt?: string;
+    cancelledAt?: string;
     expiredAt?: string;
     createdAt?: string;
     updatedAt?: string;
+    customer?: BookingCustomerSummary;
     vehicle?: BookingVehicleSummary;
     mechanic?: BookingMechanicSummary;
     payment?: BookingDetailsPaymentSummary;
     allocation?: PaymentAllocationSummary;
 }
 
+export type MechanicBookingFilterTab =
+    | "all"
+    | "upcoming"
+    | "today"
+    | "in_progress"
+    | "completed"
+    | "cancelled";
+
+export type MechanicBookingSort = "upcoming" | "newest";
+
+export interface GetMechanicBookingsParams {
+    page?: number;
+    limit?: number;
+    filter?: MechanicBookingFilterTab;
+    search?: string;
+    date?: string;
+    serviceType?: string;
+    sort?: MechanicBookingSort;
+}
+
+export interface MechanicBookingItem {
+    bookingId: string;
+    bookingReference: string;
+    userId: string;
+    vehicleId: string;
+    bookingType: string;
+    serviceType: string;
+    serviceCategory?: BookingServiceCategory;
+    problemDescription?: string;
+    serviceAddress: string;
+    latitude?: number;
+    longitude?: number;
+    scheduledDate: string;
+    scheduledDateDayKey: string;
+    slot: BookingSlot;
+    scheduleTimings?: BookingScheduleTimings;
+    bookingAmount: number;
+    status: BookingStatus;
+    paymentStatus?: PaymentStatus;
+    confirmedAt?: string;
+    startedAt?: string;
+    completedAt?: string;
+    cancelledAt?: string;
+    createdAt?: string;
+    customer?: BookingCustomerSummary;
+    vehicle?: BookingVehicleSummary;
+}
+
+export interface MechanicBookingsSummaryCounts {
+    total: number;
+    upcoming: number;
+    today: number;
+    inProgress: number;
+    completed: number;
+    cancelled: number;
+}
+
+export interface GetMechanicBookingsResponse {
+    bookings: MechanicBookingItem[];
+    pagination: MyBookingsPagination;
+    counts: MechanicBookingsSummaryCounts;
+}
+
+export interface MechanicBookingActionResponse {
+    bookingId: string;
+    status: BookingStatus;
+    startedAt?: string;
+    completedAt?: string;
+    updatedAt?: string;
+}
+
 export interface ScheduledBookingState {
     step: BookingStep;
     selectedVehicle: Vehicle | null;
     serviceType: string;
+    problemDescription: string;
     location: BookingLocation | null;
     scheduledDate: string;
     slot: BookingSlot | null;

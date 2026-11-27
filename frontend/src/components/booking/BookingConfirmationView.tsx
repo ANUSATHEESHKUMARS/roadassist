@@ -104,6 +104,17 @@ export function BookingConfirmationView({
               </p>
             </div>
 
+            {reservation?.problemDescription && (
+              <div className="sm:col-span-2">
+                <p className="text-[11px] text-muted-foreground">
+                  Problem Description
+                </p>
+                <p className="font-medium text-foreground">
+                  {reservation.problemDescription}
+                </p>
+              </div>
+            )}
+
             <div>
               <p className="text-[11px] text-muted-foreground">
                 Scheduled Date & Shift

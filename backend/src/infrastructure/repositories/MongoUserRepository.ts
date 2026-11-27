@@ -153,6 +153,22 @@ export class MongoUserRepository implements IUserRepository {
 
       return documents.map((doc) => UserMapper.toDomain(doc));
    }
+
+   async findIdsByNameSearch(searchTerm: string): Promise<string[]> {
+      const trimmed = searchTerm.trim();
+      if (!trimmed) {
+         return [];
+      }
+      const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const documents = await UserModel.find(
+         { fullName: { $regex: escaped, $options: "i" } },
+         { _id: 1 }
+      )
+         .limit(100)
+         .exec();
+
+      return documents.map((doc) => doc._id.toString());
+   }
 }
 
 

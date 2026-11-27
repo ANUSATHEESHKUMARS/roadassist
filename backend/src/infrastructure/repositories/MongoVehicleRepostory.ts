@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { VehicleMapper } from "../../application/mappers/VehicleMapper.js";
 import { IVehicleRepository } from "../../domain/repositories/IVehicleRepository.js";
 import { Vehicle } from "../../domain/vehilce/Vehilce.js";
@@ -41,6 +42,17 @@ constructor(){
             return null
         }
      return VehicleMapper.toDomain(vehicleDetail)
+    }
+
+    async findByIds(vehicleIds: string[]): Promise<Vehicle[]> {
+        const validIds = vehicleIds.filter((id) => Types.ObjectId.isValid(id));
+        if (validIds.length === 0) {
+            return [];
+        }
+        const documents = await this.model.find({
+            _id: { $in: validIds.map((id) => new Types.ObjectId(id)) },
+        }).exec();
+        return documents.map((document) => VehicleMapper.toDomain(document));
     }
 
     async update(vehicleId: string, vehicle: Partial<Vehicle>): Promise<Vehicle | null> {

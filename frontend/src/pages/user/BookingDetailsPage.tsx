@@ -267,6 +267,17 @@ export default function BookingDetailsPage() {
                     </div>
                   </div>
 
+                  {details.problemDescription && (
+                    <div className="rounded-lg border border-border bg-secondary/30 p-3">
+                      <p className="text-[11px] text-muted-foreground mb-1">
+                        Problem Description
+                      </p>
+                      <p className="text-xs text-foreground whitespace-pre-line">
+                        {details.problemDescription}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="flex items-start gap-2.5">
                     <Calendar className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                     <div>

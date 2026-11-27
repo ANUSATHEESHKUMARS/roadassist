@@ -8,6 +8,7 @@ import {
     createReservationController,
     discoverMechanicsController,
     getMyBookingsController,
+    mechanicBookingController,
     razorpayWebhookController,
     verifyPaymentController,
 } from "../../di/container.js";
@@ -89,6 +90,35 @@ bookingRouter.get(
     auth,
     authorizeRoles("user"),
     asyncHandler(getMyBookingsController.getMyBookings)
+);
+
+// Mechanic scheduled booking management (must come BEFORE /:bookingId)
+bookingRouter.get(
+    "/mechanic",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(mechanicBookingController.getBookings)
+);
+
+bookingRouter.get(
+    "/mechanic/:bookingId",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(mechanicBookingController.getBookingDetails)
+);
+
+bookingRouter.patch(
+    "/mechanic/:bookingId/start",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(mechanicBookingController.startService)
+);
+
+bookingRouter.patch(
+    "/mechanic/:bookingId/complete",
+    auth,
+    authorizeRoles("mechanic"),
+    asyncHandler(mechanicBookingController.completeService)
 );
 
 // Booking status & details

@@ -19,14 +19,18 @@ const STANDARD_SERVICES = [
 
 interface BookingServiceSelectorProps {
   serviceType: string;
+  problemDescription?: string;
   onSelect: (serviceType: string) => void;
+  onProblemDescriptionChange?: (description: string) => void;
   onBack: () => void;
   onContinue: () => void;
 }
 
 export function BookingServiceSelector({
   serviceType,
+  problemDescription = "",
   onSelect,
+  onProblemDescriptionChange,
   onBack,
   onContinue,
 }: BookingServiceSelectorProps) {
@@ -146,6 +150,34 @@ export function BookingServiceSelector({
           <span className="font-mono text-foreground">serviceOffered</span>.
         </p>
       </div>
+
+      {onProblemDescriptionChange && (
+        <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <Label
+              htmlFor="problemDescription"
+              className="text-xs font-medium text-foreground"
+            >
+              Problem Description (Optional)
+            </Label>
+            <span className="text-[11px] text-muted-foreground">
+              {problemDescription.length}/1000
+            </span>
+          </div>
+          <textarea
+            id="problemDescription"
+            rows={3}
+            maxLength={1000}
+            value={problemDescription}
+            onChange={(e) => onProblemDescriptionChange(e.target.value)}
+            placeholder="Describe symptoms, noises, warning lights, or special instructions for the mechanic..."
+            className="w-full rounded-lg border border-border bg-input px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
+          />
+          <p className="text-[11px] text-muted-foreground">
+            Shared directly with your assigned mechanic after booking confirmation.
+          </p>
+        </div>
+      )}
 
       {validationError && (
         <p role="alert" className="text-xs text-destructive">

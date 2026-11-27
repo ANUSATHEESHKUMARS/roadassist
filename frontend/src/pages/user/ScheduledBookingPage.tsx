@@ -35,6 +35,7 @@ export default function ScheduledBookingPage() {
     setStep,
     selectVehicle,
     setServiceType,
+    setProblemDescription,
     setLocation,
     setScheduledDate,
     setSlot,
@@ -173,7 +174,9 @@ export default function ScheduledBookingPage() {
       {state.step === "service" && (
         <BookingServiceSelector
           serviceType={state.serviceType}
+          problemDescription={state.problemDescription}
           onSelect={setServiceType}
+          onProblemDescriptionChange={setProblemDescription}
           onBack={() => setStep("vehicle")}
           onContinue={() => setStep("location")}
         />

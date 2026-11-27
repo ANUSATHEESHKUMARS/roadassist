@@ -61,6 +61,9 @@ export class CreateBookingReservationUseCase
             dto.serviceAddress,
             "Service address"
         );
+        const problemDescription = BookingValidator.validateProblemDescription(
+            dto.problemDescription
+        );
         const { latitude, longitude } = BookingValidator.validateCoordinates(
             dto.latitude,
             dto.longitude
@@ -237,6 +240,9 @@ export class CreateBookingReservationUseCase
                     mechanicId,
                     bookingType: "scheduled",
                     serviceType,
+                    ...(problemDescription !== undefined
+                        ? { problemDescription }
+                        : {}),
                     serviceAddress,
                     latitude,
                     longitude,
@@ -258,6 +264,9 @@ export class CreateBookingReservationUseCase
             mechanicId: createdBooking.mechanicId,
             vehicleId: createdBooking.vehicleId,
             serviceType: createdBooking.serviceType,
+            ...(createdBooking.problemDescription !== undefined
+                ? { problemDescription: createdBooking.problemDescription }
+                : {}),
             serviceAddress: createdBooking.serviceAddress,
             scheduledDate: createdBooking.scheduledDate,
             slot: createdBooking.slot,

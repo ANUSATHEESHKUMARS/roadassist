@@ -2,6 +2,38 @@ import { Booking, BookingProps } from "../User/entities/Booking.js";
 import { BookingSlot, BookingStatus } from "../User/Types/BookingTypes.js";
 import { ITransactionContext } from "../../infrastructure/databases/interface/ITransactionContext.js";
 
+export type MechanicBookingFilterOption =
+    | "all"
+    | "upcoming"
+    | "today"
+    | "in_progress"
+    | "completed"
+    | "cancelled";
+
+export type MechanicBookingSortOption = "upcoming" | "newest";
+
+export interface FindMechanicBookingsCriteria {
+    mechanicId: string;
+    page: number;
+    limit: number;
+    filter?: MechanicBookingFilterOption;
+    search?: string;
+    matchingCustomerIds?: string[];
+    dateKey?: string;
+    serviceType?: string;
+    sort?: MechanicBookingSortOption;
+    now?: Date;
+}
+
+export interface MechanicBookingCounts {
+    total: number;
+    upcoming: number;
+    today: number;
+    inProgress: number;
+    completed: number;
+    cancelled: number;
+}
+
 export interface IBookingRepository {
     create(booking: Booking, transaction?: ITransactionContext): Promise<Booking>;
 
@@ -26,6 +58,15 @@ export interface IBookingRepository {
         page: number,
         limit: number
     ): Promise<Booking[]>;
+
+    findMechanicBookings(
+        criteria: FindMechanicBookingsCriteria
+    ): Promise<{ bookings: Booking[]; total: number }>;
+
+    getMechanicBookingCounts(
+        mechanicId: string,
+        now?: Date
+    ): Promise<MechanicBookingCounts>;
 
     findConflictingBooking(
         mechanicId: string,

@@ -9,6 +9,7 @@ export interface IBookingDocument extends Document {
     mechanicId: Types.ObjectId;
     bookingType: BookingType;
     serviceType: string;
+    problemDescription?: string;
     serviceAddress: string;
     latitude?: number;
     longitude?: number;
@@ -29,6 +30,7 @@ export interface IBookingDocument extends Document {
 
     requestedAt: Date;
     acceptedAt?: Date;
+    startedAt?: Date;
     completedAt?: Date;
     cancelledAt?: Date;
 
@@ -66,6 +68,13 @@ const bookingSchema = new Schema<IBookingDocument>(
             type: String,
             required: true,
             trim: true,
+        },
+
+        problemDescription: {
+            type: String,
+            required: false,
+            trim: true,
+            maxlength: 1000,
         },
 
         serviceAddress: {
@@ -163,6 +172,10 @@ const bookingSchema = new Schema<IBookingDocument>(
         },
 
         acceptedAt: {
+            type: Date,
+        },
+
+        startedAt: {
             type: Date,
         },
 
