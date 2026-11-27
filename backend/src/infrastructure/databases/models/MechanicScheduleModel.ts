@@ -1,13 +1,15 @@
 
 import { Schema, model, Types, Document } from "mongoose";
 import {
-    DailySchedule
+    DailySchedule,
+    DateAvailability,
 } from "../../../domain/User/entities/MechanicSchedule.js";
 
 export interface IMechanicScheduleDocument extends Document {
     _id: Types.ObjectId;
     mechanicId: Types.ObjectId;
     weeklyAvailability: DailySchedule[];
+    dateAvailability: DateAvailability[];
     morningStartTime: string;
     morningEndTime: string;
     afternoonStartTime: string;
@@ -46,6 +48,47 @@ const dailyScheduleSchema = new Schema<DailySchedule>(
     { _id: false }
 );
 
+const dateAvailabilitySchema = new Schema<DateAvailability>(
+    {
+        date: {
+            type: String,
+            required: true,
+        },
+        isAvailable: {
+            type: Boolean,
+            required: true,
+            default: true,
+        },
+        morning: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
+        afternoon: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
+        morningStartTime: {
+            type: String,
+            required: false,
+        },
+        morningEndTime: {
+            type: String,
+            required: false,
+        },
+        afternoonStartTime: {
+            type: String,
+            required: false,
+        },
+        afternoonEndTime: {
+            type: String,
+            required: false,
+        },
+    },
+    { _id: false }
+);
+
 const mechanicScheduleSchema =
     new Schema<IMechanicScheduleDocument>(
         {
@@ -58,6 +101,10 @@ const mechanicScheduleSchema =
             weeklyAvailability: {
                 type: [dailyScheduleSchema],
                 required: true
+            },
+            dateAvailability: {
+                type: [dateAvailabilitySchema],
+                default: []
             },
             morningStartTime: {
                 type: String,

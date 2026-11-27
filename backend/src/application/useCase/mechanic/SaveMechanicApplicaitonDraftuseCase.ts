@@ -43,6 +43,27 @@ export class SaveMechanicDraftUseCase
         this.mechanicApplicationValidator.validateDraft(dto);
 
         await this.mechanicSpecializationValidator.validate(dto.specializations)
+
+        const normalizedExperienceYears =
+            MechanicApplicationValidator.normalizeFiniteNumber(
+                dto.experienceYears
+            );
+        const normalizedLatitude =
+            MechanicApplicationValidator.normalizeFiniteNumber(dto.latitude);
+        const normalizedLongitude =
+            MechanicApplicationValidator.normalizeFiniteNumber(dto.longitude);
+        const normalizedServiceRadiusKm =
+            MechanicApplicationValidator.normalizeFiniteNumber(
+                dto.serviceRadiusKm
+            );
+        const normalizedWorkshopLatitude =
+            MechanicApplicationValidator.normalizeFiniteNumber(
+                dto.workshopLatitude
+            );
+        const normalizedWorkshopLongitude =
+            MechanicApplicationValidator.normalizeFiniteNumber(
+                dto.workshopLongitude
+            );
         
         const existingApplication =
             await this.mechanicApplicationRepository.findByUserId(userId);
@@ -82,8 +103,8 @@ export class SaveMechanicDraftUseCase
                     profilePhotoKey: dto.profilePhotoKey
                 }),
 
-                ...(dto.experienceYears !== undefined && {
-                    experienceYears: dto.experienceYears
+                ...(normalizedExperienceYears !== undefined && {
+                    experienceYears: normalizedExperienceYears
                 }),
 
                 ...(dto.professionalDescription !== undefined && {
@@ -102,16 +123,20 @@ export class SaveMechanicDraftUseCase
                     pincode: dto.pincode
                 }),
 
-                ...(dto.latitude !== undefined && {
-                    latitude: dto.latitude
+                ...(normalizedLatitude !== undefined && {
+                    latitude: normalizedLatitude
                 }),
 
-                ...(dto.longitude !== undefined && {
-                    longitude: dto.longitude
+                ...(normalizedLongitude !== undefined && {
+                    longitude: normalizedLongitude
                 }),
 
-                ...(dto.serviceRadiusKm !== undefined && {
-                    serviceRadiusKm: dto.serviceRadiusKm
+                ...(dto.locationSource !== undefined && {
+                    locationSource: dto.locationSource
+                }),
+
+                ...(normalizedServiceRadiusKm !== undefined && {
+                    serviceRadiusKm: normalizedServiceRadiusKm
                 }),
 
                 ...(dto.workshopName !== undefined && {
@@ -120,6 +145,18 @@ export class SaveMechanicDraftUseCase
 
                 ...(dto.workshopAddress !== undefined && {
                     workshopAddress: dto.workshopAddress
+                }),
+
+                ...(normalizedWorkshopLatitude !== undefined && {
+                    workshopLatitude: normalizedWorkshopLatitude
+                }),
+
+                ...(normalizedWorkshopLongitude !== undefined && {
+                    workshopLongitude: normalizedWorkshopLongitude
+                }),
+
+                ...(dto.workshopLocationSource !== undefined && {
+                    workshopLocationSource: dto.workshopLocationSource
                 })
             });
 
@@ -191,8 +228,8 @@ export class SaveMechanicDraftUseCase
                 profilePhotoKey: dto.profilePhotoKey
             }),
 
-            ...(dto.experienceYears !== undefined
-                ? { experienceYears: dto.experienceYears }
+            ...(normalizedExperienceYears !== undefined
+                ? { experienceYears: normalizedExperienceYears }
                 : existingApplication.experienceYears !== undefined
                     ? { experienceYears: existingApplication.experienceYears }
                     : {}),
@@ -221,20 +258,26 @@ export class SaveMechanicDraftUseCase
                     ? { pincode: existingApplication.pincode }
                     : {}),
 
-            ...(dto.latitude !== undefined
-                ? { latitude: dto.latitude }
+            ...(normalizedLatitude !== undefined
+                ? { latitude: normalizedLatitude }
                 : existingApplication.latitude !== undefined
                     ? { latitude: existingApplication.latitude }
                     : {}),
 
-            ...(dto.longitude !== undefined
-                ? { longitude: dto.longitude }
+            ...(normalizedLongitude !== undefined
+                ? { longitude: normalizedLongitude }
                 : existingApplication.longitude !== undefined
                     ? { longitude: existingApplication.longitude }
                     : {}),
 
-            ...(dto.serviceRadiusKm !== undefined
-                ? { serviceRadiusKm: dto.serviceRadiusKm }
+            ...(dto.locationSource !== undefined
+                ? { locationSource: dto.locationSource }
+                : existingApplication.locationSource !== undefined
+                    ? { locationSource: existingApplication.locationSource }
+                    : {}),
+
+            ...(normalizedServiceRadiusKm !== undefined
+                ? { serviceRadiusKm: normalizedServiceRadiusKm }
                 : existingApplication.serviceRadiusKm !== undefined
                     ? { serviceRadiusKm: existingApplication.serviceRadiusKm }
                     : {}),
@@ -249,6 +292,24 @@ export class SaveMechanicDraftUseCase
                 ? { workshopAddress: dto.workshopAddress }
                 : existingApplication.workshopAddress !== undefined
                     ? { workshopAddress: existingApplication.workshopAddress }
+                    : {}),
+
+            ...(normalizedWorkshopLatitude !== undefined
+                ? { workshopLatitude: normalizedWorkshopLatitude }
+                : existingApplication.workshopLatitude !== undefined
+                    ? { workshopLatitude: existingApplication.workshopLatitude }
+                    : {}),
+
+            ...(normalizedWorkshopLongitude !== undefined
+                ? { workshopLongitude: normalizedWorkshopLongitude }
+                : existingApplication.workshopLongitude !== undefined
+                    ? { workshopLongitude: existingApplication.workshopLongitude }
+                    : {}),
+
+            ...(dto.workshopLocationSource !== undefined
+                ? { workshopLocationSource: dto.workshopLocationSource }
+                : existingApplication.workshopLocationSource !== undefined
+                    ? { workshopLocationSource: existingApplication.workshopLocationSource }
                     : {}),
 
             ...(existingApplication.submittedAt !== undefined && {

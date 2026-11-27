@@ -14,6 +14,17 @@ export interface DailySchedule {
     afternoon: boolean;
 }
 
+export interface DateAvailability {
+    date: string;
+    isAvailable: boolean;
+    morning: boolean;
+    afternoon: boolean;
+    morningStartTime?: string;
+    morningEndTime?: string;
+    afternoonStartTime?: string;
+    afternoonEndTime?: string;
+}
+
 export class MechanicSchedule {
     constructor(
         public mechanicId: string,
@@ -25,6 +36,7 @@ export class MechanicSchedule {
         public isActive: boolean,
         public id?: string,
         public createdAt?: Date,
-        public updatedAt?: Date
+        public updatedAt?: Date,
+        public dateAvailability: DateAvailability[] = []
     ) {}
 }

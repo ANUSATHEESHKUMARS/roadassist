@@ -15,6 +15,7 @@ export class MechanicScheduleRepository
         const created = await MechanicScheduleModel.create({
             mechanicId: schedule.mechanicId,
             weeklyAvailability: schedule.weeklyAvailability,
+            dateAvailability: schedule.dateAvailability ?? [],
             morningStartTime: schedule.morningStartTime,
             morningEndTime: schedule.morningEndTime,
             afternoonStartTime: schedule.afternoonStartTime,
@@ -47,6 +48,7 @@ export class MechanicScheduleRepository
 
         const {
             weeklyAvailability,
+            dateAvailability,
             morningStartTime,
             morningEndTime,
             afternoonStartTime,
@@ -60,6 +62,9 @@ export class MechanicScheduleRepository
                 $set: {
                     ...(weeklyAvailability !== undefined && {
                         weeklyAvailability
+                    }),
+                    ...(dateAvailability !== undefined && {
+                        dateAvailability
                     }),
                     ...(morningStartTime !== undefined && {
                         morningStartTime

@@ -19,6 +19,12 @@ export class DiscoverMechanicsController {
         const source =
             req.method === "GET" ? req.query : req.body;
 
+        const rawServiceMode = source.serviceMode;
+        const serviceMode =
+            rawServiceMode === "mobile" || rawServiceMode === "workshop"
+                ? rawServiceMode
+                : undefined;
+
         const result = await this.discoverAvailableMechanicsUseCase.execute(
             userId,
             {
@@ -28,6 +34,7 @@ export class DiscoverMechanicsController {
                 serviceType: String(source.serviceType ?? ""),
                 latitude: Number(source.latitude),
                 longitude: Number(source.longitude),
+                ...(serviceMode !== undefined ? { serviceMode } : {}),
             }
         );
 

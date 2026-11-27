@@ -244,6 +244,39 @@ export class BookingRepository implements IBookingRepository {
         return new Set(conflicts.map((doc) => doc.mechanicId.toString()));
     }
 
+    async findActiveScheduledBookingsByMechanic(
+        mechanicId: string,
+        startDate: Date,
+        endDate?: Date
+    ): Promise<Booking[]> {
+        if (!Types.ObjectId.isValid(mechanicId)) {
+            return [];
+        }
+
+        const now = new Date();
+        const dateFilter: Record<string, Date> = {
+            $gte: startDate,
+            ...(endDate !== undefined ? { $lt: endDate } : {}),
+        };
+
+        const bookings = await BookingModel.find({
+            mechanicId: new Types.ObjectId(mechanicId),
+            bookingType: "scheduled",
+            scheduledDate: dateFilter,
+            $or: [
+                { status: { $in: ACTIVE_BOOKING_STATUSES } },
+                {
+                    status: "pending_payment",
+                    reservationExpiresAt: { $gt: now },
+                },
+            ],
+        })
+            .sort({ scheduledDate: 1 })
+            .exec();
+
+        return bookings.map((booking) => BookingMapper.toDomain(booking));
+    }
+
     async updateStatus(
         bookingId: string,
         status: BookingStatus,

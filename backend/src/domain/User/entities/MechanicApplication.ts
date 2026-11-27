@@ -13,6 +13,8 @@ export type MechanicServiceModel =
     | "workshop"
     | "both";
 
+export type LocationCaptureSource = "gps" | "map" | "manual";
+
 
 export type MechanicDocumentStatus =
     | "pending"
@@ -84,10 +86,14 @@ export interface MechanicApplicationProps {
     pincode?: string;
     latitude?: number;
     longitude?: number;
+    locationSource?: LocationCaptureSource;
     serviceRadiusKm?: number;
 
     workshopName?: string;
     workshopAddress?: string;
+    workshopLatitude?: number;
+    workshopLongitude?: number;
+    workshopLocationSource?: LocationCaptureSource;
 
     // Uploaded documents
     documents?: MechanicDocument[];
@@ -205,6 +211,22 @@ export class MechanicApplication {
 
     get workshopAddress(): string | undefined {
         return this.props.workshopAddress;
+    }
+
+    get locationSource(): LocationCaptureSource | undefined {
+        return this.props.locationSource;
+    }
+
+    get workshopLatitude(): number | undefined {
+        return this.props.workshopLatitude;
+    }
+
+    get workshopLongitude(): number | undefined {
+        return this.props.workshopLongitude;
+    }
+
+    get workshopLocationSource(): LocationCaptureSource | undefined {
+        return this.props.workshopLocationSource;
     }
 
     get documents(): MechanicDocument[] {

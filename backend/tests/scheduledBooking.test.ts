@@ -215,6 +215,17 @@ function createInMemoryRepos() {
             }
             return result;
         },
+        async findActiveScheduledBookingsByMechanic(mechanicId, startDate, endDate) {
+            const now = new Date();
+            return [...bookings.values()].filter(
+                (b) =>
+                    b.mechanicId === mechanicId &&
+                    b.bookingType === "scheduled" &&
+                    b.scheduledDate >= startDate &&
+                    (!endDate || b.scheduledDate < endDate) &&
+                    isBookingBlocking(b, now)
+            );
+        },
         async updateStatus(bookingId, status: BookingStatus, additionalFields?: Partial<BookingProps>, expected?: BookingStatus[]) {
             const existing = bookings.get(bookingId);
             if (!existing) return null;

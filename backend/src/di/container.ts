@@ -476,17 +476,22 @@ export const emergencyRequestStatusController = new EmergencyRequestStatusContro
 export { getActiveEmergencyRequestUseCase }
 
 const mechanicScheduleRepository = new MechanicScheduleRepository()
+const bookingRepository = new BookingRepository()
 
 const createMechanicScheduleUseCase = new CreateMechanicScheduleUseCase(mechanicScheduleRepository)
 
-const getMechanicScheduleUseCase = new GetMechanicScheduleUseCase(mechanicScheduleRepository)
+const getMechanicScheduleUseCase = new GetMechanicScheduleUseCase(
+    mechanicScheduleRepository,
+    bookingRepository
+)
 
 
-const updateMechanicSceduleUseCase = new UpdateMechanicScheduleUseCase(mechanicScheduleRepository)
+const updateMechanicSceduleUseCase = new UpdateMechanicScheduleUseCase(
+    mechanicScheduleRepository,
+    bookingRepository
+)
 
 //booking
-
-const bookingRepository = new BookingRepository()
 
 const createSlotBookingUseCase = new CreateSlotBookingUseCase(userRepository,
     vehiceRepository,

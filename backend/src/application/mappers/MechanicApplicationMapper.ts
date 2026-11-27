@@ -103,6 +103,10 @@ export class MechanicApplicationMapper {
                 longitude: application.longitude,
             }),
 
+            ...(application.locationSource !== undefined && {
+                locationSource: application.locationSource,
+            }),
+
             ...(application.serviceRadiusKm !== undefined && {
                 serviceRadiusKm: application.serviceRadiusKm,
             }),
@@ -113,6 +117,18 @@ export class MechanicApplicationMapper {
 
             ...(application.workshopAddress !== undefined && {
                 workshopAddress: application.workshopAddress,
+            }),
+
+            ...(application.workshopLatitude !== undefined && {
+                workshopLatitude: application.workshopLatitude,
+            }),
+
+            ...(application.workshopLongitude !== undefined && {
+                workshopLongitude: application.workshopLongitude,
+            }),
+
+            ...(application.workshopLocationSource !== undefined && {
+                workshopLocationSource: application.workshopLocationSource,
             }),
 
             documents: application.documents,
@@ -231,6 +247,10 @@ export class MechanicApplicationMapper {
                 longitude: document.longitude,
             }),
 
+            ...(document.locationSource !== undefined && {
+                locationSource: document.locationSource,
+            }),
+
             ...(document.serviceRadiusKm !== undefined && {
                 serviceRadiusKm: document.serviceRadiusKm,
             }),
@@ -241,6 +261,18 @@ export class MechanicApplicationMapper {
 
             ...(document.workshopAddress !== undefined && {
                 workshopAddress: document.workshopAddress,
+            }),
+
+            ...(document.workshopLatitude !== undefined && {
+                workshopLatitude: document.workshopLatitude,
+            }),
+
+            ...(document.workshopLongitude !== undefined && {
+                workshopLongitude: document.workshopLongitude,
+            }),
+
+            ...(document.workshopLocationSource !== undefined && {
+                workshopLocationSource: document.workshopLocationSource,
             }),
 
             ...(document.submittedAt !== undefined && {
@@ -302,11 +334,19 @@ export class MechanicApplicationMapper {
 
             longitude: application.longitude,
 
+            locationSource: application.locationSource,
+
             serviceRadiusKm: application.serviceRadiusKm,
 
             workshopName: application.workshopName,
 
             workshopAddress: application.workshopAddress,
+
+            workshopLatitude: application.workshopLatitude,
+
+            workshopLongitude: application.workshopLongitude,
+
+            workshopLocationSource: application.workshopLocationSource,
 
             documents: application.documents,
 

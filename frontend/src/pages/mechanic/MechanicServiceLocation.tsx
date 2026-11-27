@@ -27,6 +27,8 @@ import type {
     UpdateMechanicServiceLocationDto,
 } from "@/types/mechanic/mechanicapplication";
 import { MobileServiceFields } from "@/components/mechanic/MobileServiceFields";
+import type { EmergencyLocation } from "@/types/emergencyRequest";
+import type { LocationCaptureSource } from "@/types/mechanic/mechanicapplication";
 import {
     getApplicationStatusInfo,
     type ApplicationStatusInfo,
@@ -38,9 +40,13 @@ interface LocationForm {
     pincode: string;
     latitude: string;
     longitude: string;
+    locationSource?: LocationCaptureSource;
     serviceRadiusKm: string;
     workshopName: string;
     workshopAddress: string;
+    workshopLatitude: string;
+    workshopLongitude: string;
+    workshopLocationSource?: LocationCaptureSource;
 }
 
 const initialForm: LocationForm = {
@@ -49,9 +55,13 @@ const initialForm: LocationForm = {
     pincode: "",
     latitude: "",
     longitude: "",
+    locationSource: undefined,
     serviceRadiusKm: "10",
     workshopName: "",
     workshopAddress: "",
+    workshopLatitude: "",
+    workshopLongitude: "",
+    workshopLocationSource: undefined,
 };
 
 const VARIANT_STYLES: Record<
@@ -121,9 +131,7 @@ export const MechanicServiceLocationPage = () => {
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [locating, setLocating] = useState(false);
     const [hasApplication, setHasApplication] = useState<boolean>(false);
-    const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
     const [statusInfo, setStatusInfo] = useState<ApplicationStatusInfo | null>(null);
     const [applicationError, setApplicationError] = useState<string | null>(null);
 
@@ -140,7 +148,6 @@ export const MechanicServiceLocationPage = () => {
 
                 if (!application) {
                     setHasApplication(false);
-                    setApplicationStatus(null);
                     setStatusInfo(null);
                     setApplicationError(
                         "No mechanic application found for your account. Complete mechanic onboarding to create your application before setting a service location."
@@ -149,7 +156,6 @@ export const MechanicServiceLocationPage = () => {
                 }
 
                 setHasApplication(true);
-                setApplicationStatus(application.status);
 
                 const info = getApplicationStatusInfo(
                     application.status,
@@ -170,12 +176,26 @@ export const MechanicServiceLocationPage = () => {
                         application.longitude !== undefined
                             ? String(application.longitude)
                             : "",
+                    locationSource: application.locationSource,
                     serviceRadiusKm:
                         application.serviceRadiusKm !== undefined
                             ? String(application.serviceRadiusKm)
                             : "10",
                     workshopName: application.workshopName ?? "",
                     workshopAddress: application.workshopAddress ?? "",
+                    workshopLatitude:
+                        application.workshopLatitude !== undefined
+                            ? String(application.workshopLatitude)
+                            : application.latitude !== undefined
+                              ? String(application.latitude)
+                              : "",
+                    workshopLongitude:
+                        application.workshopLongitude !== undefined
+                            ? String(application.workshopLongitude)
+                            : application.longitude !== undefined
+                              ? String(application.longitude)
+                              : "",
+                    workshopLocationSource: application.workshopLocationSource,
                 });
             } catch (error) {
                 if (cancelled) return;
@@ -232,7 +252,7 @@ export const MechanicServiceLocationPage = () => {
     };
 
     const handleWorkshopFieldChange = (
-        field: "workshopName" | "workshopAddress",
+        field: "workshopName" | "workshopAddress" | "serviceRadiusKm",
         value: string
     ) => {
 
@@ -242,78 +262,47 @@ export const MechanicServiceLocationPage = () => {
         }));
     };
 
-    // Get current GPS coordinates.
-    const handleGetCurrentLocation = () => {
-
-        if (!navigator.geolocation) {
-            showToast(
-                "Geolocation is not supported by this browser",
-                "error"
-            );
+    const handleMobileLocationSelect = (loc: EmergencyLocation | null) => {
+        if (!loc) {
+            setForm((previous) => ({
+                ...previous,
+                latitude: "",
+                longitude: "",
+                locationSource: undefined,
+            }));
             return;
         }
 
-        setLocating(true);
+        setForm((previous) => ({
+            ...previous,
+            latitude: String(loc.latitude),
+            longitude: String(loc.longitude),
+            locationSource: loc.source ?? "gps",
+            ...(loc.address ? { serviceAddress: loc.address } : {}),
+            ...(loc.pincode && !previous.pincode.trim()
+                ? { pincode: loc.pincode }
+                : {}),
+        }));
+    };
 
-        navigator.geolocation.getCurrentPosition(
+    const handleWorkshopLocationSelect = (loc: EmergencyLocation | null) => {
+        if (!loc) {
+            setForm((previous) => ({
+                ...previous,
+                workshopLatitude: "",
+                workshopLongitude: "",
+                workshopLocationSource: undefined,
+            }));
+            return;
+        }
 
-            (position) => {
-
-                setForm((previous) => ({
-                    ...previous,
-                    latitude: String(position.coords.latitude),
-                    longitude: String(position.coords.longitude),
-                }));
-
-                setLocating(false);
-
-                showToast(
-                    "Current location captured successfully",
-                    "success"
-                );
-            },
-
-            (error) => {
-
-                setLocating(false);
-
-                switch (error.code) {
-
-                    case error.PERMISSION_DENIED:
-                        showToast(
-                            "Please allow location access in your browser",
-                            "error"
-                        );
-                        break;
-
-                    case error.POSITION_UNAVAILABLE:
-                        showToast(
-                            "Unable to determine your current location",
-                            "error"
-                        );
-                        break;
-
-                    case error.TIMEOUT:
-                        showToast(
-                            "Location request timed out. Try again",
-                            "error"
-                        );
-                        break;
-
-                    default:
-                        showToast(
-                            "Unable to get your current location",
-                            "error"
-                        );
-                }
-            },
-
-            {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 0,
-            }
-        );
+        setForm((previous) => ({
+            ...previous,
+            workshopLatitude: String(loc.latitude),
+            workshopLongitude: String(loc.longitude),
+            workshopLocationSource: loc.source ?? "gps",
+            ...(loc.address ? { workshopAddress: loc.address } : {}),
+        }));
     };
 
     const validateForm = (): boolean => {
@@ -385,13 +374,39 @@ export const MechanicServiceLocationPage = () => {
                 showToast("Enter your workshop address", "error");
                 return false;
             }
+
+            const wLat = Number(form.workshopLatitude);
+            const wLng = Number(form.workshopLongitude);
+            const baseLat = Number(form.latitude);
+            const baseLng = Number(form.longitude);
+
+            const hasValidWorkshopCoords =
+                Boolean(form.workshopLatitude) &&
+                Boolean(form.workshopLongitude) &&
+                Number.isFinite(wLat) &&
+                Number.isFinite(wLng) &&
+                wLat >= -90 &&
+                wLat <= 90 &&
+                wLng >= -180 &&
+                wLng <= 180;
+
+            const hasValidBaseCoords =
+                Boolean(form.latitude) &&
+                Boolean(form.longitude) &&
+                Number.isFinite(baseLat) &&
+                Number.isFinite(baseLng);
+
+            if (form.serviceModel === "workshop" && !hasValidWorkshopCoords && !hasValidBaseCoords) {
+                showToast("Please select your workshop location on the map", "error");
+                return false;
+            }
         }
 
         return true;
     };
 
     const handleSave = async () => {
-        if (saving || locating) return;
+        if (saving) return;
 
         if (!hasApplication) {
             showToast(
@@ -421,7 +436,15 @@ export const MechanicServiceLocationPage = () => {
 
         const parsedLat = Number(form.latitude);
         const parsedLng = Number(form.longitude);
+        const parsedWorkshopLat = Number(form.workshopLatitude);
+        const parsedWorkshopLng = Number(form.workshopLongitude);
         const parsedRadius = Number(form.serviceRadiusKm);
+
+        const hasWorkshopCoords =
+            form.workshopLatitude.trim() !== "" &&
+            form.workshopLongitude.trim() !== "" &&
+            Number.isFinite(parsedWorkshopLat) &&
+            Number.isFinite(parsedWorkshopLng);
 
         const payload: UpdateMechanicServiceLocationDto = {
             serviceModel: form.serviceModel,
@@ -431,6 +454,7 @@ export const MechanicServiceLocationPage = () => {
                 pincode: form.pincode.trim(),
                 latitude: parsedLat,
                 longitude: parsedLng,
+                ...(form.locationSource ? { locationSource: form.locationSource } : {}),
                 serviceRadiusKm: parsedRadius,
             }),
 
@@ -441,6 +465,7 @@ export const MechanicServiceLocationPage = () => {
                 Number.isFinite(parsedLng) && {
                     latitude: parsedLat,
                     longitude: parsedLng,
+                    ...(form.locationSource ? { locationSource: form.locationSource } : {}),
                 }),
 
             ...(!requiresMobile &&
@@ -452,6 +477,13 @@ export const MechanicServiceLocationPage = () => {
             ...(requiresWorkshop && {
                 workshopName: form.workshopName.trim(),
                 workshopAddress: form.workshopAddress.trim(),
+                ...(hasWorkshopCoords && {
+                    workshopLatitude: parsedWorkshopLat,
+                    workshopLongitude: parsedWorkshopLng,
+                    ...(form.workshopLocationSource
+                        ? { workshopLocationSource: form.workshopLocationSource }
+                        : {}),
+                }),
             }),
         };
 
@@ -464,7 +496,6 @@ export const MechanicServiceLocationPage = () => {
                 );
 
             setHasApplication(true);
-            setApplicationStatus(updatedApplication.status);
             setStatusInfo(
                 getApplicationStatusInfo(
                     updatedApplication.status,
@@ -488,12 +519,27 @@ export const MechanicServiceLocationPage = () => {
                     updatedApplication.longitude !== undefined
                         ? String(updatedApplication.longitude)
                         : "",
+                locationSource: updatedApplication.locationSource,
                 serviceRadiusKm:
                     updatedApplication.serviceRadiusKm !== undefined
                         ? String(updatedApplication.serviceRadiusKm)
                         : "10",
                 workshopName: updatedApplication.workshopName ?? "",
                 workshopAddress: updatedApplication.workshopAddress ?? "",
+                workshopLatitude:
+                    updatedApplication.workshopLatitude !== undefined
+                        ? String(updatedApplication.workshopLatitude)
+                        : updatedApplication.latitude !== undefined
+                          ? String(updatedApplication.latitude)
+                          : "",
+                workshopLongitude:
+                    updatedApplication.workshopLongitude !== undefined
+                        ? String(updatedApplication.workshopLongitude)
+                        : updatedApplication.longitude !== undefined
+                          ? String(updatedApplication.longitude)
+                          : "",
+                workshopLocationSource:
+                    updatedApplication.workshopLocationSource,
             }));
 
             showToast(
@@ -607,10 +653,10 @@ export const MechanicServiceLocationPage = () => {
                     pincode={form.pincode}
                     latitude={form.latitude}
                     longitude={form.longitude}
+                    locationSource={form.locationSource}
                     serviceRadiusKm={form.serviceRadiusKm}
-                    locating={locating}
                     onChange={handleMobileFieldChange}
-                    onGetLocation={handleGetCurrentLocation}
+                    onLocationSelect={handleMobileLocationSelect}
                 />
 
             )}
@@ -621,7 +667,13 @@ export const MechanicServiceLocationPage = () => {
                 <WorkshopServiceFields
                     workshopName={form.workshopName}
                     workshopAddress={form.workshopAddress}
+                    workshopLatitude={form.workshopLatitude}
+                    workshopLongitude={form.workshopLongitude}
+                    workshopLocationSource={form.workshopLocationSource}
+                    showRadius={!requiresMobile}
+                    serviceRadiusKm={form.serviceRadiusKm}
                     onChange={handleWorkshopFieldChange}
+                    onWorkshopLocationSelect={handleWorkshopLocationSelect}
                 />
 
             )}
@@ -631,7 +683,7 @@ export const MechanicServiceLocationPage = () => {
 
                 <Button
                     onClick={handleSave}
-                    disabled={saving || locating || !hasApplication || !statusInfo?.canEditServiceLocation}
+                    disabled={saving || !hasApplication || !statusInfo?.canEditServiceLocation}
                     className="w-full sm:w-auto"
                 >
 

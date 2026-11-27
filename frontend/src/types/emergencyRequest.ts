@@ -22,7 +22,9 @@ export type EmergencyRequestStatus =
 export interface EmergencyLocation {
     latitude: number,
     longitude: number,
-    address?: string
+    address?: string,
+    source?: "gps" | "map" | "manual",
+    pincode?: string
 }
 
 export interface EmergencyVehicleOption {

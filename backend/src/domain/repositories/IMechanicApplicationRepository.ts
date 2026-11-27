@@ -1,4 +1,5 @@
 import {
+     LocationCaptureSource,
      MechanicApplication,
      MechanicApplicationStatus,
      MechanicServiceModel,
@@ -11,9 +12,13 @@ export interface ServiceLocationUpdateData {
      pincode?: string;
      latitude?: number;
      longitude?: number;
+     locationSource?: LocationCaptureSource;
      serviceRadiusKm?: number;
      workshopName?: string;
      workshopAddress?: string;
+     workshopLatitude?: number;
+     workshopLongitude?: number;
+     workshopLocationSource?: LocationCaptureSource;
 }
 
 export interface IMechanicApplicationRepository {

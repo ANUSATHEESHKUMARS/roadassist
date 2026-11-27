@@ -3,6 +3,59 @@ import { BadRequest } from "../errors/BadRequestError.js";
 
 export const INDIA_TIME_ZONE = "Asia/Kolkata";
 
+const DATE_KEY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+export function isValidDateKey(dateKey: string): boolean {
+    if (typeof dateKey !== "string" || !DATE_KEY_REGEX.test(dateKey.trim())) {
+        return false;
+    }
+
+    const [yearStr, monthStr, dayStr] = dateKey.trim().split("-");
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+
+    if (month < 1 || month > 12 || day < 1 || day > 31) {
+        return false;
+    }
+
+    const checkDate = new Date(Date.UTC(year, month - 1, day));
+    return (
+        checkDate.getUTCFullYear() === year &&
+        checkDate.getUTCMonth() === month - 1 &&
+        checkDate.getUTCDate() === day
+    );
+}
+
+export function parseIndiaDateKeyToDate(dateKey: string): Date {
+    const trimmed = typeof dateKey === "string" ? dateKey.trim() : "";
+    if (!isValidDateKey(trimmed)) {
+        throw new BadRequest(
+            "Invalid date format. Use YYYY-MM-DD",
+            "INVALID_DATE_KEY"
+        );
+    }
+    return new Date(`${trimmed}T00:00:00+05:30`);
+}
+
+export function getIndiaTodayDateKey(now: Date = new Date()): string {
+    return getIndiaDayKey(now);
+}
+
+export function getIndiaDayOfWeekFromDateKey(dateKey: string): IndiaWeekday {
+    const date = parseIndiaDateKeyToDate(dateKey);
+    return getIndiaDateParts(date).dayOfWeek;
+}
+
+export function getIndiaDateRangeForDayKeys(
+    startDateKey: string,
+    endDateKey: string
+): { startOfRange: Date; endOfRange: Date } {
+    const startOfRange = parseIndiaDateKeyToDate(startDateKey);
+    const { endOfDay } = getIndiaDayRange(parseIndiaDateKeyToDate(endDateKey));
+    return { startOfRange, endOfRange: endOfDay };
+}
+
 export const WEEKDAY_MAP = [
     "sunday",
     "monday",

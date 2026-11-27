@@ -36,7 +36,10 @@ const API_ROUTES = {
       BASE: "/mechanic/schedule",
       CREATE: "/mechanic/schedule/create",
       UPDATE: "/mechanic/schedule/update",
-
+      DATE_AVAILABILITY: "/mechanic/schedule/date-availability",
+      REMOVE_DATE_AVAILABILITY: (date: string) =>
+        `/mechanic/schedule/date-availability/${encodeURIComponent(date)}`,
+      BOOKED_DATES: "/mechanic/schedule/booked-dates",
     },
 
     AVAILABILITY: "/mechanic/availability",

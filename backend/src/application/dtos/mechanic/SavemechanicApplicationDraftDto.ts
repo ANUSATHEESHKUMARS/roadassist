@@ -1,5 +1,6 @@
 
 import {
+    LocationCaptureSource,
     MechanicServiceModel,
     SupportedVehicleType,
     MechanicDocument,
@@ -30,15 +31,23 @@ export interface SaveMechanicApplicationDraftDto {
 
     pincode?: string;
 
-    latitude?: number;
+    latitude?: number | string;
 
-    longitude?: number;
+    longitude?: number | string;
 
-    serviceRadiusKm?: number;
+    locationSource?: LocationCaptureSource;
+
+    serviceRadiusKm?: number | string;
 
     workshopName?: string;
 
     workshopAddress?: string;
+
+    workshopLatitude?: number | string;
+
+    workshopLongitude?: number | string;
+
+    workshopLocationSource?: LocationCaptureSource;
 
     documents?: MechanicDocument[];
 }

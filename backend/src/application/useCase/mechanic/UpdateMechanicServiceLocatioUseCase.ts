@@ -73,6 +73,8 @@ export class UpdateMechanicServiceLocationUseCase
 
         const parsedLatitude = parseFiniteNumber(dto.latitude);
         const parsedLongitude = parseFiniteNumber(dto.longitude);
+        const parsedWorkshopLatitude = parseFiniteNumber(dto.workshopLatitude);
+        const parsedWorkshopLongitude = parseFiniteNumber(dto.workshopLongitude);
         const parsedRadius = parseFiniteNumber(dto.serviceRadiusKm);
 
         if (requiresMobileLocation) {
@@ -169,6 +171,51 @@ export class UpdateMechanicServiceLocationUseCase
                     "WORKSHOP_ADDRESS_REQUIRED"
                 );
             }
+
+            if (
+                parsedWorkshopLatitude !== undefined ||
+                parsedWorkshopLongitude !== undefined
+            ) {
+                if (
+                    parsedWorkshopLatitude === undefined ||
+                    parsedWorkshopLongitude === undefined ||
+                    !Number.isFinite(parsedWorkshopLatitude) ||
+                    parsedWorkshopLatitude < -90 ||
+                    parsedWorkshopLatitude > 90 ||
+                    !Number.isFinite(parsedWorkshopLongitude) ||
+                    parsedWorkshopLongitude < -180 ||
+                    parsedWorkshopLongitude > 180
+                ) {
+                    throw new BadRequest(
+                        "Invalid workshop coordinates",
+                        "INVALID_WORKSHOP_COORDINATES"
+                    );
+                }
+            }
+
+            if (dto.serviceModel === "workshop") {
+                const hasIncomingWorkshopCoords =
+                    parsedWorkshopLatitude !== undefined &&
+                    parsedWorkshopLongitude !== undefined;
+                const hasIncomingBaseCoords =
+                    parsedLatitude !== undefined && parsedLongitude !== undefined;
+                const hasExistingCoords =
+                    (application.workshopLatitude !== undefined &&
+                        application.workshopLongitude !== undefined) ||
+                    (application.latitude !== undefined &&
+                        application.longitude !== undefined);
+
+                if (
+                    !hasIncomingWorkshopCoords &&
+                    !hasIncomingBaseCoords &&
+                    !hasExistingCoords
+                ) {
+                    throw new BadRequest(
+                        "Workshop coordinates are required",
+                        "WORKSHOP_COORDINATES_REQUIRED"
+                    );
+                }
+            }
         }
 
         // Targeted service-location fields only (do NOT touch unrelated application fields)
@@ -180,6 +227,9 @@ export class UpdateMechanicServiceLocationUseCase
                 latitude: parsedLatitude!,
                 longitude: parsedLongitude!,
                 serviceRadiusKm: parsedRadius!,
+                ...(dto.locationSource !== undefined && {
+                    locationSource: dto.locationSource,
+                }),
             }),
             ...(!requiresMobileLocation &&
                 parsedLatitude !== undefined &&
@@ -188,12 +238,24 @@ export class UpdateMechanicServiceLocationUseCase
                     longitude: parsedLongitude,
                 }),
             ...(!requiresMobileLocation &&
+                dto.locationSource !== undefined && {
+                    locationSource: dto.locationSource,
+                }),
+            ...(!requiresMobileLocation &&
                 parsedRadius !== undefined && {
                     serviceRadiusKm: parsedRadius,
                 }),
             ...(requiresWorkshopLocation && {
                 workshopName: dto.workshopName!.trim(),
                 workshopAddress: dto.workshopAddress!.trim(),
+                ...(parsedWorkshopLatitude !== undefined &&
+                    parsedWorkshopLongitude !== undefined && {
+                        workshopLatitude: parsedWorkshopLatitude,
+                        workshopLongitude: parsedWorkshopLongitude,
+                    }),
+                ...(dto.workshopLocationSource !== undefined && {
+                    workshopLocationSource: dto.workshopLocationSource,
+                }),
             }),
         };
 
@@ -201,6 +263,16 @@ export class UpdateMechanicServiceLocationUseCase
 
         if (dto.serviceModel === "mobile") {
             unsetFields.push("workshopName", "workshopAddress");
+            if (
+                application.workshopLatitude !== undefined ||
+                application.workshopLongitude !== undefined
+            ) {
+                unsetFields.push(
+                    "workshopLatitude",
+                    "workshopLongitude",
+                    "workshopLocationSource"
+                );
+            }
         }
 
         if (dto.serviceModel === "workshop") {

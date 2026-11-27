@@ -1,12 +1,25 @@
 import { BookingSlot } from "../../domain/User/Types/BookingTypes.js";
 import { BadRequest } from "../../shared/errors/BadRequestError.js";
-import { compareIndiaDateWithToday } from "../../shared/utils/timezone.js";
+import {
+    compareIndiaDateWithToday,
+    parseIndiaDateKeyToDate,
+} from "../../shared/utils/timezone.js";
 
 const VALID_SLOTS: BookingSlot[] = ["morning", "afternoon", "full_day"];
 
 export class BookingValidator {
     static parseAndValidateDate(dateInput: string | Date): Date {
-        const parsed = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        let parsed: Date;
+        if (
+            typeof dateInput === "string" &&
+            /^\d{4}-\d{2}-\d{2}$/.test(dateInput.trim())
+        ) {
+            parsed = parseIndiaDateKeyToDate(dateInput.trim());
+        } else {
+            parsed =
+                dateInput instanceof Date ? dateInput : new Date(dateInput);
+        }
+
         if (Number.isNaN(parsed.getTime())) {
             throw new BadRequest("Invalid booking date", "INVALID_BOOKING_DATE");
         }

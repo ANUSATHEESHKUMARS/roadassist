@@ -9,11 +9,7 @@ import { BadRequest } from "../../../shared/errors/BadRequestError.js";
 import { ConflictError } from "../../../shared/errors/ConflitError.js";
 import { ForbiddenError } from "../../../shared/errors/ForbiddenError.js";
 import { NotfoundError } from "../../../shared/errors/NotFoundError.js";
-import { calculateDistanceKm } from "../../../shared/utils/haversine.js";
-import {
-    getIndiaDateParts,
-    isShiftWindowPassedForDate,
-} from "../../../shared/utils/timezone.js";
+import { isShiftWindowPassedForDate } from "../../../shared/utils/timezone.js";
 import {
     getBookingAmountInr,
     getBookingCurrency,
@@ -24,6 +20,8 @@ import {
     CreateBookingReservationResponseDto,
 } from "../../dtos/booking/ScheduledBookingDtos.js";
 import { ICreateBookingReservationUseCase } from "../../interfaces/booking/IScheduledBookingUseCases.js";
+import { MechanicAvailabilityResolver } from "../../services/MechanicAvailabilityResolver.js";
+import { MechanicLocationResolver } from "../../services/MechanicLocationResolver.js";
 import { BookingValidator } from "../../validators/BookingValidator.js";
 
 export class CreateBookingReservationUseCase
@@ -116,24 +114,20 @@ export class CreateBookingReservationUseCase
             );
         }
 
-        if (
-            application.latitude === undefined ||
-            application.longitude === undefined ||
-            application.serviceRadiusKm === undefined
-        ) {
+        if (!MechanicLocationResolver.hasValidDiscoveryLocation(application)) {
             throw new BadRequest(
                 "Mechanic service location is not configured",
                 "MECHANIC_LOCATION_UNAVAILABLE"
             );
         }
 
-        const distanceKm = calculateDistanceKm(
+        const resolvedLocation = MechanicLocationResolver.resolveForCustomer(
+            application,
             latitude,
             longitude,
-            application.latitude,
-            application.longitude
+            dto.serviceMode
         );
-        if (distanceKm > application.serviceRadiusKm) {
+        if (!resolvedLocation) {
             throw new BadRequest(
                 "Selected mechanic is outside the service radius",
                 "OUTSIDE_SERVICE_RADIUS"
@@ -149,25 +143,22 @@ export class CreateBookingReservationUseCase
             );
         }
 
-        const dateParts = getIndiaDateParts(scheduledDate);
-        const dailySchedule = schedule.weeklyAvailability.find(
-            (item) => item.day === dateParts.dayOfWeek
-        );
-        if (!dailySchedule) {
+        const resolvedAvailability =
+            MechanicAvailabilityResolver.resolveForDate(schedule, scheduledDate);
+
+        if (!resolvedAvailability.isAvailable) {
             throw new ConflictError(
                 "Mechanic is not available on this day",
                 "DAY_UNAVAILABLE"
             );
         }
 
-        const shiftAvailable =
-            slot === "morning"
-                ? dailySchedule.morning
-                : slot === "afternoon"
-                  ? dailySchedule.afternoon
-                  : dailySchedule.morning && dailySchedule.afternoon;
-
-        if (!shiftAvailable) {
+        if (
+            !MechanicAvailabilityResolver.isSlotAvailable(
+                resolvedAvailability,
+                slot
+            )
+        ) {
             throw new ConflictError(
                 "Mechanic is not available for the selected shift",
                 "SHIFT_UNAVAILABLE"
@@ -180,10 +171,11 @@ export class CreateBookingReservationUseCase
                 scheduledDate,
                 slot,
                 {
-                    morningStartTime: schedule.morningStartTime,
-                    morningEndTime: schedule.morningEndTime,
-                    afternoonStartTime: schedule.afternoonStartTime,
-                    afternoonEndTime: schedule.afternoonEndTime,
+                    morningStartTime: resolvedAvailability.morningStartTime,
+                    morningEndTime: resolvedAvailability.morningEndTime,
+                    afternoonStartTime:
+                        resolvedAvailability.afternoonStartTime,
+                    afternoonEndTime: resolvedAvailability.afternoonEndTime,
                 },
                 now
             )

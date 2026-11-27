@@ -41,6 +41,12 @@ export interface IBookingRepository {
         slot: BookingSlot
     ): Promise<Set<string>>;
 
+    findActiveScheduledBookingsByMechanic(
+        mechanicId: string,
+        startDate: Date,
+        endDate?: Date
+    ): Promise<Booking[]>;
+
     updateStatus(
         bookingId: string,
         status: BookingStatus,

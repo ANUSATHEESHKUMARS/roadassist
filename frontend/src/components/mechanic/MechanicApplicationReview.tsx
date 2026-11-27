@@ -199,11 +199,12 @@ export const MechanicApplicationReview: React.FC<ReviewProps> = ({
           {data.latitude !== undefined && data.longitude !== undefined && (
             <div className="sm:col-span-2">
               <span className="text-[10px] text-muted-foreground uppercase font-semibold">
-                GPS Coordinates
+                Service Coordinates
               </span>
 
               <p className="text-foreground mt-1 font-mono">
                 {data.latitude.toFixed(6)}, {data.longitude.toFixed(6)}
+                {data.locationSource ? ` (${data.locationSource})` : ""}
               </p>
             </div>
           )}
@@ -228,6 +229,19 @@ export const MechanicApplicationReview: React.FC<ReviewProps> = ({
 
               <p className="text-foreground mt-1">
                 {data.workshopAddress}
+              </p>
+            </div>
+          )}
+
+          {data.workshopLatitude !== undefined && data.workshopLongitude !== undefined && (
+            <div className="sm:col-span-2">
+              <span className="text-[10px] text-muted-foreground uppercase font-semibold">
+                Workshop Coordinates
+              </span>
+
+              <p className="text-foreground mt-1 font-mono">
+                {data.workshopLatitude.toFixed(6)}, {data.workshopLongitude.toFixed(6)}
+                {data.workshopLocationSource ? ` (${data.workshopLocationSource})` : ""}
               </p>
             </div>
           )}

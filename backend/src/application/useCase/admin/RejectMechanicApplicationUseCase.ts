@@ -70,6 +70,7 @@ export class RejectMechanicApplicationUseCase
             // Updated specialization structure
             specializations: application.specializations,
             supportedVehicleTypes: application.supportedVehicleTypes,
+            serviceOffered: application.serviceOffered,
 
             documents: application.documents,
 
@@ -105,6 +106,10 @@ export class RejectMechanicApplicationUseCase
                 longitude: application.longitude
             }),
 
+            ...(application.locationSource !== undefined && {
+                locationSource: application.locationSource
+            }),
+
             ...(application.serviceRadiusKm !== undefined && {
                 serviceRadiusKm: application.serviceRadiusKm
             }),
@@ -115,6 +120,18 @@ export class RejectMechanicApplicationUseCase
 
             ...(application.workshopAddress !== undefined && {
                 workshopAddress: application.workshopAddress
+            }),
+
+            ...(application.workshopLatitude !== undefined && {
+                workshopLatitude: application.workshopLatitude
+            }),
+
+            ...(application.workshopLongitude !== undefined && {
+                workshopLongitude: application.workshopLongitude
+            }),
+
+            ...(application.workshopLocationSource !== undefined && {
+                workshopLocationSource: application.workshopLocationSource
             }),
 
             ...(application.submittedAt !== undefined && {

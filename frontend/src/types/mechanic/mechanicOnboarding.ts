@@ -1,5 +1,6 @@
 
 export type MechanicType = "mobile" | "workshop" | "both";
+export type LocationCaptureSource = "gps" | "map" | "manual";
 
 export type VehicleSpecialization =
   | "car"
@@ -62,9 +63,13 @@ export interface MechanicOnboardingRequest {
   pincode?: string;
   latitude?: number;
   longitude?: number;
+  locationSource?: LocationCaptureSource;
   serviceRadiusKm?: number;
   workshopName?: string;
   workshopAddress?: string;
+  workshopLatitude?: number;
+  workshopLongitude?: number;
+  workshopLocationSource?: LocationCaptureSource;
   documents: DocumentEntry[];
 }
 export type SaveMechanicDraftRequest =

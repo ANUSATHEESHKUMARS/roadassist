@@ -32,6 +32,19 @@ export class CreateMechanicScheduleUseCase
             );
         }
 
+        const normalizedDateAvailability =
+            dto.dateAvailability !== undefined
+                ? MechanicScheduleValidator.validateDateAvailabilityList(
+                      dto.dateAvailability,
+                      {
+                          morningStartTime: dto.morningStartTime,
+                          morningEndTime: dto.morningEndTime,
+                          afternoonStartTime: dto.afternoonStartTime,
+                          afternoonEndTime: dto.afternoonEndTime,
+                      }
+                  )
+                : [];
+
         const schedule = new MechanicSchedule(
             mechanicId,
             dto.weeklyAvailability,
@@ -39,7 +52,11 @@ export class CreateMechanicScheduleUseCase
             dto.morningEndTime,
             dto.afternoonStartTime,
             dto.afternoonEndTime,
-            true
+            dto.isActive !== undefined ? dto.isActive : true,
+            undefined,
+            undefined,
+            undefined,
+            normalizedDateAvailability
         );
 
         return await this.scheduleRepository.create(schedule);

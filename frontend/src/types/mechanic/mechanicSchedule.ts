@@ -14,10 +14,29 @@ export interface DailySchedule {
     afternoon: boolean;
 }
 
+export interface DateAvailability {
+    date: string;
+    isAvailable: boolean;
+    morning: boolean;
+    afternoon: boolean;
+    morningStartTime?: string;
+    morningEndTime?: string;
+    afternoonStartTime?: string;
+    afternoonEndTime?: string;
+}
+
+export interface MechanicBookedDate {
+    bookingId: string;
+    date: string;
+    slot: "morning" | "afternoon" | "full_day";
+    status: string;
+}
+
 export interface MechanicSchedule {
     id?: string;
     mechanicId: string;
     weeklyAvailability: DailySchedule[];
+    dateAvailability?: DateAvailability[];
     morningStartTime: string;
     morningEndTime: string;
     afternoonStartTime: string;
@@ -29,6 +48,7 @@ export interface MechanicSchedule {
 
 export interface CreateMechanicScheduleDto {
     weeklyAvailability: DailySchedule[];
+    dateAvailability?: DateAvailability[];
     morningStartTime: string;
     morningEndTime: string;
     afternoonStartTime: string;

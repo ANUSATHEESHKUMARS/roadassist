@@ -5,11 +5,7 @@ import { IUserRepository } from "../../../domain/repositories/IUserRepository.js
 import { IVehicleRepository } from "../../../domain/repositories/IVehicleRepository.js";
 import { ForbiddenError } from "../../../shared/errors/ForbiddenError.js";
 import { NotfoundError } from "../../../shared/errors/NotFoundError.js";
-import { calculateDistanceKm } from "../../../shared/utils/haversine.js";
-import {
-    getIndiaDateParts,
-    isShiftWindowPassedForDate,
-} from "../../../shared/utils/timezone.js";
+import { isShiftWindowPassedForDate } from "../../../shared/utils/timezone.js";
 import {
     getBookingAmountInr,
     getBookingCurrency,
@@ -20,6 +16,8 @@ import {
     DiscoverMechanicsResponseDto,
 } from "../../dtos/booking/ScheduledBookingDtos.js";
 import { IDiscoverAvailableMechanicsUseCase } from "../../interfaces/booking/IScheduledBookingUseCases.js";
+import { MechanicAvailabilityResolver } from "../../services/MechanicAvailabilityResolver.js";
+import { MechanicLocationResolver } from "../../services/MechanicLocationResolver.js";
 import { BookingValidator } from "../../validators/BookingValidator.js";
 
 export class DiscoverAvailableMechanicsUseCase
@@ -70,9 +68,6 @@ export class DiscoverAvailableMechanicsUseCase
         const approvedApps =
             await this.mechanicApplicationRepository.findByStatus("approved");
 
-        const dateParts = getIndiaDateParts(scheduledDate);
-        const dayOfWeek = dateParts.dayOfWeek;
-
         // Pre-filter by vehicle type, service offered, and valid coordinates/radius
         const candidateApps = approvedApps.filter((app) => {
             if (!app.supportedVehicleTypes.includes(vehicle.vehicleType)) {
@@ -81,12 +76,7 @@ export class DiscoverAvailableMechanicsUseCase
             if (!app.serviceOffered.includes(serviceType)) {
                 return false;
             }
-            if (
-                app.latitude === undefined ||
-                app.longitude === undefined ||
-                app.serviceRadiusKm === undefined ||
-                app.serviceRadiusKm <= 0
-            ) {
+            if (!MechanicLocationResolver.hasValidDiscoveryLocation(app)) {
                 return false;
             }
             return true;
@@ -133,29 +123,24 @@ export class DiscoverAvailableMechanicsUseCase
                 continue;
             }
 
-            // Filter 4: Active schedule
+            // Filter 4, 5 & 6: Active schedule + resolved date override or weekly availability
             const schedule = scheduleMap.get(app.userId);
             if (!schedule || !schedule.isActive) {
                 continue;
             }
 
-            // Filter 5: Weekday enabled
-            const dailySchedule = schedule.weeklyAvailability.find(
-                (item) => item.day === dayOfWeek
-            );
-            if (!dailySchedule) {
-                continue;
-            }
+            const resolvedAvailability =
+                MechanicAvailabilityResolver.resolveForDate(
+                    schedule,
+                    scheduledDate
+                );
 
-            // Filter 6: Shift available & not already past for today in Asia/Kolkata
-            const shiftAvailable =
-                slot === "morning"
-                    ? dailySchedule.morning
-                    : slot === "afternoon"
-                      ? dailySchedule.afternoon
-                      : dailySchedule.morning && dailySchedule.afternoon;
-
-            if (!shiftAvailable) {
+            if (
+                !MechanicAvailabilityResolver.isSlotAvailable(
+                    resolvedAvailability,
+                    slot
+                )
+            ) {
                 continue;
             }
 
@@ -164,10 +149,11 @@ export class DiscoverAvailableMechanicsUseCase
                     scheduledDate,
                     slot,
                     {
-                        morningStartTime: schedule.morningStartTime,
-                        morningEndTime: schedule.morningEndTime,
-                        afternoonStartTime: schedule.afternoonStartTime,
-                        afternoonEndTime: schedule.afternoonEndTime,
+                        morningStartTime: resolvedAvailability.morningStartTime,
+                        morningEndTime: resolvedAvailability.morningEndTime,
+                        afternoonStartTime:
+                            resolvedAvailability.afternoonStartTime,
+                        afternoonEndTime: resolvedAvailability.afternoonEndTime,
                     },
                     now
                 )
@@ -175,14 +161,15 @@ export class DiscoverAvailableMechanicsUseCase
                 continue;
             }
 
-            // Filter 9: Within service radius (Haversine)
-            const distanceKm = calculateDistanceKm(
-                latitude,
-                longitude,
-                app.latitude!,
-                app.longitude!
-            );
-            if (distanceKm > app.serviceRadiusKm!) {
+            // Filter 9: Within service radius (Haversine against serviceModel location)
+            const resolvedLocation =
+                MechanicLocationResolver.resolveForCustomer(
+                    app,
+                    latitude,
+                    longitude,
+                    dto.serviceMode
+                );
+            if (!resolvedLocation) {
                 continue;
             }
 
@@ -209,12 +196,12 @@ export class DiscoverAvailableMechanicsUseCase
                 ...(app.experienceYears !== undefined
                     ? { experienceYears: app.experienceYears }
                     : {}),
-                distanceKm,
-                serviceRadiusKm: app.serviceRadiusKm!,
-                morningStartTime: schedule.morningStartTime,
-                morningEndTime: schedule.morningEndTime,
-                afternoonStartTime: schedule.afternoonStartTime,
-                afternoonEndTime: schedule.afternoonEndTime,
+                distanceKm: resolvedLocation.distanceKm,
+                serviceRadiusKm: resolvedLocation.serviceRadiusKm,
+                morningStartTime: resolvedAvailability.morningStartTime,
+                morningEndTime: resolvedAvailability.morningEndTime,
+                afternoonStartTime: resolvedAvailability.afternoonStartTime,
+                afternoonEndTime: resolvedAvailability.afternoonEndTime,
             });
         }
 

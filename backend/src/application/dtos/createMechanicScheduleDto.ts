@@ -1,5 +1,8 @@
 
-import { DailySchedule } from "../../domain/User/entities/MechanicSchedule.js";
+import {
+    DailySchedule,
+    DateAvailability,
+} from "../../domain/User/entities/MechanicSchedule.js";
 
 export interface CreateMechanicScheduleDto {
     weeklyAvailability: DailySchedule[];
@@ -9,4 +12,8 @@ export interface CreateMechanicScheduleDto {
 
     afternoonStartTime: string;
     afternoonEndTime: string;
+
+    isActive?: boolean;
+
+    dateAvailability?: DateAvailability[];
 }

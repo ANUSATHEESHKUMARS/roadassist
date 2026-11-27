@@ -38,14 +38,6 @@ import {
 } from "@/services/mechanic/mechanicApplicaitonService";
 
 
-import type {
-    MechanicApplicationStatus,
-    MechanicServiceModel,
-    SupportedVehicleType,
-    MechanicDocumentType,
-} from "../../types/mechanic/common";
-
-
 const INITIAL_DATA: MechanicOnboardingRequest = {
     profilePhotoKey: "",
     experienceYears: 0,
@@ -58,9 +50,13 @@ const INITIAL_DATA: MechanicOnboardingRequest = {
     pincode: "",
     latitude: undefined,
     longitude: undefined,
+    locationSource: undefined,
     serviceRadiusKm: 5,
     workshopName: "",
     workshopAddress: "",
+    workshopLatitude: undefined,
+    workshopLongitude: undefined,
+    workshopLocationSource: undefined,
     documents: [],
 };
 
@@ -146,9 +142,13 @@ export default function MechanicOnboardingPage() {
                     pincode: app.pincode ?? "",
                     latitude: app.latitude,
                     longitude: app.longitude,
+                    locationSource: app.locationSource,
                     serviceRadiusKm: app.serviceRadiusKm ?? 5,
                     workshopName: app.workshopName ?? "",
                     workshopAddress: app.workshopAddress ?? "",
+                    workshopLatitude: app.workshopLatitude,
+                    workshopLongitude: app.workshopLongitude,
+                    workshopLocationSource: app.workshopLocationSource,
                     documents: restoredDocuments,
                 });
 
@@ -206,6 +206,16 @@ export default function MechanicOnboardingPage() {
             } else if (!/^\d{6}$/.test(pincode)) {
                 validationErrors.pincode =
                     "Enter a valid 6-digit Indian pincode.";
+            }
+
+            if (
+                formData.latitude === undefined ||
+                formData.longitude === undefined ||
+                !Number.isFinite(formData.latitude) ||
+                !Number.isFinite(formData.longitude)
+            ) {
+                validationErrors.location =
+                    "Please capture your exact GPS location or pin it on the map.";
             }
 
             if (
@@ -268,6 +278,37 @@ export default function MechanicOnboardingPage() {
             if (formData.serviceOffered.length === 0) {
                 validationErrors.serviceOffered =
                     "Select at least one service offered.";
+            }
+
+            if (
+                formData.serviceModel === "workshop" ||
+                formData.serviceModel === "both"
+            ) {
+                if (!formData.workshopName?.trim()) {
+                    validationErrors.workshopName =
+                        "Workshop name is required.";
+                }
+
+                if (!formData.workshopAddress?.trim()) {
+                    validationErrors.workshopAddress =
+                        "Workshop address is required.";
+                }
+
+                const hasWorkshopCoords =
+                    formData.workshopLatitude !== undefined &&
+                    formData.workshopLongitude !== undefined &&
+                    Number.isFinite(formData.workshopLatitude) &&
+                    Number.isFinite(formData.workshopLongitude);
+                const hasBaseCoords =
+                    formData.latitude !== undefined &&
+                    formData.longitude !== undefined &&
+                    Number.isFinite(formData.latitude) &&
+                    Number.isFinite(formData.longitude);
+
+                if (!hasWorkshopCoords && !hasBaseCoords) {
+                    validationErrors.workshopLocation =
+                        "Please select your workshop location on the map.";
+                }
             }
         }
         if (step === 3) {

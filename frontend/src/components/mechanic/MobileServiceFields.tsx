@@ -1,18 +1,18 @@
-import { MapPin, LocateFixed, Loader2 } from "lucide-react";
+import { MapPin } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import LocationPicker from "@/components/emergency/LocationPicker";
+import type { EmergencyLocation } from "@/types/emergencyRequest";
 
 interface Props {
     serviceAddress: string;
     pincode: string;
     latitude: string;
     longitude: string;
+    locationSource?: "gps" | "map" | "manual";
     serviceRadiusKm: string;
-
-    locating: boolean;
 
     onChange: (
         field:
@@ -24,7 +24,7 @@ interface Props {
         value: string
     ) => void;
 
-    onGetLocation: () => void;
+    onLocationSelect: (loc: EmergencyLocation | null) => void;
 }
 
 export const MobileServiceFields = ({
@@ -32,16 +32,22 @@ export const MobileServiceFields = ({
     pincode,
     latitude,
     longitude,
+    locationSource,
     serviceRadiusKm,
-    locating,
     onChange,
-    onGetLocation,
+    onLocationSelect,
 }: Props) => {
+    const parsedLat = Number(latitude);
+    const parsedLng = Number(longitude);
+    const hasCoords =
+        latitude.trim() !== "" &&
+        longitude.trim() !== "" &&
+        Number.isFinite(parsedLat) &&
+        Number.isFinite(parsedLng);
 
     return (
         <Card>
             <CardContent className="space-y-5 p-6">
-
                 <div className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-primary" />
 
@@ -77,57 +83,29 @@ export const MobileServiceFields = ({
                 </div>
 
                 <div className="space-y-3">
-
                     <div>
-                        <Label>GPS Coordinates *</Label>
+                        <Label>GPS / Map Coordinates *</Label>
 
                         <p className="text-sm text-muted-foreground">
-                            Use your current location to identify your
-                            service area.
+                            Use your current GPS location, search an address, or adjust your pin on the map.
                         </p>
                     </div>
 
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onGetLocation}
-                        disabled={locating}
-                    >
-                        {locating ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <LocateFixed className="mr-2 h-4 w-4" />
-                        )}
-
-                        {locating
-                            ? "Getting location..."
-                            : "Use My Current Location"}
-                    </Button>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-
-                        <div className="space-y-2">
-                            <Label>Latitude</Label>
-
-                            <Input
-                                value={latitude}
-                                readOnly
-                                placeholder="Latitude"
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label>Longitude</Label>
-
-                            <Input
-                                value={longitude}
-                                readOnly
-                                placeholder="Longitude"
-                            />
-                        </div>
-
-                    </div>
-
+                    <LocationPicker
+                        location={
+                            hasCoords
+                                ? {
+                                      latitude: parsedLat,
+                                      longitude: parsedLng,
+                                      address: serviceAddress || undefined,
+                                      ...(locationSource
+                                          ? { source: locationSource }
+                                          : {}),
+                                  }
+                                : null
+                        }
+                        onLocationChange={onLocationSelect}
+                    />
                 </div>
 
                 <div className="space-y-2">
@@ -149,7 +127,6 @@ export const MobileServiceFields = ({
                         Minimum 0.1 KM and maximum 100 KM.
                     </p>
                 </div>
-
             </CardContent>
         </Card>
     );

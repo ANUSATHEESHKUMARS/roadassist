@@ -6,6 +6,7 @@ import mongoose, {
     Model
 } from "mongoose";
 import {
+    LocationCaptureSource,
     MechanicApplicationStatus,
     MechanicServiceModel,
     SupportedVehicleType,
@@ -172,11 +173,19 @@ export interface IMechanicApplicationDocument extends Document {
 
     longitude?: number;
 
+    locationSource?: LocationCaptureSource;
+
     serviceRadiusKm?: number;
 
     workshopName?: string;
 
     workshopAddress?: string;
+
+    workshopLatitude?: number;
+
+    workshopLongitude?: number;
+
+    workshopLocationSource?: LocationCaptureSource;
 
     documents: {
         documentType: string;
@@ -268,6 +277,11 @@ const MechanicApplicationSchema = new Schema<IMechanicApplicationDocument>({
         type: Number
     },
 
+    locationSource: {
+        type: String,
+        enum: ["gps", "map", "manual"]
+    },
+
     serviceRadiusKm: {
         type: Number,
         min: 0
@@ -279,6 +293,19 @@ const MechanicApplicationSchema = new Schema<IMechanicApplicationDocument>({
 
     workshopAddress: {
         type: String
+    },
+
+    workshopLatitude: {
+        type: Number
+    },
+
+    workshopLongitude: {
+        type: Number
+    },
+
+    workshopLocationSource: {
+        type: String,
+        enum: ["gps", "map", "manual"]
     },
 
     documents: {

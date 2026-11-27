@@ -12,20 +12,11 @@ import { BadRequest } from "../../../shared/errors/BadRequestError.js";
 import { ForbiddenError } from "../../../shared/errors/ForbiddenError.js";
 import { NotfoundError } from "../../../shared/errors/NotFoundError.js";
 import { ConflictError } from "../../../shared/errors/ConflitError.js";
+import { isShiftWindowPassedForDate } from "../../../shared/utils/timezone.js";
+import { MechanicAvailabilityResolver } from "../../services/MechanicAvailabilityResolver.js";
+import { BookingValidator } from "../../validators/BookingValidator.js";
 
 const BOOKING_AMOUNT = 800;
-
-const INDIA_TIME_ZONE = "Asia/Kolkata";
-
-const weekdayMap = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday"
-] as const;
 
 export class CreateSlotBookingUseCase {
 
@@ -43,28 +34,9 @@ export class CreateSlotBookingUseCase {
     ): Promise<Booking> {
 
         // 1. Validate the booking date
-        const scheduledDate = new Date(dto.scheduledDate);
-
-        if (Number.isNaN(scheduledDate.getTime())) {
-            throw new BadRequest("Invalid booking date");
-        }
-
-        const selectedDate = this.getIndiaDateParts(scheduledDate);
-        const today = this.getIndiaDateParts(new Date());
-
-        const selectedDateValue =
-            selectedDate.year * 10000 +
-            selectedDate.month * 100 +
-            selectedDate.day;
-
-        const todayValue =
-            today.year * 10000 +
-            today.month * 100 +
-            today.day;
-
-        if (selectedDateValue < todayValue) {
-            throw new BadRequest("Booking date cannot be in the past");
-        }
+        const scheduledDate = BookingValidator.parseAndValidateDate(
+            dto.scheduledDate
+        );
 
         // 2. Validate the selected slot
         const validSlots: BookingSlot[] = [
@@ -153,29 +125,39 @@ export class CreateSlotBookingUseCase {
             );
         }
 
-        const selectedWeekday =
-            weekdayMap[selectedDate.weekday];
+        const resolvedAvailability =
+            MechanicAvailabilityResolver.resolveForDate(schedule, scheduledDate);
 
-        const dailySchedule = schedule.weeklyAvailability.find(
-            item => item.day === selectedWeekday
-        );
-
-        if (!dailySchedule) {
+        if (!resolvedAvailability.isAvailable) {
             throw new ConflictError(
-                "Mechanic is not available on this day"
+                "Mechanic is not available on this day",
+                "DAY_UNAVAILABLE"
             );
         }
 
-        const isShiftAvailable =
-            dto.slot === "morning"
-                ? dailySchedule.morning
-                : dto.slot === "afternoon"
-                    ? dailySchedule.afternoon
-                    : dailySchedule.morning && dailySchedule.afternoon;
-
-        if (!isShiftAvailable) {
+        if (
+            !MechanicAvailabilityResolver.isSlotAvailable(
+                resolvedAvailability,
+                dto.slot
+            )
+        ) {
             throw new ConflictError(
-                "Mechanic is not available for the selected shift"
+                "Mechanic is not available for the selected shift",
+                "SHIFT_UNAVAILABLE"
+            );
+        }
+
+        if (
+            isShiftWindowPassedForDate(scheduledDate, dto.slot, {
+                morningStartTime: resolvedAvailability.morningStartTime,
+                morningEndTime: resolvedAvailability.morningEndTime,
+                afternoonStartTime: resolvedAvailability.afternoonStartTime,
+                afternoonEndTime: resolvedAvailability.afternoonEndTime,
+            })
+        ) {
+            throw new BadRequest(
+                "Selected shift time window has already passed for today",
+                "SHIFT_WINDOW_PASSED"
             );
         }
 
@@ -213,38 +195,5 @@ export class CreateSlotBookingUseCase {
 
         // 11. Persist the booking
         return await this.bookingRepository.create(booking);
-    }
-
-    private getIndiaDateParts(date: Date) {
-        const parts = new Intl.DateTimeFormat("en-IN", {
-            timeZone: INDIA_TIME_ZONE,
-            year: "numeric",
-            month: "numeric",
-            day: "numeric",
-            weekday: "long"
-        }).formatToParts(date);
-
-        const getPart = (type: string): string => {
-            const value = parts.find(part => part.type === type)?.value;
-
-            if (!value) {
-                throw new BadRequest("Unable to process booking date");
-            }
-
-            return value;
-        };
-
-        const weekdayName = getPart("weekday").toLowerCase();
-
-        const weekday = weekdayMap.indexOf(
-            weekdayName as typeof weekdayMap[number]
-        );
-
-        return {
-            year: Number(getPart("year")),
-            month: Number(getPart("month")),
-            day: Number(getPart("day")),
-            weekday
-        };
     }
 }

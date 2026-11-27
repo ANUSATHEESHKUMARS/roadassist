@@ -152,6 +152,10 @@ export class SubmitMechanicApplicationUseCase
                 longitude: application.longitude
             }),
 
+            ...(application.locationSource !== undefined && {
+                locationSource: application.locationSource
+            }),
+
             ...(application.serviceRadiusKm !== undefined && {
                 serviceRadiusKm: application.serviceRadiusKm
             }),
@@ -162,6 +166,18 @@ export class SubmitMechanicApplicationUseCase
 
             ...(application.workshopAddress !== undefined && {
                 workshopAddress: application.workshopAddress
+            }),
+
+            ...(application.workshopLatitude !== undefined && {
+                workshopLatitude: application.workshopLatitude
+            }),
+
+            ...(application.workshopLongitude !== undefined && {
+                workshopLongitude: application.workshopLongitude
+            }),
+
+            ...(application.workshopLocationSource !== undefined && {
+                workshopLocationSource: application.workshopLocationSource
             })
         };
 
@@ -216,6 +232,10 @@ export class SubmitMechanicApplicationUseCase
                 longitude: application.longitude
             }),
 
+            ...(application.locationSource !== undefined && {
+                locationSource: application.locationSource
+            }),
+
             ...(application.serviceRadiusKm !== undefined && {
                 serviceRadiusKm: application.serviceRadiusKm
             }),
@@ -226,6 +246,18 @@ export class SubmitMechanicApplicationUseCase
 
             ...(application.workshopAddress !== undefined && {
                 workshopAddress: application.workshopAddress
+            }),
+
+            ...(application.workshopLatitude !== undefined && {
+                workshopLatitude: application.workshopLatitude
+            }),
+
+            ...(application.workshopLongitude !== undefined && {
+                workshopLongitude: application.workshopLongitude
+            }),
+
+            ...(application.workshopLocationSource !== undefined && {
+                workshopLocationSource: application.workshopLocationSource
             }),
 
             documents: application.documents,

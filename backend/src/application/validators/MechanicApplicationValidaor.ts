@@ -1,5 +1,6 @@
 
 import {
+    LocationCaptureSource,
     MechanicServiceModel,
     SupportedVehicleType,
     MechanicDocument,
@@ -36,6 +37,20 @@ export class MechanicApplicationValidator {
     ];
 
 
+    private readonly locationSources: LocationCaptureSource[] = [
+        "gps",
+        "map",
+        "manual",
+    ];
+
+    static normalizeFiniteNumber(value: unknown): number | undefined {
+        if (value === undefined || value === null || value === "") {
+            return undefined;
+        }
+        const parsed = typeof value === "number" ? value : Number(value);
+        return Number.isFinite(parsed) ? parsed : NaN;
+    }
+
     // ==========================================
     // VALIDATE DRAFT
     // ==========================================
@@ -51,7 +66,11 @@ export class MechanicApplicationValidator {
         }
 
         if (data.experienceYears !== undefined) {
-            this.validateExperience(data.experienceYears);
+            this.validateExperience(
+                MechanicApplicationValidator.normalizeFiniteNumber(
+                    data.experienceYears
+                ) ?? NaN
+            );
         }
 
         if (data.specializations !== undefined) {
@@ -79,12 +98,20 @@ export class MechanicApplicationValidator {
         }
 
         this.validateCoordinates(
-            data.latitude,
-            data.longitude
+            MechanicApplicationValidator.normalizeFiniteNumber(data.latitude),
+            MechanicApplicationValidator.normalizeFiniteNumber(data.longitude)
         );
 
+        if (data.locationSource !== undefined) {
+            this.validateLocationSource(data.locationSource);
+        }
+
         if (data.serviceRadiusKm !== undefined) {
-            this.validateServiceRadius(data.serviceRadiusKm);
+            this.validateServiceRadius(
+                MechanicApplicationValidator.normalizeFiniteNumber(
+                    data.serviceRadiusKm
+                ) ?? NaN
+            );
         }
 
         if (data.workshopName !== undefined) {
@@ -103,6 +130,20 @@ export class MechanicApplicationValidator {
             );
         }
 
+        this.validateCoordinates(
+            MechanicApplicationValidator.normalizeFiniteNumber(
+                data.workshopLatitude
+            ),
+            MechanicApplicationValidator.normalizeFiniteNumber(
+                data.workshopLongitude
+            ),
+            "workshop"
+        );
+
+        if (data.workshopLocationSource !== undefined) {
+            this.validateLocationSource(data.workshopLocationSource);
+        }
+
         if (data.documents !== undefined) {
             this.validateDocuments(data.documents, false);
         }
@@ -119,7 +160,11 @@ export class MechanicApplicationValidator {
             "PROFILE_PHOTO_REQUIRED"
         );
 
-        this.validateExperience(data.experienceYears);
+        this.validateExperience(
+            MechanicApplicationValidator.normalizeFiniteNumber(
+                data.experienceYears
+            ) ?? NaN
+        );
 
         this.validateSpecializations(data.specializations);
 
@@ -127,7 +172,21 @@ export class MechanicApplicationValidator {
 
         this.validateServiceModel(data.serviceModel);
 
-
+        const lat = MechanicApplicationValidator.normalizeFiniteNumber(
+            data.latitude
+        );
+        const lng = MechanicApplicationValidator.normalizeFiniteNumber(
+            data.longitude
+        );
+        const workshopLat = MechanicApplicationValidator.normalizeFiniteNumber(
+            data.workshopLatitude
+        );
+        const workshopLng = MechanicApplicationValidator.normalizeFiniteNumber(
+            data.workshopLongitude
+        );
+        const radius = MechanicApplicationValidator.normalizeFiniteNumber(
+            data.serviceRadiusKm
+        );
 
         if (
             data.serviceModel === "mobile" ||
@@ -142,23 +201,26 @@ export class MechanicApplicationValidator {
 
             this.validatePincode(data.pincode ?? "");
 
-            if (data.latitude === undefined || data.longitude === undefined) {
+            if (lat === undefined || lng === undefined) {
                 throw new BadRequest(
                     "Location coordinates are required for mobile services",
                     "SERVICE_LOCATION_REQUIRED"
                 );
             }
 
-            this.validateServiceRadius(data.serviceRadiusKm ?? NaN);
+            this.validateServiceRadius(radius ?? NaN);
         }
 
 
-        this.validateCoordinates(
-            data.latitude,
-            data.longitude
-        );
+        this.validateCoordinates(lat, lng);
+        this.validateCoordinates(workshopLat, workshopLng, "workshop");
 
-
+        if (data.locationSource !== undefined) {
+            this.validateLocationSource(data.locationSource);
+        }
+        if (data.workshopLocationSource !== undefined) {
+            this.validateLocationSource(data.workshopLocationSource);
+        }
 
         if (
             data.serviceModel === "workshop" ||
@@ -176,6 +238,19 @@ export class MechanicApplicationValidator {
                 "Workshop address is required",
                 "WORKSHOP_ADDRESS_REQUIRED"
             );
+
+            if (data.serviceModel === "workshop") {
+                const hasWorkshopCoords =
+                    workshopLat !== undefined && workshopLng !== undefined;
+                const hasBaseCoords = lat !== undefined && lng !== undefined;
+                if (!hasWorkshopCoords && !hasBaseCoords) {
+                    throw new BadRequest(
+                        "Workshop coordinates are required for workshop services",
+                        "WORKSHOP_LOCATION_REQUIRED"
+                    );
+                }
+                this.validateServiceRadius(radius ?? NaN);
+            }
         }
 
 
@@ -393,9 +468,21 @@ export class MechanicApplicationValidator {
     }
 
 
+    private validateLocationSource(
+        source: LocationCaptureSource
+    ): void {
+        if (!this.locationSources.includes(source)) {
+            throw new BadRequest(
+                "Invalid location source",
+                "INVALID_LOCATION_SOURCE"
+            );
+        }
+    }
+
     private validateCoordinates(
         latitude: number | undefined,
-        longitude: number | undefined
+        longitude: number | undefined,
+        label = "service"
     ): void {
 
         if (
@@ -403,7 +490,7 @@ export class MechanicApplicationValidator {
             (longitude === undefined)
         ) {
             throw new BadRequest(
-                "Latitude and longitude must be provided together",
+                `Latitude and longitude must be provided together for ${label} location`,
                 "INVALID_COORDINATES"
             );
         }

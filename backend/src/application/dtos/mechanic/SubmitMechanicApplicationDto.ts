@@ -1,5 +1,6 @@
 
 import {
+    LocationCaptureSource,
     MechanicServiceModel,
     SupportedVehicleType,
     MechanicDocument,
@@ -34,11 +35,19 @@ export interface SubmitMechanicApplicationDto {
 
     longitude?: number;
 
+    locationSource?: LocationCaptureSource;
+
     serviceRadiusKm?: number;
 
     workshopName?: string;
 
     workshopAddress?: string;
+
+    workshopLatitude?: number;
+
+    workshopLongitude?: number;
+
+    workshopLocationSource?: LocationCaptureSource;
 
     documents: MechanicDocument[];
 }

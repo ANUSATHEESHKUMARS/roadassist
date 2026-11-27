@@ -13,6 +13,7 @@ export interface DiscoverMechanicsDto {
     serviceType: string;
     latitude: number;
     longitude: number;
+    serviceMode?: "mobile" | "workshop";
 }
 
 export interface DiscoveredMechanicItem {
@@ -48,6 +49,7 @@ export interface CreateBookingReservationDto {
     slot: BookingSlot;
     latitude: number;
     longitude: number;
+    serviceMode?: "mobile" | "workshop";
 }
 
 export interface CreateBookingReservationResponseDto {

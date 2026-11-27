@@ -5,6 +5,8 @@ import type {
     MechanicSchedule,
     CreateMechanicScheduleDto,
     UpdateMechanicScheduleDto,
+    DateAvailability,
+    MechanicBookedDate,
     CommonResponse,
 } from "../../types/mechanic/mechanicSchedule"
 
@@ -47,5 +49,42 @@ export const mechanicScheduleService = {
         }
 
         return response.data.data;
+    },
+
+    async upsertDateAvailability(
+        data: DateAvailability
+    ): Promise<MechanicSchedule> {
+        const response = await apiClient.put<CommonResponse<MechanicSchedule>>(
+            API_ROUTES.MECHANIC.SCHEDULE.DATE_AVAILABILITY,
+            data
+        );
+
+        if (!response.data.data) {
+            throw new Error("Unable to save date availability");
+        }
+
+        return response.data.data;
+    },
+
+    async removeDateAvailability(dateKey: string): Promise<MechanicSchedule> {
+        const response = await apiClient.delete<
+            CommonResponse<MechanicSchedule>
+        >(API_ROUTES.MECHANIC.SCHEDULE.REMOVE_DATE_AVAILABILITY(dateKey));
+
+        if (!response.data.data) {
+            throw new Error("Unable to remove date availability override");
+        }
+
+        return response.data.data;
+    },
+
+    async getBookedDates(month: string): Promise<MechanicBookedDate[]> {
+        const response = await apiClient.get<
+            CommonResponse<MechanicBookedDate[]>
+        >(API_ROUTES.MECHANIC.SCHEDULE.BOOKED_DATES, {
+            params: { month },
+        });
+
+        return response.data.data ?? [];
     },
 };

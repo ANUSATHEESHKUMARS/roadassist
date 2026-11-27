@@ -113,6 +113,7 @@ export class ApproveMechanicApplicationUseCase
 
             specializations: application.specializations,
             supportedVehicleTypes: application.supportedVehicleTypes,
+            serviceOffered: application.serviceOffered,
 
             documents: application.documents,
 
@@ -148,6 +149,10 @@ export class ApproveMechanicApplicationUseCase
                 longitude: application.longitude
             }),
 
+            ...(application.locationSource !== undefined && {
+                locationSource: application.locationSource
+            }),
+
             ...(application.serviceRadiusKm !== undefined && {
                 serviceRadiusKm: application.serviceRadiusKm
             }),
@@ -158,6 +163,18 @@ export class ApproveMechanicApplicationUseCase
 
             ...(application.workshopAddress !== undefined && {
                 workshopAddress: application.workshopAddress
+            }),
+
+            ...(application.workshopLatitude !== undefined && {
+                workshopLatitude: application.workshopLatitude
+            }),
+
+            ...(application.workshopLongitude !== undefined && {
+                workshopLongitude: application.workshopLongitude
+            }),
+
+            ...(application.workshopLocationSource !== undefined && {
+                workshopLocationSource: application.workshopLocationSource
             }),
 
             ...(application.submittedAt !== undefined && {

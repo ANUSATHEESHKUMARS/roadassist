@@ -203,6 +203,8 @@ export class ReviewMechanicSpecializationUseCase implements IReviewMechanicSpeci
 
             supportedVehicleTypes: application.supportedVehicleTypes,
 
+            serviceOffered: application.serviceOffered,
+
             documents: application.documents,
 
             ...(application.profilePhotoKey !== undefined && {
@@ -237,6 +239,10 @@ export class ReviewMechanicSpecializationUseCase implements IReviewMechanicSpeci
                 longitude: application.longitude
             }),
 
+            ...(application.locationSource !== undefined && {
+                locationSource: application.locationSource
+            }),
+
             ...(application.serviceRadiusKm !== undefined && {
                 serviceRadiusKm: application.serviceRadiusKm
             }),
@@ -247,6 +253,18 @@ export class ReviewMechanicSpecializationUseCase implements IReviewMechanicSpeci
 
             ...(application.workshopAddress !== undefined && {
                 workshopAddress: application.workshopAddress
+            }),
+
+            ...(application.workshopLatitude !== undefined && {
+                workshopLatitude: application.workshopLatitude
+            }),
+
+            ...(application.workshopLongitude !== undefined && {
+                workshopLongitude: application.workshopLongitude
+            }),
+
+            ...(application.workshopLocationSource !== undefined && {
+                workshopLocationSource: application.workshopLocationSource
             }),
 
             ...(application.submittedAt !== undefined && {

@@ -135,9 +135,13 @@ export interface MyMechanicApplicationResponse {
     pincode?: string;
     latitude?: number;
     longitude?: number;
+    locationSource?: "gps" | "map" | "manual";
     serviceRadiusKm?: number;
     workshopName?: string;
     workshopAddress?: string;
+    workshopLatitude?: number;
+    workshopLongitude?: number;
+    workshopLocationSource?: "gps" | "map" | "manual";
     professionalDescription?: string;
     documents?: {
       documentType: string;

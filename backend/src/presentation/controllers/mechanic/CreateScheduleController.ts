@@ -118,4 +118,95 @@ export class MechanicScheduleController {
 
         res.status(HttpStatusCode.OK).json(response);
     };
+
+    upsertDateAvailability = async (
+        req: Request,
+        res: Response
+    ): Promise<void> => {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Unauthorized, please log in."
+            };
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+            return;
+        }
+
+        const updatedSchedule =
+            await this.updateMechanicScheduleUseCase.upsertDateAvailability(
+                userId,
+                req.body
+            );
+
+        const response: CommonResponse<typeof updatedSchedule> = {
+            success: true,
+            message: "Date availability saved successfully",
+            data: updatedSchedule
+        };
+
+        res.status(HttpStatusCode.OK).json(response);
+    };
+
+    removeDateAvailability = async (
+        req: Request,
+        res: Response
+    ): Promise<void> => {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Unauthorized, please log in."
+            };
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+            return;
+        }
+
+        const rawDate = req.params.date;
+        const dateKey = Array.isArray(rawDate) ? rawDate[0] ?? "" : rawDate ?? "";
+        const updatedSchedule =
+            await this.updateMechanicScheduleUseCase.removeDateAvailability(
+                userId,
+                dateKey
+            );
+
+        const response: CommonResponse<typeof updatedSchedule> = {
+            success: true,
+            message: "Date availability override removed",
+            data: updatedSchedule
+        };
+
+        res.status(HttpStatusCode.OK).json(response);
+    };
+
+    getBookedDates = async (
+        req: Request,
+        res: Response
+    ): Promise<void> => {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            const response: CommonResponse = {
+                success: false,
+                message: "Unauthorized, please log in."
+            };
+            res.status(HttpStatusCode.UNAUTHORIZED).json(response);
+            return;
+        }
+
+        const month =
+            typeof req.query.month === "string" ? req.query.month : undefined;
+        const bookedDates =
+            await this.getMechanicScheduleUseCase.getBookedDates(userId, month);
+
+        const response: CommonResponse<typeof bookedDates> = {
+            success: true,
+            message: "Booked schedule dates retrieved successfully",
+            data: bookedDates
+        };
+
+        res.status(HttpStatusCode.OK).json(response);
+    };
 }

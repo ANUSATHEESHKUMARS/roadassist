@@ -11,18 +11,31 @@ interface LocationPickerProps {
 
 type PickerMode = "idle" | "gps" | "manual";
 
-/** Reverse-geocode lat/lng → human-readable address via Nominatim */
-async function reverseGeocode(lat: number, lng: number): Promise<string> {
+interface ReverseGeocodeResult {
+    address: string;
+    pincode?: string;
+}
+
+/** Reverse-geocode lat/lng → human-readable address & optional 6-digit pincode via Nominatim */
+async function reverseGeocode(lat: number, lng: number): Promise<ReverseGeocodeResult> {
     try {
         const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`,
             { headers: { "Accept-Language": "en" } }
         );
-        if (!res.ok) return "";
+        if (!res.ok) return { address: "" };
         const data = await res.json();
-        return (data.display_name as string) ?? "";
+        const rawPostcode =
+            typeof data?.address?.postcode === "string"
+                ? data.address.postcode.replace(/\D/g, "")
+                : "";
+        const pincode = /^\d{6}$/.test(rawPostcode) ? rawPostcode : undefined;
+        return {
+            address: (data.display_name as string) ?? "",
+            ...(pincode ? { pincode } : {}),
+        };
     } catch {
-        return "";
+        return { address: "" };
     }
 }
 
@@ -114,8 +127,14 @@ export default function LocationPicker({
     const applyPosition = async (pos: GeolocationPosition) => {
         const { latitude, longitude, accuracy: acc } = pos.coords;
         setAccuracy(acc);
-        const address = await reverseGeocode(latitude, longitude);
-        onLocationChange({ latitude, longitude, address });
+        const { address, pincode } = await reverseGeocode(latitude, longitude);
+        onLocationChange({
+            latitude,
+            longitude,
+            address,
+            source: "gps",
+            ...(pincode ? { pincode } : {}),
+        });
         setLoading(false);
         if (acc > 100) {
             setError(
@@ -149,6 +168,7 @@ export default function LocationPicker({
             latitude: parseFloat(result.lat),
             longitude: parseFloat(result.lon),
             address: result.display_name,
+            source: "manual",
         });
         setSearchResults([]);
         setSearchQuery("");
@@ -156,8 +176,13 @@ export default function LocationPicker({
 
     // ── Map click: also reverse-geocode the new pin position ─────────────
     const handleMapLocationChange = async (loc: EmergencyLocation) => {
-        const address = await reverseGeocode(loc.latitude, loc.longitude);
-        onLocationChange({ ...loc, address });
+        const { address, pincode } = await reverseGeocode(loc.latitude, loc.longitude);
+        onLocationChange({
+            ...loc,
+            address,
+            source: "map",
+            ...(pincode ? { pincode } : {}),
+        });
     };
 
     const clearLocation = () => {

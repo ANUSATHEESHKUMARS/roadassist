@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useMechanicCategories } from "@/hooks/useMechanicCategories";
+import LocationPicker from "@/components/emergency/LocationPicker";
+import type { EmergencyLocation } from "@/types/emergencyRequest";
 
 import type {
   MechanicOnboardingRequest,
@@ -85,6 +87,24 @@ export const MechanicProfessionalDetailsForm: React.FC<
     value: string
   ) => {
     onChange({ [field]: value });
+  };
+
+  const handleWorkshopLocationChange = (loc: EmergencyLocation | null) => {
+    if (!loc) {
+      onChange({
+        workshopLatitude: undefined,
+        workshopLongitude: undefined,
+        workshopLocationSource: undefined,
+      });
+      return;
+    }
+
+    onChange({
+      workshopLatitude: loc.latitude,
+      workshopLongitude: loc.longitude,
+      workshopLocationSource: loc.source ?? "gps",
+      ...(loc.address ? { workshopAddress: loc.address } : {}),
+    });
   };
 
   // Select or deselect a category.
@@ -508,6 +528,36 @@ export const MechanicProfessionalDetailsForm: React.FC<
             {errors.workshopAddress && (
               <p className="text-[11px] text-destructive">
                 {errors.workshopAddress}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2 pt-2 border-t border-border/50">
+            <Label className="text-xs text-foreground">
+              Workshop Pin Location *
+            </Label>
+            <p className="text-[11px] text-muted-foreground">
+              Select the exact map location of your workshop (independent from your mobile base if you offer both).
+            </p>
+            <LocationPicker
+              location={
+                data.workshopLatitude !== undefined &&
+                data.workshopLongitude !== undefined
+                  ? {
+                      latitude: data.workshopLatitude,
+                      longitude: data.workshopLongitude,
+                      address: data.workshopAddress,
+                      ...(data.workshopLocationSource
+                        ? { source: data.workshopLocationSource }
+                        : {}),
+                    }
+                  : null
+              }
+              onLocationChange={handleWorkshopLocationChange}
+            />
+            {errors.workshopLocation && (
+              <p className="text-[11px] text-destructive">
+                {errors.workshopLocation}
               </p>
             )}
           </div>

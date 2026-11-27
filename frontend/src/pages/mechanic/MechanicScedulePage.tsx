@@ -16,13 +16,17 @@ import { useToast } from "@/components/ui/toast/ToastProvider";
 import { WeeklyAvailability } from "@/components/mechanic/WeeklyAvailabilty";
 import { ShiftTimings } from "@/components/mechanic/ShiftTimings";
 import { ScheduleSummary } from "@/components/mechanic/ScheduleSummary";
+import { ScheduleCalendar } from "@/components/mechanic/ScheduleCalendar";
 
 import { mechanicScheduleService } from "@/services/mechanic/mechanicScheduleService";
 import { mechanicServiceLocationService } from "@/services/mechanic/mechaniclocationservice";
+import { getIndiaTodayDateKey } from "@/utils/mechanicScheduleCalendar";
 import type {
     CreateMechanicScheduleDto,
     DailySchedule,
+    DateAvailability,
     DayOfWeek,
+    MechanicBookedDate,
     MechanicSchedule,
 } from "../../types/mechanic/mechanicSchedule";
 
@@ -54,10 +58,30 @@ export const MechanicSchedulePage: React.FC = () => {
     );
 
     const [hasSchedule, setHasSchedule] = useState(false);
+    const [dateAvailability, setDateAvailability] = useState<DateAvailability[]>(
+        []
+    );
+    const [bookedDates, setBookedDates] = useState<MechanicBookedDate[]>([]);
+    const [activeCalendarMonth, setActiveCalendarMonth] = useState(() =>
+        getIndiaTodayDateKey().slice(0, 7)
+    );
+    const [loadingBookedDates, setLoadingBookedDates] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [onboardingRequiredWarning, setOnboardingRequiredWarning] =
         useState(false);
+
+    const loadBookedDatesForMonth = async (monthKey: string) => {
+        try {
+            setLoadingBookedDates(true);
+            const items = await mechanicScheduleService.getBookedDates(monthKey);
+            setBookedDates(items);
+        } catch {
+            // Non-blocking: schedule page remains usable even if booked dates fail to load
+        } finally {
+            setLoadingBookedDates(false);
+        }
+    };
 
     useEffect(() => {
         const loadSchedule = async () => {
@@ -73,14 +97,16 @@ export const MechanicSchedulePage: React.FC = () => {
                     afternoonEndTime: schedule.afternoonEndTime,
                     isActive: schedule.isActive,
                 });
-
+                setDateAvailability(schedule.dateAvailability ?? []);
                 setHasSchedule(true);
+                void loadBookedDatesForMonth(activeCalendarMonth);
             } catch (error) {
                 if (
                     axios.isAxiosError(error) &&
                     error.response?.status === 404
                 ) {
                     setForm(createInitialForm());
+                    setDateAvailability([]);
                     setHasSchedule(false);
                 } else {
                     showToast("Unable to load your schedule", "error");
@@ -204,7 +230,7 @@ export const MechanicSchedulePage: React.FC = () => {
                 afternoonEndTime: savedSchedule.afternoonEndTime,
                 isActive: savedSchedule.isActive,
             });
-
+            setDateAvailability(savedSchedule.dateAvailability ?? []);
             setHasSchedule(true);
 
             showToast(
@@ -214,26 +240,18 @@ export const MechanicSchedulePage: React.FC = () => {
                 "success"
             );
 
-            // Verify mechanic application exists before navigating to service-location
+            void loadBookedDatesForMonth(activeCalendarMonth);
+
+            // Check mechanic application status without unexpectedly navigating away from the calendar
             try {
                 const application =
                     await mechanicServiceLocationService.getMyApplication();
 
                 if (!application) {
                     setOnboardingRequiredWarning(true);
-                    showToast(
-                        "Schedule saved. Please complete mechanic onboarding before configuring service location.",
-                        "info"
-                    );
-                    return;
                 }
-
-                navigate("/mechanic/service-location");
             } catch {
-                showToast(
-                    "Schedule saved, but unable to verify mechanic application. Please open Onboarding or try Service Location again.",
-                    "error"
-                );
+                // Non-blocking
             }
         } catch (error) {
             const responseData = axios.isAxiosError(error)
@@ -246,6 +264,63 @@ export const MechanicSchedulePage: React.FC = () => {
             );
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleCalendarMonthChange = (monthKey: string) => {
+        setActiveCalendarMonth(monthKey);
+        if (hasSchedule) {
+            void loadBookedDatesForMonth(monthKey);
+        }
+    };
+
+    const handleSaveDateAvailability = async (entry: DateAvailability) => {
+        try {
+            const updatedSchedule =
+                await mechanicScheduleService.upsertDateAvailability(entry);
+            setDateAvailability(updatedSchedule.dateAvailability ?? []);
+            showToast(
+                `Availability for ${entry.date} saved successfully`,
+                "success"
+            );
+            void loadBookedDatesForMonth(activeCalendarMonth);
+        } catch (error) {
+            const responseData = axios.isAxiosError(error)
+                ? (error.response?.data as { message?: string } | undefined)
+                : undefined;
+
+            showToast(
+                responseData?.message ||
+                    (error instanceof Error
+                        ? error.message
+                        : "Unable to save date availability"),
+                "error"
+            );
+        }
+    };
+
+    const handleRemoveDateAvailability = async (dateKey: string) => {
+        try {
+            const updatedSchedule =
+                await mechanicScheduleService.removeDateAvailability(dateKey);
+            setDateAvailability(updatedSchedule.dateAvailability ?? []);
+            showToast(
+                `Override removed for ${dateKey}; weekly default restored`,
+                "success"
+            );
+            void loadBookedDatesForMonth(activeCalendarMonth);
+        } catch (error) {
+            const responseData = axios.isAxiosError(error)
+                ? (error.response?.data as { message?: string } | undefined)
+                : undefined;
+
+            showToast(
+                responseData?.message ||
+                    (error instanceof Error
+                        ? error.message
+                        : "Unable to remove date override"),
+                "error"
+            );
         }
     };
 
@@ -343,6 +418,17 @@ export const MechanicSchedulePage: React.FC = () => {
                     </CardContent>
                 </Card>
             )}
+
+            <ScheduleCalendar
+                schedule={form}
+                dateAvailability={dateAvailability}
+                bookedDates={bookedDates}
+                hasSavedSchedule={hasSchedule}
+                loadingBookedDates={loadingBookedDates}
+                onMonthChange={handleCalendarMonthChange}
+                onSaveDateAvailability={handleSaveDateAvailability}
+                onRemoveDateAvailability={handleRemoveDateAvailability}
+            />
 
             <WeeklyAvailability
                 weeklyAvailability={form.weeklyAvailability}

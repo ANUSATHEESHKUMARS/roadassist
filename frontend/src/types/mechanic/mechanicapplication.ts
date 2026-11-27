@@ -3,6 +3,8 @@ export type MechanicServiceModel =
     | "workshop"
     | "both";
 
+export type LocationCaptureSource = "gps" | "map" | "manual";
+
 export interface MechanicApplication {
     id: string;
     userId: string;
@@ -13,10 +15,14 @@ export interface MechanicApplication {
 
     latitude?: number;
     longitude?: number;
+    locationSource?: LocationCaptureSource;
     serviceRadiusKm?: number;
 
     workshopName?: string;
     workshopAddress?: string;
+    workshopLatitude?: number;
+    workshopLongitude?: number;
+    workshopLocationSource?: LocationCaptureSource;
 
     status: string;
     reviewReason?: string;
@@ -30,8 +36,12 @@ export interface UpdateMechanicServiceLocationDto {
 
     latitude?: number;
     longitude?: number;
+    locationSource?: LocationCaptureSource;
     serviceRadiusKm?: number;
 
     workshopName?: string;
     workshopAddress?: string;
+    workshopLatitude?: number;
+    workshopLongitude?: number;
+    workshopLocationSource?: LocationCaptureSource;
 }
