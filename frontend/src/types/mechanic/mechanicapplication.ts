@@ -19,6 +19,7 @@ export interface MechanicApplication {
     workshopAddress?: string;
 
     status: string;
+    reviewReason?: string;
 }
 
 export interface UpdateMechanicServiceLocationDto {

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import Toast, { type ToastType } from "./Toast";
 
 interface ToastData {
@@ -21,12 +21,12 @@ export const ToastProvider = ({
 
   const [toasts, setToasts] = useState<ToastData[]>([]);
 
-  const showToast = (
+  const showToast = useCallback((
     message: string,
     type: ToastType
   ) => {
 
-    const id = Date.now();
+    const id = Date.now() + Math.floor(Math.random() * 1000);
 
     setToasts((prev) => [
       ...prev,
@@ -42,16 +42,21 @@ export const ToastProvider = ({
         prev.filter((toast) => toast.id !== id)
       );
     }, 3000);
-  };
+  }, []);
 
-  const removeToast = (id: number) => {
+  const removeToast = useCallback((id: number) => {
     setToasts((prev) =>
       prev.filter((toast) => toast.id !== id)
     );
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({ showToast }),
+    [showToast]
+  );
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={contextValue}>
 
       {children}
 
@@ -70,6 +75,7 @@ export const ToastProvider = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToast = () => {
 
   const context = useContext(ToastContext);
@@ -82,4 +88,3 @@ export const useToast = () => {
 
   return context;
 };
-

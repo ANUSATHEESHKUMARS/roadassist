@@ -12,16 +12,18 @@ import type {
 
 export const mechanicServiceLocationService = {
 
-    async getMyApplication(): Promise<MechanicApplication> {
+    async getMyApplication(): Promise<MechanicApplication | null> {
         const response = await apiClient.get<
-            CommonResponse<MechanicApplication>
+            CommonResponse<MechanicApplication | null>
         >(API_ROUTES.MECHANIC.MY_APPLICATION);
 
-        if (!response.data.data) {
-            throw new Error("Mechanic application not found");
+        if (!response.data || response.data.success === false) {
+            throw new Error(
+                response.data?.message || "Unable to fetch mechanic application"
+            );
         }
 
-        return response.data.data;
+        return response.data.data ?? null;
     },
 
     async updateServiceLocation(
@@ -35,8 +37,16 @@ export const mechanicServiceLocationService = {
             data
         );
 
+        if (!response.data || response.data.success === false) {
+            throw new Error(
+                response.data?.message || "Unable to update service location"
+            );
+        }
+
         if (!response.data.data) {
-            throw new Error("Unable to update service location");
+            throw new Error(
+                "Unable to update service location: missing response data"
+            );
         }
 
         return response.data.data;

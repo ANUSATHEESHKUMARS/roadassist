@@ -18,6 +18,7 @@ import { ShiftTimings } from "@/components/mechanic/ShiftTimings";
 import { ScheduleSummary } from "@/components/mechanic/ScheduleSummary";
 
 import { mechanicScheduleService } from "@/services/mechanic/mechanicScheduleService";
+import { mechanicServiceLocationService } from "@/services/mechanic/mechaniclocationservice";
 import type {
     CreateMechanicScheduleDto,
     DailySchedule,
@@ -55,6 +56,8 @@ export const MechanicSchedulePage: React.FC = () => {
     const [hasSchedule, setHasSchedule] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [onboardingRequiredWarning, setOnboardingRequiredWarning] =
+        useState(false);
 
     useEffect(() => {
         const loadSchedule = async () => {
@@ -180,10 +183,12 @@ export const MechanicSchedulePage: React.FC = () => {
 
         try {
             setSaving(true);
+            setOnboardingRequiredWarning(false);
 
+            const wasExisting = hasSchedule;
             let savedSchedule: MechanicSchedule;
 
-            if (hasSchedule) {
+            if (wasExisting) {
                 savedSchedule =
                     await mechanicScheduleService.updateSchedule(form);
             } else {
@@ -203,13 +208,33 @@ export const MechanicSchedulePage: React.FC = () => {
             setHasSchedule(true);
 
             showToast(
-                hasSchedule
+                wasExisting
                     ? "Schedule updated successfully"
                     : "Schedule created successfully",
                 "success"
             );
 
-            navigate("/mechanic/service-location");
+            // Verify mechanic application exists before navigating to service-location
+            try {
+                const application =
+                    await mechanicServiceLocationService.getMyApplication();
+
+                if (!application) {
+                    setOnboardingRequiredWarning(true);
+                    showToast(
+                        "Schedule saved. Please complete mechanic onboarding before configuring service location.",
+                        "info"
+                    );
+                    return;
+                }
+
+                navigate("/mechanic/service-location");
+            } catch {
+                showToast(
+                    "Schedule saved, but unable to verify mechanic application. Please open Onboarding or try Service Location again.",
+                    "error"
+                );
+            }
         } catch (error) {
             const responseData = axios.isAxiosError(error)
                 ? error.response?.data as { message?: string } | undefined
@@ -300,6 +325,24 @@ export const MechanicSchedulePage: React.FC = () => {
             </Card>
 
             <ScheduleSummary />
+
+            {onboardingRequiredWarning && (
+                <Card className="border-amber-500/30 bg-amber-500/10">
+                    <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+                        <p className="text-foreground">
+                            Your schedule is saved, but no mechanic application was found for your account. Complete onboarding before setting your service location.
+                        </p>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate("/mechanic/onboarding")}
+                        >
+                            Complete Onboarding
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
 
             <WeeklyAvailability
                 weeklyAvailability={form.weeklyAvailability}

@@ -15,4 +15,8 @@ export interface IMechanicScheduleRepository {
         mechanicId: string,
         schedule: Partial<MechanicSchedule>
     ): Promise<MechanicSchedule | null>;
+
+    findActiveByMechanicIds(
+        mechanicIds: string[]
+    ): Promise<MechanicSchedule[]>;
 }

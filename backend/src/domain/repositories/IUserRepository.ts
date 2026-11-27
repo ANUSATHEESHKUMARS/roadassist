@@ -24,5 +24,7 @@ export interface IUserRepository {
     updateActiveRole(userId:string,
         roles:UserRole
     ):Promise<User|null>
+
+    findByIds(userIds: string[]): Promise<User[]>;
 }
 

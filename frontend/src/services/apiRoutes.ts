@@ -118,6 +118,17 @@ const API_ROUTES = {
     BASE: "/bookings",
     MY_BOOKINGS: "/bookings/my-bookings",
     AVAILABLE_SLOTS: "/bookings/available-slots",
+    DISCOVER: "/bookings/discover",
+    RESERVATIONS: "/bookings/reservations",
+
+    PAYMENT_ORDER: (bookingId: string) =>
+      `/bookings/${bookingId}/payment-order`,
+
+    VERIFY_PAYMENT: (bookingId: string) =>
+      `/bookings/${bookingId}/verify-payment`,
+
+    STATUS: (bookingId: string) =>
+      `/bookings/${bookingId}/status`,
 
     BY_ID: (bookingId: string) => `/bookings/${bookingId}`,
 

@@ -142,6 +142,17 @@ export class MongoUserRepository implements IUserRepository {
       }
       return UserMapper.toDomain(updatedDocument)
    }
+
+   async findByIds(userIds: string[]): Promise<User[]> {
+      if (userIds.length === 0) {
+         return [];
+      }
+      const documents = await UserModel.find({
+         _id: { $in: userIds }
+      }).select("-password").exec();
+
+      return documents.map((doc) => UserMapper.toDomain(doc));
+   }
 }
 
 

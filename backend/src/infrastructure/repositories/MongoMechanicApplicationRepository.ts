@@ -1,5 +1,8 @@
 import { MechanicApplicationMapper } from "../../application/mappers/MechanicApplicationMapper.js";
-import { IMechanicApplicationRepository } from "../../domain/repositories/IMechanicApplicationRepository.js";
+import {
+    IMechanicApplicationRepository,
+    ServiceLocationUpdateData,
+} from "../../domain/repositories/IMechanicApplicationRepository.js";
 import { MechanicApplication, MechanicApplicationStatus } from "../../domain/User/entities/MechanicApplication.js";
 import { ITransactionContext } from "../databases/interface/ITransactionContext.js";
 import { IMechanicApplicationDocument, MechanicApplicationModel } from "../databases/models/MechanicApplicationModel.js";
@@ -68,10 +71,48 @@ export class MongoMechanicApplicaitonRepository
 
     return MechanicApplicationMapper.toDomain(document);
 }
+
+    async updateServiceLocation(
+        applicationId: string,
+        data: ServiceLocationUpdateData,
+        unsetFields: string[] = []
+    ): Promise<MechanicApplication | null> {
+        if (!Types.ObjectId.isValid(applicationId)) {
+            return null;
+        }
+
+        const document = await this.updateDocument(
+            applicationId,
+            data,
+            unsetFields
+        );
+
+        if (!document) {
+            return null;
+        }
+
+        return MechanicApplicationMapper.toDomain(document);
+    }
     async findByStatus(status: MechanicApplicationStatus): Promise<MechanicApplication[]> {
         const document = await MechanicApplicationModel.find({ status }).exec()
 
         return document.map((document) => MechanicApplicationMapper.toDomain(document))
+    }
+
+    async findByUserIds(userIds: string[]): Promise<MechanicApplication[]> {
+        const objectIds = userIds
+            .filter((id) => Types.ObjectId.isValid(id))
+            .map((id) => new Types.ObjectId(id));
+
+        if (objectIds.length === 0) {
+            return [];
+        }
+
+        const documents = await MechanicApplicationModel.find({
+            userId: { $in: objectIds },
+        }).exec();
+
+        return documents.map((document) => MechanicApplicationMapper.toDomain(document));
     }
 }
 

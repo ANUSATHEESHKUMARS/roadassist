@@ -14,6 +14,7 @@ import mechanicRouter from './presentation/routes/mechanicRoutes.js';
 import { createEmergencyRequestRouter } from './presentation/routes/emergencyRequestRoute.js';
 import { CreateEmergencyRequestController } from './presentation/controllers/EmergencyRequestController.js';
 import sceduleRouter from './presentation/routes/sceduleRoute.js';
+import bookingRouter from './presentation/routes/bookingRoutes.js';
 
 export function createApp(
     createEmergencyRequestController: CreateEmergencyRequestController
@@ -25,7 +26,11 @@ export function createApp(
         next();
     });
 
-    app.use(express.json());
+    app.use(express.json({
+        verify: (req, _res, buf) => {
+            (req as express.Request & { rawBody?: Buffer }).rawBody = buf;
+        }
+    }));
     app.use(cookieParser());
 
     app.use(cors({
@@ -46,6 +51,7 @@ export function createApp(
     app.use('/api/media', mediaRouter);
     app.use('/api/mechanic', mechanicRouter);
     app.use("/api/mechanic/schedule", sceduleRouter);
+    app.use("/api/bookings", bookingRouter);
     app.use(
         '/api/emergency-requests',
         createEmergencyRequestRouter(createEmergencyRequestController)

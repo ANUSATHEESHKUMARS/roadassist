@@ -90,4 +90,19 @@ export class MechanicScheduleRepository
 
         return MechanicScheduleMapper.toEntity(updated);
     }
+
+    async findActiveByMechanicIds(
+        mechanicIds: string[]
+    ): Promise<MechanicSchedule[]> {
+        if (mechanicIds.length === 0) {
+            return [];
+        }
+
+        const schedules = await MechanicScheduleModel.find({
+            mechanicId: { $in: mechanicIds },
+            isActive: true,
+        }).exec();
+
+        return schedules.map((doc) => MechanicScheduleMapper.toEntity(doc));
+    }
 }

@@ -1,10 +1,17 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 import {
+    AlertTriangle,
+    ArrowRight,
+    CheckCircle2,
+    Clock,
+    Info,
     Loader2,
     MapPin,
     Save,
+    XCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +27,10 @@ import type {
     UpdateMechanicServiceLocationDto,
 } from "@/types/mechanic/mechanicapplication";
 import { MobileServiceFields } from "@/components/mechanic/MobileServiceFields";
+import {
+    getApplicationStatusInfo,
+    type ApplicationStatusInfo,
+} from "@/utils/mechanicApplicationStatus";
 
 interface LocationForm {
     serviceModel: MechanicServiceModel;
@@ -43,6 +54,65 @@ const initialForm: LocationForm = {
     workshopAddress: "",
 };
 
+const VARIANT_STYLES: Record<
+    ApplicationStatusInfo["variant"],
+    { border: string; bg: string; text: string; icon: React.ReactNode }
+> = {
+    info: {
+        border: "border-blue-300/50",
+        bg: "bg-blue-50",
+        text: "text-blue-700",
+        icon: <Info className="h-4 w-4 shrink-0 mt-0.5" />,
+    },
+    warning: {
+        border: "border-yellow-300/50",
+        bg: "bg-yellow-50",
+        text: "text-yellow-700",
+        icon: <Clock className="h-4 w-4 shrink-0 mt-0.5" />,
+    },
+    success: {
+        border: "border-green-300/50",
+        bg: "bg-green-50",
+        text: "text-green-700",
+        icon: <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />,
+    },
+    destructive: {
+        border: "border-destructive/30",
+        bg: "bg-destructive/10",
+        text: "text-destructive",
+        icon: <XCircle className="h-4 w-4 shrink-0 mt-0.5" />,
+    },
+};
+
+function StatusBanner({ statusInfo }: { statusInfo: ApplicationStatusInfo }) {
+    const style = VARIANT_STYLES[statusInfo.variant];
+
+    return (
+        <div
+            role="status"
+            className={`rounded-xl border ${style.border} ${style.bg} p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs ${style.text}`}
+        >
+            <div className="flex items-start gap-2.5">
+                {style.icon}
+                <div>
+                    <span className="font-semibold">{statusInfo.label}</span>
+                    <span className="mx-1">—</span>
+                    <span>{statusInfo.message}</span>
+                </div>
+            </div>
+
+            {statusInfo.showOnboardingLink && (
+                <Link to="/mechanic/onboarding" className="shrink-0">
+                    <Button type="button" size="sm" variant="outline">
+                        Go to Onboarding
+                        <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                    </Button>
+                </Link>
+            )}
+        </div>
+    );
+}
+
 export const MechanicServiceLocationPage = () => {
 
     const { showToast } = useToast();
@@ -52,16 +122,41 @@ export const MechanicServiceLocationPage = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [locating, setLocating] = useState(false);
+    const [hasApplication, setHasApplication] = useState<boolean>(false);
+    const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
+    const [statusInfo, setStatusInfo] = useState<ApplicationStatusInfo | null>(null);
+    const [applicationError, setApplicationError] = useState<string | null>(null);
 
-    // Load existing mechanic application details.
+    // Load existing mechanic application details once on mount (StrictMode-safe).
     useEffect(() => {
+        let cancelled = false;
 
         const loadApplication = async () => {
-
             try {
-
                 const application =
                     await mechanicServiceLocationService.getMyApplication();
+
+                if (cancelled) return;
+
+                if (!application) {
+                    setHasApplication(false);
+                    setApplicationStatus(null);
+                    setStatusInfo(null);
+                    setApplicationError(
+                        "No mechanic application found for your account. Complete mechanic onboarding to create your application before setting a service location."
+                    );
+                    return;
+                }
+
+                setHasApplication(true);
+                setApplicationStatus(application.status);
+
+                const info = getApplicationStatusInfo(
+                    application.status,
+                    application.reviewReason
+                );
+                setStatusInfo(info);
+                setApplicationError(null);
 
                 setForm({
                     serviceModel: application.serviceModel ?? "mobile",
@@ -82,26 +177,33 @@ export const MechanicServiceLocationPage = () => {
                     workshopName: application.workshopName ?? "",
                     workshopAddress: application.workshopAddress ?? "",
                 });
-
             } catch (error) {
+                if (cancelled) return;
 
                 const message = axios.isAxiosError(error)
                     ? error.response?.data?.message
-                    : undefined;
+                    : error instanceof Error
+                      ? error.message
+                      : undefined;
 
-                showToast(
-                    message || "Unable to load mechanic application",
-                    "error"
-                );
-
+                const resolvedMessage =
+                    message || "Unable to load mechanic application";
+                setHasApplication(false);
+                setApplicationError(resolvedMessage);
+                showToast(resolvedMessage, "error");
             } finally {
-                setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
         };
 
         void loadApplication();
 
-    }, []);
+        return () => {
+            cancelled = true;
+        };
+    }, [showToast]);
 
     const handleServiceModelChange = (
         serviceModel: MechanicServiceModel
@@ -273,18 +375,39 @@ export const MechanicServiceLocationPage = () => {
             }
         }
 
-        if (
-            requiresWorkshop &&
-            !form.workshopAddress.trim()
-        ) {
-            showToast("Enter your workshop address", "error");
-            return false;
+        if (requiresWorkshop) {
+            if (!form.workshopName.trim()) {
+                showToast("Enter your workshop name", "error");
+                return false;
+            }
+
+            if (!form.workshopAddress.trim()) {
+                showToast("Enter your workshop address", "error");
+                return false;
+            }
         }
 
         return true;
     };
 
     const handleSave = async () => {
+        if (saving || locating) return;
+
+        if (!hasApplication) {
+            showToast(
+                "Please complete mechanic onboarding first to create your application.",
+                "error"
+            );
+            return;
+        }
+
+        if (!statusInfo?.canEditServiceLocation) {
+            showToast(
+                "Only approved mechanics can update their service location",
+                "error"
+            );
+            return;
+        }
 
         if (!validateForm()) return;
 
@@ -296,16 +419,35 @@ export const MechanicServiceLocationPage = () => {
             form.serviceModel === "workshop" ||
             form.serviceModel === "both";
 
+        const parsedLat = Number(form.latitude);
+        const parsedLng = Number(form.longitude);
+        const parsedRadius = Number(form.serviceRadiusKm);
+
         const payload: UpdateMechanicServiceLocationDto = {
             serviceModel: form.serviceModel,
 
             ...(requiresMobile && {
                 serviceAddress: form.serviceAddress.trim(),
                 pincode: form.pincode.trim(),
-                latitude: Number(form.latitude),
-                longitude: Number(form.longitude),
-                serviceRadiusKm: Number(form.serviceRadiusKm),
+                latitude: parsedLat,
+                longitude: parsedLng,
+                serviceRadiusKm: parsedRadius,
             }),
+
+            ...(!requiresMobile &&
+                form.latitude.trim() !== "" &&
+                form.longitude.trim() !== "" &&
+                Number.isFinite(parsedLat) &&
+                Number.isFinite(parsedLng) && {
+                    latitude: parsedLat,
+                    longitude: parsedLng,
+                }),
+
+            ...(!requiresMobile &&
+                form.serviceRadiusKm.trim() !== "" &&
+                Number.isFinite(parsedRadius) && {
+                    serviceRadiusKm: parsedRadius,
+                }),
 
             ...(requiresWorkshop && {
                 workshopName: form.workshopName.trim(),
@@ -313,14 +455,23 @@ export const MechanicServiceLocationPage = () => {
             }),
         };
 
+        setSaving(true);
+
         try {
-
-            setSaving(true);
-
             const updatedApplication =
                 await mechanicServiceLocationService.updateServiceLocation(
                     payload
                 );
+
+            setHasApplication(true);
+            setApplicationStatus(updatedApplication.status);
+            setStatusInfo(
+                getApplicationStatusInfo(
+                    updatedApplication.status,
+                    updatedApplication.reviewReason
+                )
+            );
+            setApplicationError(null);
 
             setForm((previous) => ({
                 ...previous,
@@ -349,19 +500,17 @@ export const MechanicServiceLocationPage = () => {
                 "Service location updated successfully",
                 "success"
             );
-
         } catch (error) {
-
             const responseData = axios.isAxiosError(error)
-                ? error.response?.data as { message?: string } | undefined
+                ? (error.response?.data as { message?: string } | undefined)
                 : undefined;
 
-            showToast(
+            const message =
                 responseData?.message ||
-                    "Unable to update service location",
-                "error"
-            );
+                (error instanceof Error ? error.message : undefined) ||
+                "Unable to update service location";
 
+            showToast(message, "error");
         } finally {
             setSaving(false);
         }
@@ -404,6 +553,29 @@ export const MechanicServiceLocationPage = () => {
                     Configure where and how you provide vehicle assistance.
                 </p>
             </div>
+
+            {applicationError && (
+                <div
+                    role="alert"
+                    className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-destructive"
+                >
+                    <div className="flex items-start gap-2.5">
+                        <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                        <span>{applicationError}</span>
+                    </div>
+
+                    <Link to="/mechanic/onboarding" className="shrink-0">
+                        <Button type="button" size="sm" variant="outline">
+                            Go to Onboarding
+                            <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                        </Button>
+                    </Link>
+                </div>
+            )}
+
+            {statusInfo && !applicationError && (
+                <StatusBanner statusInfo={statusInfo} />
+            )}
 
             {/* Service model */}
             <Card>
@@ -459,7 +631,7 @@ export const MechanicServiceLocationPage = () => {
 
                 <Button
                     onClick={handleSave}
-                    disabled={saving || locating}
+                    disabled={saving || locating || !hasApplication || !statusInfo?.canEditServiceLocation}
                     className="w-full sm:w-auto"
                 >
 

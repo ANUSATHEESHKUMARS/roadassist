@@ -1,5 +1,20 @@
-import { MechanicApplication, MechanicApplicationStatus } from "../../domain/User/entities/MechanicApplication.js"
+import {
+     MechanicApplication,
+     MechanicApplicationStatus,
+     MechanicServiceModel,
+} from "../../domain/User/entities/MechanicApplication.js"
 import { ITransactionContext } from "../../infrastructure/databases/interface/ITransactionContext.js";
+
+export interface ServiceLocationUpdateData {
+     serviceModel: MechanicServiceModel;
+     serviceAddress?: string;
+     pincode?: string;
+     latitude?: number;
+     longitude?: number;
+     serviceRadiusKm?: number;
+     workshopName?: string;
+     workshopAddress?: string;
+}
 
 export interface IMechanicApplicationRepository {
 
@@ -16,7 +31,15 @@ export interface IMechanicApplicationRepository {
           transaction?: ITransactionContext
      ): Promise<MechanicApplication | null>;
 
+     updateServiceLocation(
+          applicationId: string,
+          data: ServiceLocationUpdateData,
+          unsetFields?: string[]
+     ): Promise<MechanicApplication | null>;
+
      findByStatus(status: MechanicApplicationStatus): Promise<MechanicApplication[]>
+
+     findByUserIds(userIds: string[]): Promise<MechanicApplication[]>
 
 }
 

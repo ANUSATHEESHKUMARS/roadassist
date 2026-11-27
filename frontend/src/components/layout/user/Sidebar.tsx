@@ -4,9 +4,7 @@ import { NavLink } from "react-router-dom";
 import {
   Car,
   AlertTriangle,
-  History,
-  Bell,
-  CreditCard,
+  CalendarCheck,
   User,
   Settings,
   LogOut,
@@ -24,7 +22,11 @@ const mainNavItems = [
     icon: AlertTriangle,
     path: "/user/emergency",
   },
-
+  {
+    label: "Bookings",
+    icon: CalendarCheck,
+    path: "/user/bookings",
+  },
   {
     label: "Become a Mechanic",
     icon: Wrench,

@@ -1,4 +1,3 @@
-
 import {
   BookingType,
   BookingSlot,
@@ -13,11 +12,18 @@ export interface BookingProps {
   bookingType: BookingType;
   serviceType: string;
   serviceAddress: string;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
   scheduledDate: Date;
   slot: BookingSlot;
   bookingAmount: number;
   estimatedAmount?: number | undefined;
   status: BookingStatus;
+  reservationExpiresAt?: Date | undefined;
+  paymentId?: string | undefined;
+  confirmedAt?: Date | undefined;
+  expiredAt?: Date | undefined;
+  requestedAt?: Date | undefined;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -59,6 +65,14 @@ export class Booking {
     return this.props.serviceAddress;
   }
 
+  get latitude(): number | undefined {
+    return this.props.latitude;
+  }
+
+  get longitude(): number | undefined {
+    return this.props.longitude;
+  }
+
   get scheduledDate(): Date {
     return this.props.scheduledDate;
   }
@@ -75,6 +89,26 @@ export class Booking {
 
   get status(): BookingStatus {
     return this.props.status;
+  }
+
+  get reservationExpiresAt(): Date | undefined {
+    return this.props.reservationExpiresAt;
+  }
+
+  get paymentId(): string | undefined {
+    return this.props.paymentId;
+  }
+
+  get confirmedAt(): Date | undefined {
+    return this.props.confirmedAt;
+  }
+
+  get expiredAt(): Date | undefined {
+    return this.props.expiredAt;
+  }
+
+  get requestedAt(): Date | undefined {
+    return this.props.requestedAt;
   }
 
   get createdAt(): Date | undefined {

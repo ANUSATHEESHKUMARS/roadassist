@@ -12,6 +12,24 @@ import { VerifyOtpController } from "../presentation/controllers/VerifyOtpContro
 import { JwtTokenService } from "../infrastructure/services/JwtTokenService.js";
 import { VehicleRepostory } from "../infrastructure/repositories/MongoVehicleRepostory.js";
 import { CreateVehicleUseCase } from "../application/useCase/vehicle/CreateVehicleUseCase.js";
+import { PaymentRepository } from "../infrastructure/repositories/PaymentRepository.js";
+import { RazorpayService } from "../infrastructure/services/razorpay/RazorpayService.js";
+import { DiscoverAvailableMechanicsUseCase } from "../application/useCase/booking/DiscoverAvailableMechanicsUseCase.js";
+import { CreateBookingReservationUseCase } from "../application/useCase/booking/CreateBookingReservationUseCase.js";
+import { CreatePaymentOrderUseCase } from "../application/useCase/booking/CreatePaymentOrderUseCase.js";
+import { PaymentSettlementHelper } from "../application/useCase/booking/PaymentSettlementHelper.js";
+import { VerifyPaymentUseCase } from "../application/useCase/booking/VerifyPaymentUseCase.js";
+import { HandlePaymentWebhookUseCase } from "../application/useCase/booking/HandlePaymentWebhookUseCase.js";
+import { GetBookingStatusUseCase } from "../application/useCase/booking/GetBookingStatusUseCase.js";
+import { GetBookingDetailsUseCase } from "../application/useCase/booking/GetBookingDetailsUseCase.js";
+import { GetMyBookingsUseCase } from "../application/useCase/booking/GetMyBookingsUseCase.js";
+import { DiscoverMechanicsController } from "../presentation/controllers/Booking/DiscoverMechanicsController.js";
+import { CreateReservationController } from "../presentation/controllers/Booking/CreateReservationController.js";
+import { CreatePaymentOrderController } from "../presentation/controllers/Booking/CreatePaymentOrderController.js";
+import { VerifyPaymentController } from "../presentation/controllers/Booking/VerifyPaymentController.js";
+import { BookingStatusController } from "../presentation/controllers/Booking/BookingStatusController.js";
+import { GetMyBookingsController } from "../presentation/controllers/Booking/GetMyBookingsController.js";
+import { RazorpayWebhookController } from "../presentation/controllers/Booking/RazorpayWebhookController.js";
 import { CreateVehicleController } from "../presentation/controllers/vehicleController/CreateVehicleController.js";
 import { authMiddleware } from "../presentation/middlewares/authMiddleware.js";
 import { GetVehilceUseCase } from "../application/useCase/vehicle/GetVehicle.js";
@@ -478,6 +496,103 @@ const createSlotBookingUseCase = new CreateSlotBookingUseCase(userRepository,
 )
 
 export const bookingController = new BookingController(createSlotBookingUseCase)
+
+const paymentRepository = new PaymentRepository()
+const razorpayService = new RazorpayService()
+
+const paymentSettlementHelper = new PaymentSettlementHelper(
+    bookingRepository,
+    paymentRepository,
+    razorpayService,
+    transactionMapper
+)
+
+const discoverAvailableMechanicsUseCase = new DiscoverAvailableMechanicsUseCase(
+    userRepository,
+    vehiceRepository,
+    mechanicApplicationRepository,
+    mechanicScheduleRepository,
+    bookingRepository
+)
+
+const createBookingReservationUseCase = new CreateBookingReservationUseCase(
+    userRepository,
+    vehiceRepository,
+    mechanicApplicationRepository,
+    mechanicScheduleRepository,
+    bookingRepository,
+    transactionMapper
+)
+
+const createPaymentOrderUseCase = new CreatePaymentOrderUseCase(
+    bookingRepository,
+    paymentRepository,
+    razorpayService
+)
+
+const verifyPaymentUseCase = new VerifyPaymentUseCase(
+    bookingRepository,
+    paymentRepository,
+    razorpayService,
+    paymentSettlementHelper
+)
+
+const handlePaymentWebhookUseCase = new HandlePaymentWebhookUseCase(
+    bookingRepository,
+    paymentRepository,
+    razorpayService,
+    paymentSettlementHelper
+)
+
+const getBookingStatusUseCase = new GetBookingStatusUseCase(
+    bookingRepository,
+    paymentRepository
+)
+
+const getBookingDetailsUseCase = new GetBookingDetailsUseCase(
+    bookingRepository,
+    paymentRepository,
+    vehiceRepository,
+    userRepository,
+    mechanicApplicationRepository
+)
+
+const getMyBookingsUseCase = new GetMyBookingsUseCase(
+    bookingRepository,
+    vehiceRepository,
+    userRepository,
+    mechanicApplicationRepository,
+    paymentRepository
+)
+
+export const discoverMechanicsController = new DiscoverMechanicsController(
+    discoverAvailableMechanicsUseCase
+)
+
+export const createReservationController = new CreateReservationController(
+    createBookingReservationUseCase
+)
+
+export const createPaymentOrderController = new CreatePaymentOrderController(
+    createPaymentOrderUseCase
+)
+
+export const verifyPaymentController = new VerifyPaymentController(
+    verifyPaymentUseCase
+)
+
+export const bookingStatusController = new BookingStatusController(
+    getBookingStatusUseCase,
+    getBookingDetailsUseCase
+)
+
+export const getMyBookingsController = new GetMyBookingsController(
+    getMyBookingsUseCase
+)
+
+export const razorpayWebhookController = new RazorpayWebhookController(
+    handlePaymentWebhookUseCase
+)
 
 export const mechanicScheduleController =
     new MechanicScheduleController(

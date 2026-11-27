@@ -33,7 +33,7 @@ export const WorkshopServiceFields = ({
                 </div>
 
                 <div className="space-y-2">
-                    <Label>Workshop Name</Label>
+                    <Label>Workshop Name *</Label>
 
                     <Input
                         value={workshopName}

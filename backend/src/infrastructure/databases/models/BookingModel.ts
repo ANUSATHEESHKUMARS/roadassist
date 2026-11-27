@@ -1,21 +1,7 @@
-
 import { model, Schema, Types, Document } from "mongoose";
+import { BookingSlot, BookingStatus, BookingType } from "../../../domain/User/Types/BookingTypes.js";
 
-export type BookingType = "emergency" | "scheduled";
-
-export type BookingSlot =
-    | "morning"
-    | "afternoon"
-    | "full_day";
-
-export type BookingStatus =
-    | "pending"
-    | "accepted"
-    | "rejected"
-    | "confirmed"
-    | "in_progress"
-    | "completed"
-    | "cancelled";
+export type { BookingType, BookingSlot, BookingStatus };
 
 export interface IBookingDocument extends Document {
     userId: Types.ObjectId;
@@ -24,13 +10,22 @@ export interface IBookingDocument extends Document {
     bookingType: BookingType;
     serviceType: string;
     serviceAddress: string;
+    latitude?: number;
+    longitude?: number;
     scheduledDate: Date;
+    scheduledDateDayKey?: string;
     slot: BookingSlot;
+    occupiedShifts?: ("morning" | "afternoon")[];
 
     bookingAmount: number;
     estimatedAmount?: number;
 
     status: BookingStatus;
+
+    reservationExpiresAt?: Date;
+    paymentId?: Types.ObjectId;
+    confirmedAt?: Date;
+    expiredAt?: Date;
 
     requestedAt: Date;
     acceptedAt?: Date;
@@ -79,15 +74,36 @@ const bookingSchema = new Schema<IBookingDocument>(
             trim: true,
         },
 
+        latitude: {
+            type: Number,
+            required: false,
+        },
+
+        longitude: {
+            type: Number,
+            required: false,
+        },
+
         scheduledDate: {
             type: Date,
             required: true,
+        },
+
+        scheduledDateDayKey: {
+            type: String,
+            required: false,
         },
 
         slot: {
             type: String,
             enum: ["morning", "afternoon", "full_day"],
             required: true,
+        },
+
+        occupiedShifts: {
+            type: [String],
+            enum: ["morning", "afternoon"],
+            required: false,
         },
 
         bookingAmount: {
@@ -106,15 +122,38 @@ const bookingSchema = new Schema<IBookingDocument>(
             type: String,
             enum: [
                 "pending",
+                "pending_payment",
                 "accepted",
                 "rejected",
                 "confirmed",
                 "in_progress",
                 "completed",
                 "cancelled",
+                "expired",
             ],
             default: "pending",
             required: true,
+        },
+
+        reservationExpiresAt: {
+            type: Date,
+            required: false,
+        },
+
+        paymentId: {
+            type: Schema.Types.ObjectId,
+            ref: "Payment",
+            required: false,
+        },
+
+        confirmedAt: {
+            type: Date,
+            required: false,
+        },
+
+        expiredAt: {
+            type: Date,
+            required: false,
         },
 
         requestedAt: {
@@ -158,6 +197,38 @@ bookingSchema.index({
     scheduledDate: 1,
     status: 1,
     slot: 1,
+});
+
+// Atomic overlapping shift lock for active/pending_payment scheduled bookings
+bookingSchema.index(
+    {
+        mechanicId: 1,
+        scheduledDateDayKey: 1,
+        occupiedShifts: 1,
+    },
+    {
+        unique: true,
+        partialFilterExpression: {
+            scheduledDateDayKey: { $exists: true },
+            occupiedShifts: { $exists: true },
+            status: {
+                $in: [
+                    "pending_payment",
+                    "pending",
+                    "accepted",
+                    "confirmed",
+                    "in_progress",
+                ],
+            },
+        },
+        name: "unique_active_mechanic_shift_per_day",
+    }
+);
+
+// Stale reservation expiry lookup
+bookingSchema.index({
+    status: 1,
+    reservationExpiresAt: 1,
 });
 
 export const BookingModel = model<IBookingDocument>(

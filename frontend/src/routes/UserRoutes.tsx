@@ -15,6 +15,9 @@ import MechanicApplicationStatusPage from "@/pages/mechanic/MechanicApplicationS
 import EmergencyRequestPage from "@/pages/user/EmergencyRequestPage";
 import EmergencyRequestStatusPage from "@/pages/user/EmergencyRequestStatusPage";
 import UserEmergencyRequestsListPage from "@/pages/user/UserEmergencyRequestsListPage";
+import CustomerBookingsPage from "@/pages/user/CustomerBookingsPage";
+import BookingDetailsPage from "@/pages/user/BookingDetailsPage";
+import ScheduledBookingPage from "@/pages/user/ScheduledBookingPage";
 
 export const userRoutes: RouteObject[] = [
     {
@@ -62,6 +65,18 @@ export const userRoutes: RouteObject[] = [
                             {
                                 path: "emergency-requests/:requestId",
                                 element: <EmergencyRequestStatusPage />,
+                            },
+                            {
+                                path: "bookings",
+                                element: <CustomerBookingsPage />,
+                            },
+                            {
+                                path: "bookings/:bookingId",
+                                element: <BookingDetailsPage />,
+                            },
+                            {
+                                path: "book-service",
+                                element: <ScheduledBookingPage />,
                             },
                         ],
                     },

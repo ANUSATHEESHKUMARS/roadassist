@@ -63,7 +63,7 @@ export const MobileServiceFields = ({
                 </div>
 
                 <div className="space-y-2">
-                    <Label>Pincode</Label>
+                    <Label>Pincode *</Label>
 
                     <Input
                         value={pincode}
