@@ -23,6 +23,9 @@ import { ITransactionContext } from "../src/infrastructure/databases/interface/I
 import { MechanicScheduleValidator } from "../src/application/validators/MechanicScheduleValidator.js";
 import { MechanicAvailabilityResolver } from "../src/application/services/MechanicAvailabilityResolver.js";
 import { MechanicLocationResolver } from "../src/application/services/MechanicLocationResolver.js";
+import { MechanicServiceCompatibility } from "../src/application/services/MechanicServiceCompatibility.js";
+import { MechanicCategory } from "../src/domain/User/entities/MechanicCategory.js";
+import { IMechanicCategoryRepository } from "../src/domain/repositories/admin/IMechanicCategoryRepository.js";
 import { CreateMechanicScheduleUseCase } from "../src/application/useCase/mechanic/CreateMechanicScheduleUseCase.js";
 import { UpdateMechanicScheduleUseCase } from "../src/application/useCase/mechanic/UpdateMechanicScheduleUseCase.js";
 import { GetMechanicScheduleUseCase } from "../src/application/useCase/mechanic/GetMechanicSceduleUseCase.js";
@@ -988,4 +991,194 @@ test("Mechanic application location: numeric string normalization, exact coordin
     ]);
     const fulfilledCount = results.filter((r) => r.status === "fulfilled").length;
     assert.equal(fulfilledCount, 1);
+});
+
+// ─── 4. Approved Specializations Service Compatibility ────────────────────────
+
+test("Discovery and reservation match approved category/subcategory specializations when serviceOffered text differs, while rejecting unapproved/unselected services", async () => {
+    const h = createHarness();
+
+    const engineCategory = new MechanicCategory({
+        id: "cat_eng",
+        name: "Engine & Mechanical Repair",
+        slug: "engine-mechanical-repair",
+        isActive: true,
+        subcategories: [
+            {
+                id: "sub_diag",
+                name: "Engine Diagnostics",
+                slug: "engine-diagnostics",
+                isActive: true,
+            },
+            {
+                id: "sub_repair",
+                name: "Engine Repair",
+                slug: "engine-repair",
+                isActive: true,
+            },
+            {
+                id: "sub_trans",
+                name: "Transmission Repair",
+                slug: "transmission-repair",
+                isActive: true,
+            },
+        ],
+    });
+
+    const categoryRepo: IMechanicCategoryRepository = {
+        async create(c) { return c; },
+        async findById(id) { return id === "cat_eng" ? engineCategory : null; },
+        async findBySlug() { return null; },
+        async findAll() { return [engineCategory]; },
+        async update() { return null; },
+        async updateStatus() { return null; },
+    };
+
+    // Replicate exact Sreekaryam / Kazhakkoottam scenario
+    h.applications.set(
+        "mech_1",
+        new MechanicApplication({
+            id: "app_sreekaryam",
+            userId: "mech_1",
+            status: "approved",
+            supportedVehicleTypes: ["car", "auto", "bike", "ev"],
+            serviceOffered: ["custom-note"],
+            specializations: [
+                {
+                    categoryId: "cat_eng",
+                    subcategories: [
+                        { subcategoryId: "sub_diag", verificationStatus: "approved" },
+                        { subcategoryId: "sub_repair", verificationStatus: "approved" },
+                        { subcategoryId: "sub_trans", verificationStatus: "pending" },
+                    ],
+                },
+            ],
+            serviceModel: "mobile",
+            serviceAddress: "Sreekaryam, Thiruvananthapuram",
+            pincode: "695017",
+            latitude: 8.5489489,
+            longitude: 76.9171867,
+            serviceRadiusKm: 20,
+        })
+    );
+
+    const targetDate = getFutureDateKey(2);
+    await new CreateMechanicScheduleUseCase(h.scheduleRepo).execute("mech_1", {
+        weeklyAvailability: buildWeeklySchedule(),
+        morningStartTime: "09:00",
+        morningEndTime: "13:00",
+        afternoonStartTime: "14:00",
+        afternoonEndTime: "18:00",
+        dateAvailability: [
+            {
+                date: targetDate,
+                isAvailable: true,
+                morning: false,
+                afternoon: true,
+            },
+        ],
+    });
+
+    assert.equal(
+        MechanicServiceCompatibility.offersService(
+            h.applications.get("mech_1")!,
+            "Engine Repair",
+            [engineCategory]
+        ),
+        true
+    );
+    assert.equal(
+        MechanicServiceCompatibility.offersService(
+            h.applications.get("mech_1")!,
+            "Transmission Repair",
+            [engineCategory]
+        ),
+        false
+    );
+
+    const discoverUC = new DiscoverAvailableMechanicsUseCase(
+        h.userRepo,
+        h.vehicleRepo,
+        h.appRepo,
+        h.scheduleRepo,
+        h.bookingRepo,
+        categoryRepo
+    );
+    const reserveUC = new CreateBookingReservationUseCase(
+        h.userRepo,
+        h.vehicleRepo,
+        h.appRepo,
+        h.scheduleRepo,
+        h.bookingRepo,
+        h.txManager,
+        categoryRepo
+    );
+
+    // Afternoon discovery succeeds for "Engine Repair" with exact ~5.27 km distance
+    const afternoonRes = await discoverUC.execute("cust_1", {
+        scheduledDate: targetDate,
+        slot: "afternoon",
+        vehicleId: "veh_1",
+        serviceType: "Engine Repair",
+        latitude: 8.566324,
+        longitude: 76.872579,
+    });
+    assert.equal(afternoonRes.mechanics.length, 1);
+    assert.equal(afternoonRes.mechanics[0]?.mechanicId, "mech_1");
+    assert.equal(afternoonRes.mechanics[0]?.distanceKm, 5.27);
+
+    // Pending/unapproved subcategory ("Transmission Repair") is still excluded
+    const pendingSpecRes = await discoverUC.execute("cust_1", {
+        scheduledDate: targetDate,
+        slot: "afternoon",
+        vehicleId: "veh_1",
+        serviceType: "Transmission Repair",
+        latitude: 8.566324,
+        longitude: 76.872579,
+    });
+    assert.equal(pendingSpecRes.mechanics.length, 0);
+
+    // Morning & Full Day rejected by both discovery and reservation
+    await assert.rejects(
+        () =>
+            reserveUC.execute("cust_1", {
+                mechanicId: "mech_1",
+                vehicleId: "veh_1",
+                serviceType: "Engine Repair",
+                serviceAddress: "Kazhakkoottam",
+                scheduledDate: targetDate,
+                slot: "morning",
+                latitude: 8.566324,
+                longitude: 76.872579,
+            }),
+        /not available for the selected shift/i
+    );
+    await assert.rejects(
+        () =>
+            reserveUC.execute("cust_1", {
+                mechanicId: "mech_1",
+                vehicleId: "veh_1",
+                serviceType: "Engine Repair",
+                serviceAddress: "Kazhakkoottam",
+                scheduledDate: targetDate,
+                slot: "full_day",
+                latitude: 8.566324,
+                longitude: 76.872579,
+            }),
+        /not available for the selected shift/i
+    );
+
+    // Valid afternoon reservation succeeds
+    const reservation = await reserveUC.execute("cust_1", {
+        mechanicId: "mech_1",
+        vehicleId: "veh_1",
+        serviceType: "Engine Repair",
+        serviceAddress: "Kazhakkoottam",
+        scheduledDate: targetDate,
+        slot: "afternoon",
+        latitude: 8.566324,
+        longitude: 76.872579,
+    });
+    assert.equal(reservation.status, "pending_payment");
+    assert.equal(reservation.slot, "afternoon");
 });

@@ -493,11 +493,13 @@ const updateMechanicSceduleUseCase = new UpdateMechanicScheduleUseCase(
 
 //booking
 
-const createSlotBookingUseCase = new CreateSlotBookingUseCase(userRepository,
+const createSlotBookingUseCase = new CreateSlotBookingUseCase(
+    userRepository,
     vehiceRepository,
-    mechanicApplicationRepository
-    ,mechanicScheduleRepository,
-    bookingRepository
+    mechanicApplicationRepository,
+    mechanicScheduleRepository,
+    bookingRepository,
+    mechanicCategoryRepository
 )
 
 export const bookingController = new BookingController(createSlotBookingUseCase)
@@ -517,7 +519,8 @@ const discoverAvailableMechanicsUseCase = new DiscoverAvailableMechanicsUseCase(
     vehiceRepository,
     mechanicApplicationRepository,
     mechanicScheduleRepository,
-    bookingRepository
+    bookingRepository,
+    mechanicCategoryRepository
 )
 
 const createBookingReservationUseCase = new CreateBookingReservationUseCase(
@@ -526,7 +529,8 @@ const createBookingReservationUseCase = new CreateBookingReservationUseCase(
     mechanicApplicationRepository,
     mechanicScheduleRepository,
     bookingRepository,
-    transactionMapper
+    transactionMapper,
+    mechanicCategoryRepository
 )
 
 const createPaymentOrderUseCase = new CreatePaymentOrderUseCase(

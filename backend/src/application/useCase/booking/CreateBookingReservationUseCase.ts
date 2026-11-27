@@ -1,4 +1,5 @@
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository.js";
+import { IMechanicCategoryRepository } from "../../../domain/repositories/admin/IMechanicCategoryRepository.js";
 import { IMechanicApplicationRepository } from "../../../domain/repositories/IMechanicApplicationRepository.js";
 import { IMechanicScheduleRepository } from "../../../domain/repositories/IMechanicScheduleRepository.js";
 import { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
@@ -22,6 +23,7 @@ import {
 import { ICreateBookingReservationUseCase } from "../../interfaces/booking/IScheduledBookingUseCases.js";
 import { MechanicAvailabilityResolver } from "../../services/MechanicAvailabilityResolver.js";
 import { MechanicLocationResolver } from "../../services/MechanicLocationResolver.js";
+import { MechanicServiceCompatibility } from "../../services/MechanicServiceCompatibility.js";
 import { BookingValidator } from "../../validators/BookingValidator.js";
 
 export class CreateBookingReservationUseCase
@@ -33,7 +35,8 @@ export class CreateBookingReservationUseCase
         private readonly mechanicApplicationRepository: IMechanicApplicationRepository,
         private readonly mechanicScheduleRepository: IMechanicScheduleRepository,
         private readonly bookingRepository: IBookingRepository,
-        private readonly transactionManager: ITransactionManager
+        private readonly transactionManager: ITransactionManager,
+        private readonly mechanicCategoryRepository?: IMechanicCategoryRepository
     ) {}
 
     async execute(
@@ -100,14 +103,29 @@ export class CreateBookingReservationUseCase
             );
         }
 
-        if (!application.supportedVehicleTypes.includes(vehicle.vehicleType)) {
+        if (
+            !MechanicServiceCompatibility.supportsVehicleType(
+                application,
+                vehicle.vehicleType
+            )
+        ) {
             throw new BadRequest(
                 "Mechanic does not support this vehicle type",
                 "UNSUPPORTED_VEHICLE_TYPE"
             );
         }
 
-        if (!application.serviceOffered.includes(serviceType)) {
+        const categories = this.mechanicCategoryRepository
+            ? await this.mechanicCategoryRepository.findAll(false)
+            : [];
+
+        if (
+            !MechanicServiceCompatibility.offersService(
+                application,
+                serviceType,
+                categories
+            )
+        ) {
             throw new BadRequest(
                 "Mechanic does not offer this service",
                 "SERVICE_NOT_OFFERED"

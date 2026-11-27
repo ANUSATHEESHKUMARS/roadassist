@@ -8,12 +8,14 @@ import { IMechanicApplicationRepository } from "../../../domain/repositories/IMe
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository.js";
 
 import { IMechanicScheduleRepository } from "../../../domain/repositories/IMechanicScheduleRepository.js";
+import { IMechanicCategoryRepository } from "../../../domain/repositories/admin/IMechanicCategoryRepository.js";
 import { BadRequest } from "../../../shared/errors/BadRequestError.js";
 import { ForbiddenError } from "../../../shared/errors/ForbiddenError.js";
 import { NotfoundError } from "../../../shared/errors/NotFoundError.js";
 import { ConflictError } from "../../../shared/errors/ConflitError.js";
 import { isShiftWindowPassedForDate } from "../../../shared/utils/timezone.js";
 import { MechanicAvailabilityResolver } from "../../services/MechanicAvailabilityResolver.js";
+import { MechanicServiceCompatibility } from "../../services/MechanicServiceCompatibility.js";
 import { BookingValidator } from "../../validators/BookingValidator.js";
 
 const BOOKING_AMOUNT = 800;
@@ -25,7 +27,8 @@ export class CreateSlotBookingUseCase {
         private readonly vehicleRepository: IVehicleRepository,
         private readonly mechanicApplicationRepository: IMechanicApplicationRepository,
         private readonly mechanicScheduleRepository: IMechanicScheduleRepository,
-        private readonly bookingRepository: IBookingRepository
+        private readonly bookingRepository: IBookingRepository,
+        private readonly mechanicCategoryRepository?: IMechanicCategoryRepository
     ) {}
 
     async execute(
@@ -97,7 +100,8 @@ export class CreateSlotBookingUseCase {
 
         // 6. Validate supported vehicle type
         if (
-            !application.supportedVehicleTypes.includes(
+            !MechanicServiceCompatibility.supportsVehicleType(
+                application,
                 vehicle.vehicleType
             )
         ) {
@@ -106,8 +110,17 @@ export class CreateSlotBookingUseCase {
             );
         }
 
-        // 7. Validate offered service
-        if (!application.serviceOffered.includes(dto.serviceType)) {
+        // 7. Validate offered service (serviceOffered or approved specializations)
+        const categories = this.mechanicCategoryRepository
+            ? await this.mechanicCategoryRepository.findAll(false)
+            : [];
+        if (
+            !MechanicServiceCompatibility.offersService(
+                application,
+                dto.serviceType,
+                categories
+            )
+        ) {
             throw new BadRequest(
                 "Mechanic does not offer this service"
             );

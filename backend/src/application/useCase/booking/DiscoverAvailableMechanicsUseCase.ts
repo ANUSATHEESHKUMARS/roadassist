@@ -1,4 +1,5 @@
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository.js";
+import { IMechanicCategoryRepository } from "../../../domain/repositories/admin/IMechanicCategoryRepository.js";
 import { IMechanicApplicationRepository } from "../../../domain/repositories/IMechanicApplicationRepository.js";
 import { IMechanicScheduleRepository } from "../../../domain/repositories/IMechanicScheduleRepository.js";
 import { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
@@ -18,6 +19,7 @@ import {
 import { IDiscoverAvailableMechanicsUseCase } from "../../interfaces/booking/IScheduledBookingUseCases.js";
 import { MechanicAvailabilityResolver } from "../../services/MechanicAvailabilityResolver.js";
 import { MechanicLocationResolver } from "../../services/MechanicLocationResolver.js";
+import { MechanicServiceCompatibility } from "../../services/MechanicServiceCompatibility.js";
 import { BookingValidator } from "../../validators/BookingValidator.js";
 
 export class DiscoverAvailableMechanicsUseCase
@@ -28,7 +30,8 @@ export class DiscoverAvailableMechanicsUseCase
         private readonly vehicleRepository: IVehicleRepository,
         private readonly mechanicApplicationRepository: IMechanicApplicationRepository,
         private readonly mechanicScheduleRepository: IMechanicScheduleRepository,
-        private readonly bookingRepository: IBookingRepository
+        private readonly bookingRepository: IBookingRepository,
+        private readonly mechanicCategoryRepository?: IMechanicCategoryRepository
     ) {}
 
     async execute(
@@ -64,22 +67,48 @@ export class DiscoverAvailableMechanicsUseCase
         // Expire stale pending_payment reservations before checking conflicts
         await this.bookingRepository.expireStaleReservations(new Date());
 
-        // Filter 3: Approved mechanic applications
-        const approvedApps =
-            await this.mechanicApplicationRepository.findByStatus("approved");
+        const diagnosticsEnabled =
+            process.env.NODE_ENV === "development" ||
+            process.env.DEBUG_BOOKING_DISCOVERY === "true";
 
-        // Pre-filter by vehicle type, service offered, and valid coordinates/radius
+        // Filter 3: Approved mechanic applications + active categories for specialization matching
+        const [approvedApps, categories] = await Promise.all([
+            this.mechanicApplicationRepository.findByStatus("approved"),
+            this.mechanicCategoryRepository
+                ? this.mechanicCategoryRepository.findAll(false)
+                : Promise.resolve([]),
+        ]);
+
+        // Pre-filter by vehicle type, service offered/specializations, and valid coordinates/radius
         const candidateApps = approvedApps.filter((app) => {
-            if (!app.supportedVehicleTypes.includes(vehicle.vehicleType)) {
-                return false;
+            const vehicleOk = MechanicServiceCompatibility.supportsVehicleType(
+                app,
+                vehicle.vehicleType
+            );
+            const serviceOk = MechanicServiceCompatibility.offersService(
+                app,
+                serviceType,
+                categories
+            );
+            const locationConfigOk =
+                MechanicLocationResolver.hasValidDiscoveryLocation(app);
+
+            if (
+                diagnosticsEnabled &&
+                (!vehicleOk || !serviceOk || !locationConfigOk)
+            ) {
+                console.debug("[DiscoverMechanics][PreFilter]", {
+                    mechanicId: app.userId,
+                    applicationApproved: app.status === "approved",
+                    vehicleCompatibility: vehicleOk ? "PASS" : "FAIL",
+                    serviceCompatibility: serviceOk ? "PASS" : "FAIL",
+                    locationConfigured: locationConfigOk ? "PASS" : "FAIL",
+                    serviceRadiusKm: app.serviceRadiusKm ?? null,
+                    eligible: false,
+                });
             }
-            if (!app.serviceOffered.includes(serviceType)) {
-                return false;
-            }
-            if (!MechanicLocationResolver.hasValidDiscoveryLocation(app)) {
-                return false;
-            }
-            return true;
+
+            return vehicleOk && serviceOk && locationConfigOk;
         });
 
         const candidateMechanicIds = candidateApps.map((app) => app.userId);
@@ -114,54 +143,43 @@ export class DiscoverAvailableMechanicsUseCase
 
         for (const app of candidateApps) {
             const mechanicUser = userMap.get(app.userId);
-            // Filters 1 & 2: Active user with mechanic role
-            if (
-                !mechanicUser ||
-                mechanicUser.status !== "active" ||
-                !mechanicUser.roles.includes("mechanic")
-            ) {
-                continue;
-            }
-
-            // Filter 4, 5 & 6: Active schedule + resolved date override or weekly availability
+            const accountActive = Boolean(
+                mechanicUser && mechanicUser.status === "active"
+            );
+            const hasMechanicRole = Boolean(
+                mechanicUser && mechanicUser.roles.includes("mechanic")
+            );
             const schedule = scheduleMap.get(app.userId);
-            if (!schedule || !schedule.isActive) {
-                continue;
-            }
+            const scheduleActive = Boolean(schedule && schedule.isActive);
 
-            const resolvedAvailability =
-                MechanicAvailabilityResolver.resolveForDate(
-                    schedule,
-                    scheduledDate
-                );
-
-            if (
-                !MechanicAvailabilityResolver.isSlotAvailable(
-                    resolvedAvailability,
-                    slot
-                )
-            ) {
-                continue;
-            }
-
-            if (
-                isShiftWindowPassedForDate(
-                    scheduledDate,
-                    slot,
-                    {
-                        morningStartTime: resolvedAvailability.morningStartTime,
-                        morningEndTime: resolvedAvailability.morningEndTime,
-                        afternoonStartTime:
-                            resolvedAvailability.afternoonStartTime,
-                        afternoonEndTime: resolvedAvailability.afternoonEndTime,
-                    },
-                    now
-                )
-            ) {
-                continue;
-            }
-
-            // Filter 9: Within service radius (Haversine against serviceModel location)
+            const resolvedAvailability = schedule
+                ? MechanicAvailabilityResolver.resolveForDate(
+                      schedule,
+                      scheduledDate
+                  )
+                : null;
+            const slotAvailable = resolvedAvailability
+                ? MechanicAvailabilityResolver.isSlotAvailable(
+                      resolvedAvailability,
+                      slot
+                  )
+                : false;
+            const shiftPassed = resolvedAvailability
+                ? isShiftWindowPassedForDate(
+                      scheduledDate,
+                      slot,
+                      {
+                          morningStartTime:
+                              resolvedAvailability.morningStartTime,
+                          morningEndTime: resolvedAvailability.morningEndTime,
+                          afternoonStartTime:
+                              resolvedAvailability.afternoonStartTime,
+                          afternoonEndTime:
+                              resolvedAvailability.afternoonEndTime,
+                      },
+                      now
+                  )
+                : false;
             const resolvedLocation =
                 MechanicLocationResolver.resolveForCustomer(
                     app,
@@ -169,12 +187,45 @@ export class DiscoverAvailableMechanicsUseCase
                     longitude,
                     dto.serviceMode
                 );
-            if (!resolvedLocation) {
-                continue;
+            const hasConflict = conflictingMechanicIds.has(app.userId);
+
+            const isEligible =
+                accountActive &&
+                hasMechanicRole &&
+                scheduleActive &&
+                slotAvailable &&
+                !shiftPassed &&
+                resolvedLocation !== null &&
+                !hasConflict;
+
+            if (diagnosticsEnabled) {
+                console.debug("[DiscoverMechanics][Candidate]", {
+                    mechanicId: app.userId,
+                    applicationApproved: "PASS",
+                    accountActive: accountActive ? "PASS" : "FAIL",
+                    mechanicRole: hasMechanicRole ? "PASS" : "FAIL",
+                    vehicleCompatibility: "PASS",
+                    serviceCompatibility: "PASS",
+                    scheduleActive: scheduleActive ? "PASS" : "FAIL",
+                    availabilitySource:
+                        resolvedAvailability?.source ?? "missing",
+                    slotAvailable: slotAvailable ? "PASS" : "FAIL",
+                    shiftWindowActive: !shiftPassed ? "PASS" : "FAIL",
+                    effectiveTimings: resolvedAvailability
+                        ? {
+                              morning: `${resolvedAvailability.morningStartTime}-${resolvedAvailability.morningEndTime}`,
+                              afternoon: `${resolvedAvailability.afternoonStartTime}-${resolvedAvailability.afternoonEndTime}`,
+                          }
+                        : null,
+                    calculatedDistanceKm: resolvedLocation?.distanceKm ?? null,
+                    configuredServiceRadiusKm: app.serviceRadiusKm ?? null,
+                    locationDistance: resolvedLocation ? "PASS" : "FAIL",
+                    bookingConflict: !hasConflict ? "PASS" : "FAIL",
+                    eligible: isEligible,
+                });
             }
 
-            // Filter 10: No conflicting bookings
-            if (conflictingMechanicIds.has(app.userId)) {
+            if (!isEligible || !mechanicUser || !resolvedAvailability || !resolvedLocation) {
                 continue;
             }
 
