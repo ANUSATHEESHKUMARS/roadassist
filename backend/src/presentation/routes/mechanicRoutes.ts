@@ -4,6 +4,7 @@ import {
   mechanicApplicationController,
   uploadMediaController,
   mechanicEmergencyController,
+  emergencyWorkflowController,
 } from "../../di/container.js";
 import { asyncHandler } from "../../shared/helper/asyncHandler.js";
 import { uploadMedia } from "../middlewares/uploadMedia.js";
@@ -95,6 +96,55 @@ mechanicRouter.patch(
   authorizeRoles("mechanic"),
   asyncHandler(mechanicEmergencyController.confirmArrival)
 )
+
+mechanicRouter.post(
+  "/emergency-requests/:id/inspection/start",
+  auth,
+  authorizeRoles("mechanic"),
+  asyncHandler(emergencyWorkflowController.startInspection)
+);
+
+mechanicRouter.post(
+  "/emergency-requests/:id/inspection/complete",
+  auth,
+  authorizeRoles("mechanic"),
+  asyncHandler(emergencyWorkflowController.completeInspection)
+);
+
+mechanicRouter.post(
+  "/emergency-requests/:id/estimates",
+  auth,
+  authorizeRoles("mechanic"),
+  asyncHandler(emergencyWorkflowController.submitEstimate)
+);
+
+mechanicRouter.post(
+  "/emergency-requests/:id/repair/start",
+  auth,
+  authorizeRoles("mechanic"),
+  asyncHandler(emergencyWorkflowController.startRepair)
+);
+
+mechanicRouter.post(
+  "/emergency-requests/:id/repair/progress",
+  auth,
+  authorizeRoles("mechanic"),
+  asyncHandler(emergencyWorkflowController.logRepairProgress)
+);
+
+mechanicRouter.post(
+  "/emergency-requests/:id/repair/complete",
+  auth,
+  authorizeRoles("mechanic"),
+  asyncHandler(emergencyWorkflowController.completeRepair)
+);
+
+mechanicRouter.get(
+  "/emergency-requests/:id/service-report",
+  auth,
+  authorizeRoles("mechanic"),
+  asyncHandler(emergencyWorkflowController.getServiceReport)
+);
 mechanicRouter.patch(
     "/service-location",
     auth,

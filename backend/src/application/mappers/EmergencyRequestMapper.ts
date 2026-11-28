@@ -23,7 +23,13 @@ export class EmergencyRequestMapper {
 
             document._id.toString(),
             document.createdAt,
-            document.updatedAt
+            document.updatedAt,
+            document.acceptedAt,
+            document.travelStartedAt,
+            document.arrivedAt,
+            document.completedAt,
+            document.cancelledAt,
+            document.cancellationReason
         )
     }
 }

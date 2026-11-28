@@ -211,6 +211,7 @@ async findNearbyPending(
                 $set: {
                     status: "assigned",
                     assignedMechanicId: new Types.ObjectId(mechanicId),
+                    acceptedAt: new Date(),
                 },
             },
             { new: true }
@@ -305,7 +306,13 @@ async findNearbyPending(
             (document.rejectedByMechanicIds ?? []).map((id: Types.ObjectId) => id.toString()),
             document._id.toString(),
             document.createdAt,
-            document.updatedAt
+            document.updatedAt,
+            document.acceptedAt,
+            document.travelStartedAt,
+            document.arrivedAt,
+            document.completedAt,
+            document.cancelledAt,
+            document.cancellationReason
         );
 
         const mechanicDetails = populatedMechanic
@@ -380,7 +387,13 @@ async findNearbyPending(
             ),
             document._id.toString(),
             document.createdAt,
-            document.updatedAt
+            document.updatedAt,
+            document.acceptedAt,
+            document.travelStartedAt,
+            document.arrivedAt,
+            document.completedAt,
+            document.cancelledAt,
+            document.cancellationReason
         );
 
         const customerDetails = {
@@ -405,7 +418,7 @@ async findNearbyPending(
 
         const documents = await EmergencyRequestModel.find({
             assignedMechanicId: new Types.ObjectId(mechanicId),
-            status: ["assigned", "on_the_way", "arrived"]
+            status: { $in: ["assigned", "on_the_way", "arrived", "completed"] }
         })
             .sort({ createdAt: -1 })
             .exec();
@@ -415,11 +428,49 @@ async findNearbyPending(
         );
     }
 
+    async findActiveAssignedMechanicIds(
+        mechanicIds: string[],
+        excludeRequestId?: string
+    ): Promise<Set<string>> {
+        const validMechanicIds = mechanicIds
+            .filter((id) => Types.ObjectId.isValid(id))
+            .map((id) => new Types.ObjectId(id));
+
+        if (validMechanicIds.length === 0) {
+            return new Set<string>();
+        }
+
+        const filter: Record<string, unknown> = {
+            assignedMechanicId: { $in: validMechanicIds },
+            status: { $in: ["assigned", "on_the_way", "arrived"] },
+        };
+
+        if (excludeRequestId && Types.ObjectId.isValid(excludeRequestId)) {
+            filter._id = { $ne: new Types.ObjectId(excludeRequestId) };
+        }
+
+        const documents = await EmergencyRequestModel.find(filter, {
+            assignedMechanicId: 1,
+        }).exec();
+
+        return new Set(
+            documents
+                .map((doc) => doc.assignedMechanicId?.toString())
+                .filter((id): id is string => Boolean(id))
+        );
+    }
+
     async updateAssignedRequestStatus(
         requestId: string,
         mechanicId: string,
         currentStatus: EmergencyRequestStatus,
-        newStatus: EmergencyRequestStatus
+        newStatus: EmergencyRequestStatus,
+        timestamps?: Partial<{
+            acceptedAt: Date;
+            travelStartedAt: Date;
+            arrivedAt: Date;
+            completedAt: Date;
+        }>
     ): Promise<EmergencyRequest | null> {
 
         if (
@@ -429,6 +480,16 @@ async findNearbyPending(
             return null;
         }
 
+        const setFields: Record<string, unknown> = {
+            status: newStatus,
+            ...(timestamps?.acceptedAt ? { acceptedAt: timestamps.acceptedAt } : {}),
+            ...(timestamps?.travelStartedAt
+                ? { travelStartedAt: timestamps.travelStartedAt }
+                : {}),
+            ...(timestamps?.arrivedAt ? { arrivedAt: timestamps.arrivedAt } : {}),
+            ...(timestamps?.completedAt ? { completedAt: timestamps.completedAt } : {}),
+        };
+
         const document = await EmergencyRequestModel.findOneAndUpdate(
             {
                 _id: new Types.ObjectId(requestId),
@@ -436,9 +497,7 @@ async findNearbyPending(
                 status: currentStatus
             },
             {
-                $set: {
-                    status: newStatus
-                }
+                $set: setFields
             },
             {
                 new: true,
@@ -451,5 +510,36 @@ async findNearbyPending(
         }
 
         return EmergencyRequestMapper.toDomain(document);
+    }
+
+    async cancelByCustomer(
+        requestId: string,
+        userId: string,
+        reason?: string
+    ): Promise<EmergencyRequest | null> {
+        if (!Types.ObjectId.isValid(requestId) || !Types.ObjectId.isValid(userId)) {
+            return null;
+        }
+
+        const now = new Date();
+        const document = await EmergencyRequestModel.findOneAndUpdate(
+            {
+                _id: new Types.ObjectId(requestId),
+                userId: new Types.ObjectId(userId),
+                status: {
+                    $in: ["pending", "searching", "assigned", "on_the_way", "arrived"],
+                },
+            },
+            {
+                $set: {
+                    status: "cancelled",
+                    cancelledAt: now,
+                    ...(reason?.trim() ? { cancellationReason: reason.trim() } : {}),
+                },
+            },
+            { new: true, runValidators: true }
+        ).exec();
+
+        return document ? EmergencyRequestMapper.toDomain(document) : null;
     }
 }

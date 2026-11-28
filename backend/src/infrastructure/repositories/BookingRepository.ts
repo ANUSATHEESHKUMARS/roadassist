@@ -348,6 +348,23 @@ export class BookingRepository implements IBookingRepository {
         };
     }
 
+    async findInProgressMechanicIds(mechanicIds: string[]): Promise<Set<string>> {
+        const validIds = mechanicIds
+            .filter((id) => Types.ObjectId.isValid(id))
+            .map((id) => new Types.ObjectId(id));
+        if (validIds.length === 0) {
+            return new Set<string>();
+        }
+        const docs = await BookingModel.find(
+            {
+                mechanicId: { $in: validIds },
+                status: "in_progress",
+            },
+            { mechanicId: 1 }
+        ).exec();
+        return new Set(docs.map((doc) => doc.mechanicId.toString()));
+    }
+
     async findConflictingBooking(
         mechanicId: string,
         scheduledDate: Date,

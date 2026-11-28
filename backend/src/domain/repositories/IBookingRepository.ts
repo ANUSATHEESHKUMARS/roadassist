@@ -68,6 +68,8 @@ export interface IBookingRepository {
         now?: Date
     ): Promise<MechanicBookingCounts>;
 
+    findInProgressMechanicIds(mechanicIds: string[]): Promise<Set<string>>;
+
     findConflictingBooking(
         mechanicId: string,
         scheduledDate: Date,

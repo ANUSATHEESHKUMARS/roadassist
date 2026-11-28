@@ -294,6 +294,9 @@ function createHarness() {
                 cancelled: 0,
             };
         },
+        async findInProgressMechanicIds() {
+            return new Set<string>();
+        },
         async findConflictingBooking(mechanicId, scheduledDate, slot, excludeId) {
             const now = new Date();
             const targetDay = getIndiaDateParts(scheduledDate);

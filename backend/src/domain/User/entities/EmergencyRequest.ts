@@ -40,7 +40,13 @@ export class EmergencyRequest {
         public rejectedByMechanicIds: string[] = [],
         public id?: string,
         public createdAt?: Date,
-        public updatedAt?: Date
+        public updatedAt?: Date,
+        public acceptedAt?: Date,
+        public travelStartedAt?: Date,
+        public arrivedAt?: Date,
+        public completedAt?: Date,
+        public cancelledAt?: Date,
+        public cancellationReason?: string
 
     ) { }
 }

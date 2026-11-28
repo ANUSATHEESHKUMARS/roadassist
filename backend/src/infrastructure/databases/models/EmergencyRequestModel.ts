@@ -23,6 +23,12 @@ export interface IEmergencyRequestDocument extends Document {
     status: EmergencyRequestStatus;
     assignedMechanicId: Types.ObjectId | null;
     rejectedByMechanicIds: Types.ObjectId[];
+    acceptedAt?: Date;
+    travelStartedAt?: Date;
+    arrivedAt?: Date;
+    completedAt?: Date;
+    cancelledAt?: Date;
+    cancellationReason?: string;
 
     createdAt: Date;
     updatedAt: Date
@@ -132,7 +138,27 @@ const emergencyRequestSchema = new Schema<IEmergencyRequestDocument>({
     rejectedByMechanicIds: [{
         type: Schema.Types.ObjectId,
         ref: "User"
-    }]
+    }],
+    acceptedAt: {
+        type: Date
+    },
+    travelStartedAt: {
+        type: Date
+    },
+    arrivedAt: {
+        type: Date
+    },
+    completedAt: {
+        type: Date
+    },
+    cancelledAt: {
+        type: Date
+    },
+    cancellationReason: {
+        type: String,
+        trim: true,
+        maxlength: 500
+    }
 }, {
     timestamps: true,
     versionKey: false

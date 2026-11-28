@@ -47,24 +47,26 @@ io.on('connection', (socket) => {
 
     if (activeRole === "mechanic") {
         socket.join(`mechanic:${userId}`);
+        socket.join("mechanics:online");
 
         console.log("Mechanic connected:", userId);
 
         mechanicLocationSocketHandler.register(socket);
+        emergencyCallSocketHandler.register(socket);
     }
 
     if (activeRole === "user") {
+        socket.join(`user:${userId}`);
         console.log("Customer connected:", userId);
-        customerTrackingSocketHandler.register(socket)
+        customerTrackingSocketHandler.register(socket);
+        emergencyCallSocketHandler.register(socket);
     }
 
     socket.on("disconnect", () => {
         console.log(`${activeRole} disconnected:`, userId);
     });
-    console.log("CONNECTED MECHANIC ID:", userId);
-console.log("JOINED ROOM:", `mechanic:${userId}`);
 });
-const { createEmergencyRequestController } =
+const { createEmergencyRequestController, emergencyCallSocketHandler } =
     createEmergencyDependencies(io);
 
 const { createApp } = await import('./app.js');

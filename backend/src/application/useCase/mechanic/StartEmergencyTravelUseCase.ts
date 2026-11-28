@@ -3,37 +3,60 @@ import { EmergencyRequest } from "../../../domain/User/entities/EmergencyRequest
 import { BadRequest } from "../../../shared/errors/BadRequestError.js";
 import { ConflictError } from "../../../shared/errors/ConflitError.js";
 import { NotfoundError } from "../../../shared/errors/NotFoundError.js";
+import { IMechanicNotificationService } from "../../interfaces/mechanic/IMechanicNotificationService.js";
 import { IStartEmergencyTravelUseCase } from "../../interfaces/mechanic/IStartEmergencyTravelUseCase.js";
 
-export class StartEmergencyTravelUseCase implements IStartEmergencyTravelUseCase{
-    constructor(private readonly emergencyRequestRepository: IEmergencyRequestRepository){}
+export class StartEmergencyTravelUseCase implements IStartEmergencyTravelUseCase {
+    constructor(
+        private readonly emergencyRequestRepository: IEmergencyRequestRepository,
+        private readonly notificationService?: IMechanicNotificationService
+    ) {}
 
-   async execute(requestId: string, mechanicId: string): Promise<EmergencyRequest> {
-        if(!requestId || !requestId.trim()){
-            throw new BadRequest("Request id is required", "REQUEST_ID_REQUIRED")
+    async execute(requestId: string, mechanicId: string): Promise<EmergencyRequest> {
+        if (!requestId || !requestId.trim()) {
+            throw new BadRequest("Request id is required", "REQUEST_ID_REQUIRED");
         }
-        if(!mechanicId || !mechanicId.trim()){
-            throw new BadRequest("Mechanic id is required","MECHANIC_ID_IS_REQUIRED")
+        if (!mechanicId || !mechanicId.trim()) {
+            throw new BadRequest("Mechanic id is required", "MECHANIC_ID_IS_REQUIRED");
         }
-        const existingRequest = await this.emergencyRequestRepository.findById(requestId)
-        if(!existingRequest){
-            throw new NotfoundError("Emergency request not found","EMERGENCY_REQUEST_NOTFOUND")
+        const existingRequest = await this.emergencyRequestRepository.findById(requestId);
+        if (!existingRequest) {
+            throw new NotfoundError("Emergency request not found", "EMERGENCY_REQUEST_NOTFOUND");
         }
-        if(existingRequest.assignedMechanicId !== mechanicId){
-            throw new ConflictError("ur not assigened to this emergney request","NOT_ASSIGENED_TO_THIS_REQUIEST")
+        if (existingRequest.assignedMechanicId !== mechanicId) {
+            throw new ConflictError(
+                "You are not assigned to this emergency request",
+                "NOT_ASSIGENED_TO_THIS_REQUIEST"
+            );
         }
-      if (existingRequest.status !== "assigned") {
+        if (existingRequest.status !== "assigned") {
             throw new ConflictError(
                 "Travel can only be started for an assigned request"
             );
         }
-     const updatedRequest = await this.emergencyRequestRepository.updateAssignedRequestStatus(requestId,mechanicId, "assigned" , "on_the_way")
 
-       if (!updatedRequest) {
+        const updatedRequest =
+            await this.emergencyRequestRepository.updateAssignedRequestStatus(
+                requestId,
+                mechanicId,
+                "assigned",
+                "on_the_way",
+                { travelStartedAt: new Date() }
+            );
+
+        if (!updatedRequest) {
             throw new ConflictError(
                 "Unable to start travel. The request status may have changed."
             );
         }
-return updatedRequest
+
+        if (this.notificationService) {
+            await this.notificationService.notifyCustomerRequestUpdated(
+                updatedRequest,
+                { eventName: "emergency_travel_started" }
+            );
+        }
+
+        return updatedRequest;
     }
 }

@@ -4,11 +4,13 @@ import { BadRequest } from "../../../shared/errors/BadRequestError.js";
 import { ConflictError } from "../../../shared/errors/ConflitError.js";
 import { NotfoundError } from "../../../shared/errors/NotFoundError.js";
 import type { IConfirmArrivalUseCase } from "../../interfaces/mechanic/IConfirmArrivalUseCase.js";
+import type { IMechanicNotificationService } from "../../interfaces/mechanic/IMechanicNotificationService.js";
 
 export class ConfirmArrivalUseCase implements IConfirmArrivalUseCase {
 
     constructor(
-        private readonly emergencyRequestRepository: IEmergencyRequestRepository
+        private readonly emergencyRequestRepository: IEmergencyRequestRepository,
+        private readonly notificationService?: IMechanicNotificationService
     ) {}
 
     async execute(
@@ -59,12 +61,20 @@ export class ConfirmArrivalUseCase implements IConfirmArrivalUseCase {
                 requestId,
                 mechanicId,
                 "on_the_way",
-                "arrived"
+                "arrived",
+                { arrivedAt: new Date() }
             );
 
         if (!updatedRequest) {
             throw new ConflictError(
                 "Unable to confirm arrival. The request status may have changed."
+            );
+        }
+
+        if (this.notificationService) {
+            await this.notificationService.notifyCustomerRequestUpdated(
+                updatedRequest,
+                { eventName: "emergency_mechanic_arrived" }
             );
         }
 

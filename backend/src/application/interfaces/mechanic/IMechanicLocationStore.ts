@@ -8,4 +8,8 @@ export interface IMechanicLocationStore {
     get(
         requestId: string
     ): Promise<StoredMechanicLocation | null>;
+
+    delete(
+        requestId: string
+    ): Promise<void>;
 }

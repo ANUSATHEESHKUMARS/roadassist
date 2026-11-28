@@ -126,6 +126,35 @@ import { UpdateMechanicCategoryUseCase } from "../application/useCase/admin/Upda
 import { CreateSlotBookingUseCase } from "../application/useCase/user/CreateSlotBookingUseCase.js";
 import { BookingRepository } from "../infrastructure/repositories/BookingRepository.js";
 import { BookingController } from "../presentation/controllers/Booking/BookingController.js";
+import {
+    MongoEmergencyEstimateRepository,
+    MongoEmergencyInspectionRepository,
+    MongoEmergencyPaymentRepository,
+    MongoEmergencyRepairRepository,
+} from "../infrastructure/repositories/MongoEmergencyWorkflowRepositories.js";
+import { CancelEmergencyRequestUseCase } from "../application/useCase/emergency/CancelEmergencyRequestUseCase.js";
+import {
+    CompleteEmergencyInspectionUseCase,
+    StartEmergencyInspectionUseCase,
+} from "../application/useCase/emergency/EmergencyInspectionUseCases.js";
+import {
+    ApproveEmergencyEstimateUseCase,
+    RejectEmergencyEstimateUseCase,
+    SubmitEmergencyEstimateUseCase,
+} from "../application/useCase/emergency/EmergencyEstimateUseCases.js";
+import {
+    CreateEmergencyPaymentOrderUseCase,
+    EmergencyPaymentSettlementHelper,
+    VerifyEmergencyPaymentUseCase,
+} from "../application/useCase/emergency/EmergencyPaymentUseCases.js";
+import {
+    CompleteEmergencyRepairUseCase,
+    StartEmergencyRepairUseCase,
+    UpdateEmergencyRepairProgressUseCase,
+} from "../application/useCase/emergency/EmergencyRepairUseCases.js";
+import { GetEmergencyServiceReportUseCase } from "../application/useCase/emergency/GetEmergencyServiceReportUseCase.js";
+import { EmergencyWorkflowController } from "../presentation/controllers/emergency/EmergencyWorkflowController.js";
+import { EmergencyCallSocketHandler } from "../presentation/socket/EmergencyCallSocketHandler.js";
 
 // ─── Infrastructure Layer (Repositories & Services) ─────────────────────────
 
@@ -299,16 +328,21 @@ const saveMechanicDraftUseCase = new SaveMechanicDraftUseCase(
 
 )
 const mechanicAvailabilityRepository = new MongoMechanicAvailabilityRepository()
-
+const bookingRepository = new BookingRepository()
+const razorpayService = new RazorpayService()
+export const mechanicLocationStore = new RedisMechanicLocationStore()
 
 const emergencyRequestRepository = new EmergencyRequestRepository();
+const emergencyInspectionRepository = new MongoEmergencyInspectionRepository();
+const emergencyEstimateRepository = new MongoEmergencyEstimateRepository();
+const emergencyPaymentRepository = new MongoEmergencyPaymentRepository();
+const emergencyRepairRepository = new MongoEmergencyRepairRepository();
 
+const emergencyNotificationService = new SocketMechanicNotificationService();
 const createEmergencyRequestValidator = new CreateEmerencyRequestValidator();
 
 export function createEmergencyDependencies(io: Server) {
-
-    const mechanicNotificationService =
-        new SocketMechanicNotificationService(io);
+    emergencyNotificationService.setServer(io);
 
     const createEmergencyRequestUseCase =
         new CreateEmergencyRequestUseCase(
@@ -316,7 +350,11 @@ export function createEmergencyDependencies(io: Server) {
             vehiceRepository,
             createEmergencyRequestValidator,
             mechanicAvailabilityRepository,
-            mechanicNotificationService
+            emergencyNotificationService,
+            userRepository,
+            mechanicApplicationRepository,
+            mechanicCategoryRepository,
+            bookingRepository
         );
 
     const createEmergencyRequestController =
@@ -324,10 +362,17 @@ export function createEmergencyDependencies(io: Server) {
             createEmergencyRequestUseCase
         );
 
-    return {
-        createEmergencyRequestController
-    };
+    const emergencyCallSocketHandler =
+        new EmergencyCallSocketHandler(
+            io,
+            emergencyRequestRepository,
+            userRepository
+        );
 
+    return {
+        createEmergencyRequestController,
+        emergencyCallSocketHandler,
+    };
 }
 const emergencyImageUploadUseCase = new UploadEmergencyImagesUseCase(
     s3StorageService
@@ -415,11 +460,23 @@ const updateMechanicAvailabilityUseCase = new UpdateMechanicAvailabilityUseCase(
 
 const getNearbyEmergencyRequestsUseCase = new GetNearbyEmergencyRequestsUseCase(
     emergencyRequestRepository,
-    mechanicAvailabilityRepository
+    mechanicAvailabilityRepository,
+    userRepository,
+    mechanicApplicationRepository,
+    vehiceRepository,
+    mechanicCategoryRepository,
+    bookingRepository
 )
 
 const acceptEmergencyRequestUseCase = new AcceptEmergencyRequestUseCase(
-    emergencyRequestRepository
+    emergencyRequestRepository,
+    userRepository,
+    mechanicApplicationRepository,
+    mechanicAvailabilityRepository,
+    vehiceRepository,
+    mechanicCategoryRepository,
+    bookingRepository,
+    emergencyNotificationService
 )
 
 const rejectEmergencyRequestMechanicUseCase = new RejectEmergencyRequestMechanicUseCase(
@@ -427,18 +484,29 @@ const rejectEmergencyRequestMechanicUseCase = new RejectEmergencyRequestMechanic
 )
 
 const getAssignedEmergencyRequestDetailsUseCase = new GetAssignedEmergencyRequestDetailsUseCase(
-    emergencyRequestRepository
+    emergencyRequestRepository,
+    vehiceRepository,
+    emergencyInspectionRepository,
+    emergencyEstimateRepository,
+    emergencyPaymentRepository,
+    emergencyRepairRepository,
+    s3StorageService
 )
 
 const getMechanicAcceptRequestUseCase = new GetMechanicAcceptedRequestsUseCase(emergencyRequestRepository)
 
-const startemergencyTravelUseCase = new StartEmergencyTravelUseCase(emergencyRequestRepository)
+const startemergencyTravelUseCase = new StartEmergencyTravelUseCase(
+    emergencyRequestRepository,
+    emergencyNotificationService
+)
 
 const confirmArrivalUseCase =
-    new ConfirmArrivalUseCase(emergencyRequestRepository);
+    new ConfirmArrivalUseCase(
+        emergencyRequestRepository,
+        emergencyNotificationService
+    );
 
 
-export const mechanicLocationStore = new RedisMechanicLocationStore();
 const updateMechanicLiveLocationUseCase = new UpdateMechanicLiveLocationUseCase(emergencyRequestRepository,
     mechanicLocationStore
 )
@@ -458,7 +526,14 @@ export const mechanicEmergencyController = new MechanicEmergencyController(
 
 
 const getEmergencyRequestStatusUseCase = new GetEmergencyRequestStatusUseCase(
-    emergencyRequestRepository
+    emergencyRequestRepository,
+    vehiceRepository,
+    mechanicLocationStore,
+    emergencyInspectionRepository,
+    emergencyEstimateRepository,
+    emergencyPaymentRepository,
+    emergencyRepairRepository,
+    s3StorageService
 )
 
 const getUserEmergencyRequestsUseCase = new GetUserEmergencyRequestsUseCase(
@@ -479,8 +554,118 @@ export const emergencyRequestStatusController = new EmergencyRequestStatusContro
 )
 export { getActiveEmergencyRequestUseCase }
 
+const cancelEmergencyRequestUseCase = new CancelEmergencyRequestUseCase(
+    emergencyRequestRepository,
+    emergencyRepairRepository,
+    mechanicLocationStore,
+    emergencyNotificationService
+)
+
+const startInspectionUseCase = new StartEmergencyInspectionUseCase(
+    emergencyRequestRepository,
+    emergencyInspectionRepository,
+    emergencyNotificationService
+)
+
+const completeInspectionUseCase = new CompleteEmergencyInspectionUseCase(
+    emergencyRequestRepository,
+    emergencyInspectionRepository,
+    emergencyNotificationService
+)
+
+const submitEstimateUseCase = new SubmitEmergencyEstimateUseCase(
+    emergencyRequestRepository,
+    emergencyInspectionRepository,
+    emergencyEstimateRepository,
+    transactionMapper,
+    emergencyNotificationService
+)
+
+const approveEstimateUseCase = new ApproveEmergencyEstimateUseCase(
+    emergencyRequestRepository,
+    emergencyEstimateRepository,
+    emergencyNotificationService
+)
+
+const rejectEstimateUseCase = new RejectEmergencyEstimateUseCase(
+    emergencyRequestRepository,
+    emergencyEstimateRepository,
+    emergencyNotificationService
+)
+
+const emergencyPaymentSettlementHelper = new EmergencyPaymentSettlementHelper(
+    emergencyRequestRepository,
+    emergencyEstimateRepository,
+    emergencyPaymentRepository,
+    transactionMapper,
+    emergencyNotificationService
+)
+
+const createEmergencyPaymentOrderUseCase = new CreateEmergencyPaymentOrderUseCase(
+    emergencyRequestRepository,
+    emergencyEstimateRepository,
+    emergencyPaymentRepository,
+    razorpayService
+)
+
+const verifyEmergencyPaymentUseCase = new VerifyEmergencyPaymentUseCase(
+    emergencyRequestRepository,
+    emergencyPaymentRepository,
+    razorpayService,
+    emergencyPaymentSettlementHelper
+)
+
+const startRepairUseCase = new StartEmergencyRepairUseCase(
+    emergencyRequestRepository,
+    emergencyInspectionRepository,
+    emergencyEstimateRepository,
+    emergencyPaymentRepository,
+    emergencyRepairRepository,
+    emergencyNotificationService
+)
+
+const updateRepairProgressUseCase = new UpdateEmergencyRepairProgressUseCase(
+    emergencyRequestRepository,
+    emergencyRepairRepository,
+    emergencyNotificationService
+)
+
+const completeRepairUseCase = new CompleteEmergencyRepairUseCase(
+    emergencyRequestRepository,
+    emergencyRepairRepository,
+    transactionMapper,
+    mechanicLocationStore,
+    emergencyNotificationService
+)
+
+const getEmergencyServiceReportUseCase = new GetEmergencyServiceReportUseCase(
+    emergencyRequestRepository,
+    userRepository,
+    vehiceRepository,
+    mechanicApplicationRepository,
+    emergencyInspectionRepository,
+    emergencyEstimateRepository,
+    emergencyPaymentRepository,
+    emergencyRepairRepository,
+    s3StorageService
+)
+
+export const emergencyWorkflowController = new EmergencyWorkflowController(
+    cancelEmergencyRequestUseCase,
+    startInspectionUseCase,
+    completeInspectionUseCase,
+    submitEstimateUseCase,
+    approveEstimateUseCase,
+    rejectEstimateUseCase,
+    createEmergencyPaymentOrderUseCase,
+    verifyEmergencyPaymentUseCase,
+    startRepairUseCase,
+    updateRepairProgressUseCase,
+    completeRepairUseCase,
+    getEmergencyServiceReportUseCase
+)
+
 const mechanicScheduleRepository = new MechanicScheduleRepository()
-const bookingRepository = new BookingRepository()
 
 const createMechanicScheduleUseCase = new CreateMechanicScheduleUseCase(mechanicScheduleRepository)
 
@@ -509,7 +694,6 @@ const createSlotBookingUseCase = new CreateSlotBookingUseCase(
 export const bookingController = new BookingController(createSlotBookingUseCase)
 
 const paymentRepository = new PaymentRepository()
-const razorpayService = new RazorpayService()
 
 const paymentSettlementHelper = new PaymentSettlementHelper(
     bookingRepository,
@@ -554,7 +738,9 @@ const handlePaymentWebhookUseCase = new HandlePaymentWebhookUseCase(
     bookingRepository,
     paymentRepository,
     razorpayService,
-    paymentSettlementHelper
+    paymentSettlementHelper,
+    emergencyPaymentRepository,
+    emergencyPaymentSettlementHelper
 )
 
 const getBookingStatusUseCase = new GetBookingStatusUseCase(

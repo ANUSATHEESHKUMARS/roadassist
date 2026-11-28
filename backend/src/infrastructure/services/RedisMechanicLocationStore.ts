@@ -40,4 +40,9 @@ export class RedisMechanicLocationStore
 
         return JSON.parse(raw) as StoredMechanicLocation;
     }
+
+    async delete(requestId: string): Promise<void> {
+        const key = `${this.prefix}${requestId}`;
+        await redisClient.del(key);
+    }
 }

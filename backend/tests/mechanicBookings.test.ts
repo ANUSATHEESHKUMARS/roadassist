@@ -425,6 +425,17 @@ function createHarness() {
                     .length,
             };
         },
+        async findInProgressMechanicIds(mechanicIds) {
+            return new Set(
+                [...bookings.values()]
+                    .filter(
+                        (b) =>
+                            mechanicIds.includes(b.mechanicId) &&
+                            b.status === "in_progress"
+                    )
+                    .map((b) => b.mechanicId)
+            );
+        },
         async findConflictingBooking(mechanicId, scheduledDate, slot, excludeBookingId) {
             const now = new Date();
             const targetDay = getIndiaDateParts(scheduledDate);

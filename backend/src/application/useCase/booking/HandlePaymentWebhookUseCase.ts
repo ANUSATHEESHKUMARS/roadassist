@@ -1,9 +1,11 @@
 import { IBookingRepository } from "../../../domain/repositories/IBookingRepository.js";
+import { IEmergencyPaymentRepository } from "../../../domain/repositories/IEmergencyWorkflowRepositories.js";
 import { IPaymentRepository } from "../../../domain/repositories/IPaymentRepository.js";
 import { BadRequest } from "../../../shared/errors/BadRequestError.js";
 import { IPaymentGateway } from "../../contracts/IPaymentGateway.js";
 import { WebhookProcessResultDto } from "../../dtos/booking/ScheduledBookingDtos.js";
 import { IHandlePaymentWebhookUseCase } from "../../interfaces/booking/IScheduledBookingUseCases.js";
+import { EmergencyPaymentSettlementHelper } from "../emergency/EmergencyPaymentUseCases.js";
 import { PaymentSettlementHelper } from "./PaymentSettlementHelper.js";
 
 interface RazorpayWebhookPayload {
@@ -41,7 +43,9 @@ export class HandlePaymentWebhookUseCase
         private readonly bookingRepository: IBookingRepository,
         private readonly paymentRepository: IPaymentRepository,
         private readonly paymentGateway: IPaymentGateway,
-        private readonly settlementHelper: PaymentSettlementHelper
+        private readonly settlementHelper: PaymentSettlementHelper,
+        private readonly emergencyPaymentRepository?: IEmergencyPaymentRepository,
+        private readonly emergencySettlementHelper?: EmergencyPaymentSettlementHelper
     ) {}
 
     async execute(
@@ -147,6 +151,82 @@ export class HandlePaymentWebhookUseCase
         const payment =
             await this.paymentRepository.findByRazorpayOrderId(razorpayOrderId);
         if (!payment) {
+            if (
+                this.emergencyPaymentRepository &&
+                this.emergencySettlementHelper
+            ) {
+                const emergencyPayment =
+                    await this.emergencyPaymentRepository.findByRazorpayOrderId(
+                        razorpayOrderId
+                    );
+                if (emergencyPayment) {
+                    if (event === "payment.failed") {
+                        if (emergencyPayment.status !== "paid") {
+                            await this.emergencyPaymentRepository.updateStatusWithGuard(
+                                emergencyPayment.id!,
+                                ["pending", "processing"],
+                                "failed",
+                                {
+                                    ...(razorpayPaymentId !== undefined
+                                        ? { razorpayPaymentId }
+                                        : {}),
+                                    failureReason:
+                                        paymentEntity?.error_description ??
+                                        "Emergency payment failed at Razorpay",
+                                }
+                            );
+                        }
+                        return {
+                            received: true,
+                            event,
+                            processed: true,
+                            message: "Emergency payment failure recorded",
+                        };
+                    }
+
+                    if (event === "payment.captured" || event === "order.paid") {
+                        if (!razorpayPaymentId) {
+                            return {
+                                received: true,
+                                event,
+                                processed: false,
+                                message:
+                                    "Missing payment ID in emergency capture webhook",
+                            };
+                        }
+                        if (
+                            paymentEntity?.amount !== undefined &&
+                            paymentEntity.amount !== emergencyPayment.amountPaise
+                        ) {
+                            throw new BadRequest(
+                                "Webhook emergency payment amount mismatch",
+                                "WEBHOOK_AMOUNT_MISMATCH"
+                            );
+                        }
+                        if (
+                            paymentEntity?.currency &&
+                            paymentEntity.currency.toUpperCase() !==
+                                emergencyPayment.currency.toUpperCase()
+                        ) {
+                            throw new BadRequest(
+                                "Webhook emergency payment currency mismatch",
+                                "WEBHOOK_CURRENCY_MISMATCH"
+                            );
+                        }
+                        await this.emergencySettlementHelper.settlePaidPayment({
+                            payment: emergencyPayment,
+                            razorpayPaymentId,
+                        });
+                        return {
+                            received: true,
+                            event,
+                            processed: true,
+                            message: "Emergency payment captured and settled",
+                        };
+                    }
+                }
+            }
+
             return {
                 received: true,
                 event,
