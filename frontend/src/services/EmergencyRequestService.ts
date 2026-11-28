@@ -1,7 +1,13 @@
 import type {
+  CreateEmergencyPaymentOrderResponse,
   CreateEmergencyRequestPayload,
+  EmergencyEstimateDetail,
   EmergencyRequestDetail,
   EmergencyRequestStatusResponse,
+  EmergencyServiceReport,
+  RtcIceConfiguration,
+  VerifyEmergencyPaymentPayload,
+  VerifyEmergencyPaymentResponse,
 } from "@/types/emergencyRequest";
 
 import apiClient from "./apiClient";
@@ -17,10 +23,9 @@ interface UploadedImages {
   issueImages: string[];
 }
 
-interface CreatedEmergencyRequest {
+interface CreatedEmergencyRequest extends EmergencyRequestDetail {
   id?: string;
   _id?: string;
-  status: "pending" | "searching" | "assigned" | "cancelled" | "completed";
 }
 
 export const emergencyRequestService = {
@@ -74,5 +79,71 @@ export const emergencyRequestService = {
     >(API_ROUTES.EMERGENCY_REQUEST.MY_ACTIVE_REQUEST);
 
     return response.data.data;
-},
+  },
+
+  async getRtcIceConfiguration(): Promise<RtcIceConfiguration> {
+    const response = await apiClient.get<ApiResponse<RtcIceConfiguration>>(
+      API_ROUTES.EMERGENCY_REQUEST.RTC_CONFIG
+    );
+    return response.data.data;
+  },
+
+  async cancelRequest(
+    requestId: string,
+    reason?: string
+  ): Promise<EmergencyRequestDetail> {
+    const response = await apiClient.post<ApiResponse<EmergencyRequestDetail>>(
+      API_ROUTES.EMERGENCY_REQUEST.CANCEL(requestId),
+      ...(reason?.trim() ? [{ reason: reason.trim() }] : [{}])
+    );
+    return response.data.data;
+  },
+
+  async approveEstimate(
+    requestId: string,
+    estimateId: string
+  ): Promise<EmergencyEstimateDetail> {
+    const response = await apiClient.post<ApiResponse<EmergencyEstimateDetail>>(
+      API_ROUTES.EMERGENCY_REQUEST.APPROVE_ESTIMATE(requestId, estimateId)
+    );
+    return response.data.data;
+  },
+
+  async rejectEstimate(
+    requestId: string,
+    estimateId: string,
+    reason?: string
+  ): Promise<EmergencyEstimateDetail> {
+    const response = await apiClient.post<ApiResponse<EmergencyEstimateDetail>>(
+      API_ROUTES.EMERGENCY_REQUEST.REJECT_ESTIMATE(requestId, estimateId),
+      ...(reason?.trim() ? [{ reason: reason.trim() }] : [{}])
+    );
+    return response.data.data;
+  },
+
+  async createPaymentOrder(
+    requestId: string
+  ): Promise<CreateEmergencyPaymentOrderResponse> {
+    const response = await apiClient.post<
+      ApiResponse<CreateEmergencyPaymentOrderResponse>
+    >(API_ROUTES.EMERGENCY_REQUEST.CREATE_PAYMENT_ORDER(requestId));
+    return response.data.data;
+  },
+
+  async verifyPayment(
+    requestId: string,
+    payload: VerifyEmergencyPaymentPayload
+  ): Promise<VerifyEmergencyPaymentResponse> {
+    const response = await apiClient.post<
+      ApiResponse<VerifyEmergencyPaymentResponse>
+    >(API_ROUTES.EMERGENCY_REQUEST.VERIFY_PAYMENT(requestId), payload);
+    return response.data.data;
+  },
+
+  async getServiceReport(requestId: string): Promise<EmergencyServiceReport> {
+    const response = await apiClient.get<ApiResponse<EmergencyServiceReport>>(
+      API_ROUTES.EMERGENCY_REQUEST.SERVICE_REPORT(requestId)
+    );
+    return response.data.data;
+  },
 };

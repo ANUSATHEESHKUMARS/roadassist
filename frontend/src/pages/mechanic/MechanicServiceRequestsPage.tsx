@@ -127,35 +127,39 @@ export default function MechanicServiceRequestsPage() {
         const handleConnect = () => {
             console.log("Mechanic socket connected:", socket.id);
             void fetchRequests();
-            void fetchAcceptedRequests()
+            void fetchAcceptedRequests();
+        };
+
+        const handleRequestRemoved = (payload: { requestId?: string; id?: string; _id?: string }) => {
+            const removedId = payload.requestId ?? payload.id ?? payload._id;
+            if (!removedId) return;
+
+            setRequests((prev) =>
+                prev.filter((item) => (item.id ?? item._id) !== removedId)
+            );
+            setAcceptedRequest((prev) =>
+                prev.filter((item) => (item.id ?? item._id) !== removedId)
+            );
         };
 
         socket.on("connect", handleConnect);
-
-        socket.on(
-            "new_emergency_request",
-            handleNewEmergencyRequest
-        );
-
-        socket.connect();
+        socket.on("new_emergency_request", handleNewEmergencyRequest);
+        socket.on("emergency_request_taken", handleRequestRemoved);
+        socket.on("emergency_request_cancelled", handleRequestRemoved);
 
         // Keep polling temporarily as a fallback
         const interval = setInterval(() => {
             void fetchRequests();
-            void fetchAcceptedRequests()
+            void fetchAcceptedRequests();
         }, 15_000);
 
         return () => {
             clearInterval(interval);
 
             socket.off("connect", handleConnect);
-
-            socket.off(
-                "new_emergency_request",
-                handleNewEmergencyRequest
-            );
-
-            socket.disconnect();
+            socket.off("new_emergency_request", handleNewEmergencyRequest);
+            socket.off("emergency_request_taken", handleRequestRemoved);
+            socket.off("emergency_request_cancelled", handleRequestRemoved);
         };
 
     }, [fetchRequests, fetchAcceptedRequests]);
@@ -301,7 +305,7 @@ export default function MechanicServiceRequestsPage() {
                             Nearby Service Requests
                         </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Emergency requests within your 5 km service radius
+                            Emergency requests within your 5–10 km service radius
                         </p>
                     </div>
 
@@ -362,7 +366,7 @@ export default function MechanicServiceRequestsPage() {
                             </p>
 
                             <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                                There are no emergency requests within your 5 km
+                                There are no emergency requests within your 5–10 km
                                 radius. New requests will appear here automatically.
                             </p>
                         </CardContent>
@@ -387,10 +391,17 @@ export default function MechanicServiceRequestsPage() {
                                                 {request.issueTitle}
                                             </CardTitle>
 
-                                            <span className="mt-1 inline-flex rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">
-                                                {ISSUE_LABELS[request.emergencyIssueCategory]
-                                                    ?? request.emergencyIssueCategory}
-                                            </span>
+                                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                                <span className="inline-flex rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">
+                                                    {ISSUE_LABELS[request.emergencyIssueCategory]
+                                                        ?? request.emergencyIssueCategory}
+                                                </span>
+                                                {typeof request.distanceKm === "number" && (
+                                                    <span className="inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-400">
+                                                        {request.distanceKm.toFixed(1)} km away
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -401,6 +412,12 @@ export default function MechanicServiceRequestsPage() {
                                 </CardHeader>
 
                                 <CardContent className="space-y-4">
+                                    {request.vehicleSummary && (
+                                        <p className="text-xs font-medium text-foreground">
+                                            Vehicle: {request.vehicleSummary.brand} {request.vehicleSummary.model} ({request.vehicleSummary.vehicleType}) • {request.vehicleSummary.registrationNumber}
+                                        </p>
+                                    )}
+
                                     {request.issueDescription && (
                                         <p className="line-clamp-2 text-sm text-muted-foreground">
                                             {request.issueDescription}

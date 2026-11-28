@@ -100,6 +100,16 @@ export const MechanicSchedulePage: React.FC = () => {
                 setDateAvailability(schedule.dateAvailability ?? []);
                 setHasSchedule(true);
                 void loadBookedDatesForMonth(activeCalendarMonth);
+
+                try {
+                    const application =
+                        await mechanicServiceLocationService.getMyApplication();
+                    if (!application) {
+                        setOnboardingRequiredWarning(true);
+                    }
+                } catch {
+                    // Non-blocking warning check
+                }
             } catch (error) {
                 if (
                     axios.isAxiosError(error) &&
@@ -205,6 +215,7 @@ export const MechanicSchedulePage: React.FC = () => {
     };
 
     const handleSave = async () => {
+        if (saving) return;
         if (!validateForm()) return;
 
         try {
@@ -240,19 +251,12 @@ export const MechanicSchedulePage: React.FC = () => {
                 "success"
             );
 
-            void loadBookedDatesForMonth(activeCalendarMonth);
-
-            // Check mechanic application status without unexpectedly navigating away from the calendar
-            try {
-                const application =
-                    await mechanicServiceLocationService.getMyApplication();
-
-                if (!application) {
-                    setOnboardingRequiredWarning(true);
-                }
-            } catch {
-                // Non-blocking
-            }
+            navigate("/mechanic/schedule/success", {
+                state: {
+                    schedule: savedSchedule,
+                    isNewSchedule: !wasExisting,
+                },
+            });
         } catch (error) {
             const responseData = axios.isAxiosError(error)
                 ? error.response?.data as { message?: string } | undefined

@@ -1,29 +1,43 @@
 
 import { useEffect } from "react";
-
+import L from "leaflet";
 import {
     MapContainer,
     TileLayer,
     Marker,
     Popup,
+    Polyline,
     useMap,
 } from "react-leaflet";
 
-import type { EmergencyLocation } from "../../types/emergencyRequest";
-
-interface MechanicLiveLocation {
-    latitude: number;
-    longitude: number;
-    accuracy: number;
-    updatedAt: string;
-}
+import type {
+    EmergencyLocation,
+    MechanicLiveLocation,
+} from "../../types/emergencyRequest";
 
 interface EmergencyTrackingMapProps {
     customerLocation: EmergencyLocation | null;
-    mechanicLocation: MechanicLiveLocation | null;
+    mechanicLocation: Pick<
+        MechanicLiveLocation,
+        "latitude" | "longitude" | "accuracy" | "updatedAt"
+    > | null;
 }
 
 const DEFAULT_POSITION: [number, number] = [8.5241, 76.9366];
+
+const customerPinIcon = L.divIcon({
+    className: "",
+    html: `<div style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9999px;background:#dc2626;border:3px solid #ffffff;box-shadow:0 2px 8px rgba(0,0,0,0.45);color:#fff;font-size:12px;font-weight:700;">C</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+});
+
+const mechanicPinIcon = L.divIcon({
+    className: "",
+    html: `<div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9999px;background:#10b981;border:3px solid #ffffff;box-shadow:0 2px 8px rgba(0,0,0,0.45);color:#fff;font-size:12px;font-weight:700;">M</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+});
 
 function TrackingMapUpdater({
     customerLocation,
@@ -97,15 +111,44 @@ export default function EmergencyTrackingMap({
                     mechanicLocation={mechanicLocation}
                 />
 
+                {customerLocation && mechanicLocation && (
+                    <Polyline
+                        positions={[
+                            [
+                                mechanicLocation.latitude,
+                                mechanicLocation.longitude,
+                            ],
+                            [
+                                customerLocation.latitude,
+                                customerLocation.longitude,
+                            ],
+                        ]}
+                        pathOptions={{
+                            color: "#ef4444",
+                            weight: 3,
+                            dashArray: "6 6",
+                            opacity: 0.85,
+                        }}
+                    />
+                )}
+
                 {customerLocation && (
                     <Marker
                         position={[
                             customerLocation.latitude,
                             customerLocation.longitude,
                         ]}
+                        icon={customerPinIcon}
                     >
                         <Popup>
-                            Your emergency location
+                            <div className="text-xs">
+                                <p className="font-semibold">Customer Breakdown Location</p>
+                                {customerLocation.address && (
+                                    <p className="mt-0.5 text-muted-foreground">
+                                        {customerLocation.address}
+                                    </p>
+                                )}
+                            </div>
                         </Popup>
                     </Marker>
                 )}
@@ -116,9 +159,18 @@ export default function EmergencyTrackingMap({
                             mechanicLocation.latitude,
                             mechanicLocation.longitude,
                         ]}
+                        icon={mechanicPinIcon}
                     >
                         <Popup>
-                            Mechanic's live location
+                            <div className="text-xs">
+                                <p className="font-semibold">Mechanic Live Location</p>
+                                <p className="text-muted-foreground">
+                                    Updated{" "}
+                                    {new Date(
+                                        mechanicLocation.updatedAt
+                                    ).toLocaleTimeString()}
+                                </p>
+                            </div>
                         </Popup>
                     </Marker>
                 )}

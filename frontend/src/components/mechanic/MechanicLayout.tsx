@@ -5,6 +5,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { MechanicSidebar } from "@/components/mechanic/MechanicSidebar";
 import { MechanicHeader } from "@/components/mechanic/MechanicHeader";
 import { socket } from "@/services/socket/socket";
+import { EmergencyVideoCallProvider } from "@/context/EmergencyVideoCallContext";
 
 export const MechanicLayout: React.FC = () => {
     const [newRequestCount, setNewRequestCount] = useState(0);
@@ -85,18 +86,20 @@ export const MechanicLayout: React.FC = () => {
     }, [isServiceRequestsPage]);
 
     return (
-        <div className="min-h-screen bg-background text-foreground">
-            <div className="flex min-h-screen">
-                <MechanicSidebar newRequestCount={newRequestCount} />
+        <EmergencyVideoCallProvider role="mechanic">
+            <div className="min-h-screen bg-background text-foreground">
+                <div className="flex min-h-screen">
+                    <MechanicSidebar newRequestCount={newRequestCount} />
 
-                <div className="flex min-w-0 flex-1 flex-col">
-                    <MechanicHeader />
+                    <div className="flex min-w-0 flex-1 flex-col">
+                        <MechanicHeader />
 
-                    <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
-                        <Outlet />
-                    </main>
+                        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+                            <Outlet />
+                        </main>
+                    </div>
                 </div>
             </div>
-        </div>
+        </EmergencyVideoCallProvider>
     );
 };

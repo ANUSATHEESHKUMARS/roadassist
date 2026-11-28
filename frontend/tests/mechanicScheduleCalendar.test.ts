@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer, type ViteDevServer } from "vite";
@@ -202,5 +203,79 @@ test("mechanicScheduleService sends PUT /date-availability, DELETE /date-availab
     assert.deepEqual(requests[2]?.params, { month: "2026-12" });
     assert.equal(booked.length, 1);
     assert.equal(booked[0]?.date, "2026-12-05");
+});
+
+test("Schedule update confirmation route, save-handler navigation, and success page actions are properly configured", async () => {
+    const routesSource = fs.readFileSync(
+        path.join(frontendRoot, "src/routes/MechanicRoutes.tsx"),
+        "utf-8"
+    );
+    assert.match(routesSource, /path:\s*["']\/mechanic\/schedule\/success["']/);
+    assert.match(routesSource, /MechanicScheduleSuccessPage/);
+
+    const schedulePageSource = fs.readFileSync(
+        path.join(frontendRoot, "src/pages/mechanic/MechanicScedulePage.tsx"),
+        "utf-8"
+    );
+    assert.match(schedulePageSource, /if \(saving\) return;/);
+    assert.match(
+        schedulePageSource,
+        /navigate\("\/mechanic\/schedule\/success",\s*\{/
+    );
+
+    const successPageSource = fs
+        .readFileSync(
+            path.join(
+                frontendRoot,
+                "src/pages/mechanic/MechanicScheduleSuccessPage.tsx"
+            ),
+            "utf-8"
+        )
+        .replace(/\s+/g, " ");
+    assert.match(successPageSource, /Schedule Updated Successfully!/);
+    assert.match(
+        successPageSource,
+        /Your working days and service timings have been saved successfully\./
+    );
+    assert.match(successPageSource, /navigate\("\/mechanic\/schedule"\)/);
+    assert.match(successPageSource, /navigate\("\/mechanic\/dashboard"\)/);
+    assert.match(successPageSource, /mechanicScheduleService\.getSchedule\(\)/);
+
+    // Confirm updateSchedule resolves with saved data cleanly
+    const requests: InternalAxiosRequestConfig[] = [];
+    apiClient.defaults.adapter = async (config) => {
+        requests.push(config);
+        return {
+            data: {
+                success: true,
+                message: "Schedule updated",
+                data: {
+                    mechanicId: "mech_1",
+                    weeklyAvailability: [
+                        { day: "monday", morning: true, afternoon: false },
+                    ],
+                    dateAvailability: [],
+                    morningStartTime: "09:00",
+                    morningEndTime: "13:00",
+                    afternoonStartTime: "14:00",
+                    afternoonEndTime: "18:00",
+                    isActive: true,
+                },
+            },
+            status: 200,
+            statusText: "OK",
+            headers: {},
+            config,
+        };
+    };
+
+    const updated = await mechanicScheduleService.updateSchedule({
+        morningStartTime: "09:00",
+        morningEndTime: "13:00",
+        isActive: true,
+    });
+    assert.equal(requests[0]?.method?.toUpperCase(), "PATCH");
+    assert.equal(requests[0]?.url, "/mechanic/schedule/update");
+    assert.equal(updated.isActive, true);
 });
 

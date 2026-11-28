@@ -21,6 +21,8 @@ import {
     ChevronRight,
     Wrench,
     ArrowLeft,
+    Navigation,
+    MapPin,
 } from "lucide-react";
 
 const STATUS_CONFIG: Record<
@@ -47,6 +49,20 @@ const STATUS_CONFIG: Record<
         bg: "bg-emerald-500/10",
         border: "border-emerald-500/20",
         icon: CheckCircle2,
+    },
+    on_the_way: {
+        label: "On the Way",
+        color: "text-sky-400",
+        bg: "bg-sky-500/10",
+        border: "border-sky-500/20",
+        icon: Navigation,
+    },
+    arrived: {
+        label: "Arrived",
+        color: "text-emerald-400",
+        bg: "bg-emerald-500/10",
+        border: "border-emerald-500/20",
+        icon: MapPin,
     },
     cancelled: {
         label: "Cancelled",

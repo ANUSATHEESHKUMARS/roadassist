@@ -1,8 +1,14 @@
 import type {
+    EmergencyEstimateDetail,
+    EmergencyEstimateItem,
+    EmergencyInspectionDetail,
+    EmergencyRepairDetail,
     EmergencyRequestDetail,
-    EmergencyRequestStatusResponse,
+    EmergencyServiceReport,
+    FindingSeverity,
     MechanicAssignedRequestResponse,
     MechanicAvailabilityResponse,
+    RepairPartUsed,
 } from "@/types/emergencyRequest";
 
 import apiClient from "../apiClient";
@@ -76,12 +82,96 @@ export const mechanicEmergencyService = {
         return response.data.data
     },
     async confirmArrival(requestId: string): Promise<EmergencyRequestDetail> {
-    const response = await apiClient.patch<
-        ApiResponse<EmergencyRequestDetail>
-    >(
-        API_ROUTES.MECHANIC.CONFIRM_EMERGENCY_ARRIVAL(requestId)
-    );
+        const response = await apiClient.patch<
+            ApiResponse<EmergencyRequestDetail>
+        >(API_ROUTES.MECHANIC.CONFIRM_EMERGENCY_ARRIVAL(requestId));
 
-    return response.data.data;
-}
+        return response.data.data;
+    },
+
+    async startInspection(
+        requestId: string
+    ): Promise<EmergencyInspectionDetail> {
+        const response = await apiClient.post<
+            ApiResponse<EmergencyInspectionDetail>
+        >(API_ROUTES.MECHANIC.START_INSPECTION(requestId));
+        return response.data.data;
+    },
+
+    async completeInspection(
+        requestId: string,
+        payload: {
+            vehicleConditionSummary: string;
+            findings: Array<{
+                component: string;
+                issue: string;
+                severity: FindingSeverity;
+                recommendedAction?: string;
+            }>;
+            requiredRepairs: string[];
+            notes?: string;
+        }
+    ): Promise<EmergencyInspectionDetail> {
+        const response = await apiClient.post<
+            ApiResponse<EmergencyInspectionDetail>
+        >(API_ROUTES.MECHANIC.COMPLETE_INSPECTION(requestId), payload);
+        return response.data.data;
+    },
+
+    async submitEstimate(
+        requestId: string,
+        payload: {
+            inspectionCharge: number;
+            items: EmergencyEstimateItem[];
+            estimatedCompletionMinutes?: number;
+            notes?: string;
+        }
+    ): Promise<EmergencyEstimateDetail> {
+        const response = await apiClient.post<
+            ApiResponse<EmergencyEstimateDetail>
+        >(API_ROUTES.MECHANIC.SUBMIT_ESTIMATE(requestId), payload);
+        return response.data.data;
+    },
+
+    async startRepair(requestId: string): Promise<EmergencyRepairDetail> {
+        const response = await apiClient.post<
+            ApiResponse<EmergencyRepairDetail>
+        >(API_ROUTES.MECHANIC.START_REPAIR(requestId));
+        return response.data.data;
+    },
+
+    async logRepairProgress(
+        requestId: string,
+        note: string
+    ): Promise<EmergencyRepairDetail> {
+        const response = await apiClient.post<
+            ApiResponse<EmergencyRepairDetail>
+        >(API_ROUTES.MECHANIC.LOG_REPAIR_PROGRESS(requestId), { note });
+        return response.data.data;
+    },
+
+    async completeRepair(
+        requestId: string,
+        payload: { workPerformed: string; partsUsed?: RepairPartUsed[] }
+    ): Promise<{
+        request: EmergencyRequestDetail;
+        repair: EmergencyRepairDetail;
+    }> {
+        const response = await apiClient.post<
+            ApiResponse<{
+                request: EmergencyRequestDetail;
+                repair: EmergencyRepairDetail;
+            }>
+        >(API_ROUTES.MECHANIC.COMPLETE_REPAIR(requestId), payload);
+        return response.data.data;
+    },
+
+    async getServiceReport(
+        requestId: string
+    ): Promise<EmergencyServiceReport> {
+        const response = await apiClient.get<
+            ApiResponse<EmergencyServiceReport>
+        >(API_ROUTES.MECHANIC.SERVICE_REPORT(requestId));
+        return response.data.data;
+    },
 };

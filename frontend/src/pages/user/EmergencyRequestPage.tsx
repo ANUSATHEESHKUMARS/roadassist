@@ -8,6 +8,7 @@ import LocationPicker from "../../components/emergency/LocationPicker";
 import IssueImageUpload from "../../components/emergency/IssueImageUpload";
 import { CheckCircle, CarFront, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { emergencyRequestService } from "../../services/EmergencyRequestService";
+import { useToast } from "@/components/ui/toast/ToastProvider";
 
 import type {
   EmergencyIssueCategory,
@@ -74,6 +75,7 @@ const ISSUE_OPTIONS: {
 
 export default function EmergencyRequestPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [vehicles, setVehicles] = useState<EmergencyVehicleOption[]>([]);
   const [vehicleId, setVehicleId] = useState("");
@@ -200,13 +202,26 @@ useEffect(() => {
         issueImages,
       });
 
+      const noImmediateMatch =
+        request.discoverySummary?.matchedMechanicsCount === 0;
+
+      if (noImmediateMatch) {
+        showToast(
+          "No online eligible mechanics were found within 10 km right now. Your request remains active for nearby mechanics.",
+          "warning"
+        );
+      }
+
       setSuccessMessage("Your emergency request has been created.");
 
       navigate(`/user/emergency-requests/${request.id ?? request._id}`, {
         replace: true,
         state: {
           status: request.status,
-          message: "Your emergency request has been created.",
+          discoverySummary: request.discoverySummary,
+          message: noImmediateMatch
+            ? "Request created. Still searching for available mechanics within 10 km."
+            : "Your emergency request has been created.",
         },
       });
     } catch {

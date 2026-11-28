@@ -57,6 +57,20 @@ const API_ROUTES = {
     START_EMERGENCY_TRAVEL: (requestId: string) => `/mechanic/emergency-requests/${requestId}/start-travel`,
     CONFIRM_EMERGENCY_ARRIVAL: (requestId: string) =>
       `/mechanic/emergency-requests/${requestId}/confirm-arrival`,
+    START_INSPECTION: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}/inspection/start`,
+    COMPLETE_INSPECTION: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}/inspection/complete`,
+    SUBMIT_ESTIMATE: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}/estimates`,
+    START_REPAIR: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}/repair/start`,
+    LOG_REPAIR_PROGRESS: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}/repair/progress`,
+    COMPLETE_REPAIR: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}/repair/complete`,
+    SERVICE_REPORT: (requestId: string) =>
+      `/mechanic/emergency-requests/${requestId}/service-report`,
   },
 
   ADMIN: {
@@ -109,12 +123,31 @@ const API_ROUTES = {
 
   EMERGENCY_REQUEST: {
     BASE: "/emergency-requests",
+    RTC_CONFIG: "/emergency-requests/rtc-config",
     UPLOAD_IMAGES: "/emergency-requests/images",
     MY_REQUESTS: "/emergency-requests/my-requests",
     MY_ACTIVE_REQUEST: "/emergency-requests/my-active-request",
 
     BY_ID: (requestId: string) =>
       `/emergency-requests/${requestId}`,
+
+    CANCEL: (requestId: string) =>
+      `/emergency-requests/${requestId}/cancel`,
+
+    APPROVE_ESTIMATE: (requestId: string, estimateId: string) =>
+      `/emergency-requests/${requestId}/estimates/${estimateId}/approve`,
+
+    REJECT_ESTIMATE: (requestId: string, estimateId: string) =>
+      `/emergency-requests/${requestId}/estimates/${estimateId}/reject`,
+
+    CREATE_PAYMENT_ORDER: (requestId: string) =>
+      `/emergency-requests/${requestId}/payment-order`,
+
+    VERIFY_PAYMENT: (requestId: string) =>
+      `/emergency-requests/${requestId}/verify-payment`,
+
+    SERVICE_REPORT: (requestId: string) =>
+      `/emergency-requests/${requestId}/service-report`,
   },
 
   BOOKING: {
